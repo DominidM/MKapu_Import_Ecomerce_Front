@@ -1,0 +1,2032 @@
+[
+  {
+    "id": 1,
+    "code": "R6602",
+    "name": "BATIDORA PEDESTAL 8L",
+    "category": "batidora",
+    "description": "Capacidad 8L, Potencia 1400W, Acero inoxidable, incluye accesorios",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 2,
+    "code": "R6007",
+    "name": "BATIDORA 2 EN 1",
+    "category": "batidora",
+    "description": "Capacidad 6L, Potencia 1300W, ABS y acero inoxidable, incluye accesorios",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 3,
+    "code": "R6603",
+    "name": "BATIDORA PEDESTAL DIGITAL",
+    "category": "batidora",
+    "description": "Capacidad 8L, Potencia 1800W, ABS y acero inoxidable, incluye accesorios",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 4,
+    "code": "R6683",
+    "name": "BATIDORA PEDESTAL",
+    "category": "batidora",
+    "description": "Capacidad 5L, Potencia 1000W, ABS y acero inoxidable, incluye accesorios",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 5,
+    "code": "R6636",
+    "name": "BATIDORA DE MANO",
+    "category": "batidora",
+    "description": "Manual, Potencia 620W, ABS y acero inoxidable, incluye accesorios",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 6,
+    "code": "R6660",
+    "name": "BATIDORA DE MANO",
+    "category": "batidora",
+    "description": "Manual, Potencia 150W, ABS y acero inoxidable",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 7,
+    "code": "R6639",
+    "name": "BATIDORA DE MANO",
+    "category": "batidora",
+    "description": "Manual, Potencia 800W, ABS y acero inoxidable",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 8,
+    "code": "R6633",
+    "name": "BATIDORA DE MANO",
+    "category": "batidora",
+    "description": "Manual, Potencia 270W, ABS y acero inoxidable",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 9,
+    "code": "R6663",
+    "name": "BATIDORA DE MANO",
+    "category": "batidora",
+    "description": "Manual, Potencia 800W, ABS y acero inoxidable",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 10,
+    "code": "R6704",
+    "name": "BATIDORA DE MANO",
+    "category": "batidora",
+    "description": "Potencia 300W, incluye gancho batidor, colores: blanco, amarillo, rojo",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 11,
+    "code": "R7035",
+    "name": "PROCESADOR 3L",
+    "category": "procesador",
+    "description": "4 aspas, Potencia 1000W, ABS y acero inoxidable",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 12,
+    "code": "R7703",
+    "name": "PROCESADOR 3L",
+    "category": "procesador",
+    "description": "4 aspas, Potencia 300W, ABS y vidrio",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 13,
+    "code": "R7041",
+    "name": "PROCESADOR 3L",
+    "category": "procesador",
+    "description": "4 aspas, Potencia 800W, ABS y acrílico",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 14,
+    "code": "R7734",
+    "name": "MAQUINA PROCESADOR 15L",
+    "category": "procesador",
+    "description": "4 aspas gruesas, Potencia 1000W, ABS y acero inoxidable",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 15,
+    "code": "R7008",
+    "name": "PROCESADOR 6L",
+    "category": "procesador",
+    "description": "4 aspas, Potencia 1000W, ABS y acero inoxidable",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 16,
+    "code": "R7731",
+    "name": "PROCESADOR 8L",
+    "category": "procesador",
+    "description": "4 aspas gruesas, Potencia 1000W, ABS y acero inoxidable",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 17,
+    "code": "R7723",
+    "name": "MAQUINA PROCESADOR 10L",
+    "category": "procesador",
+    "description": "4 aspas gruesas, Potencia 1000W, ABS y acero inoxidable",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 18,
+    "code": "R7013",
+    "name": "MAQUINA PROCESADOR 3L",
+    "category": "procesador",
+    "description": "4 aspas, Potencia 300W, ABS y acero inoxidable",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 19,
+    "code": "R7719",
+    "name": "PROCESADOR DIGITAL 5L",
+    "category": "procesador",
+    "description": "5 aspas, Potencia 500W, ABS y acero inoxidable",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 20,
+    "code": "R7732",
+    "name": "PROCESADOR 3L",
+    "category": "procesador",
+    "description": "4 aspas, Potencia 300W, vidrio y acero inoxidable",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 21,
+    "code": "R7057",
+    "name": "PROCESADOR 3 EN 1",
+    "category": "procesador",
+    "description": "4 aspas, Potencia 300W, vidrio y ABS",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 22,
+    "code": "R7720",
+    "name": "PROCESADOR 3L",
+    "category": "procesador",
+    "description": "4 aspas, Potencia 400W, ABS y acero inoxidable",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 23,
+    "code": "R2872",
+    "name": "PROCESADOR 2 EN 1",
+    "category": "procesador",
+    "description": "Capacidad 750ML, Potencia 600W, ABS y acrílico",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 24,
+    "code": "R2864",
+    "name": "LICUADORA ELECTRICA",
+    "category": "licuadora",
+    "description": "Manual, Potencia 2300W, ABS, policarbonato y acero inoxidable",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 25,
+    "code": "R2939",
+    "name": "LICUADORA ELÉCTRICA",
+    "category": "licuadora",
+    "description": "Capacidad 1.25L, Potencia 750W, ABS, acero inoxidable y vidrio",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 26,
+    "code": "R2899",
+    "name": "LICUADORA ELÉCTRICA",
+    "category": "licuadora",
+    "description": "Capacidad 1.25L, Potencia 500W, ABS, acero inox y vidrio",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 27,
+    "code": "R2901",
+    "name": "LICUADORA ELÉCTRICA",
+    "category": "licuadora",
+    "description": "Capacidad 1.25L, 4 aspas, Potencia 600W para hielo",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 28,
+    "code": "R2923",
+    "name": "LICUADORA ELÉCTRICA",
+    "category": "licuadora",
+    "description": "Capacidad 1.5L, Potencia 500W, acero inox, ABS, vidrio pirex",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 29,
+    "code": "R2865",
+    "name": "LICUADORA ELECTRICA",
+    "category": "licuadora",
+    "description": "Capacidad 2L, Potencia 2600W, acero inox, ABS, policarbonato",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 30,
+    "code": "R2879",
+    "name": "LICUADORA ELÉCTRICA",
+    "category": "licuadora",
+    "description": "Capacidad 3L, Potencia 2600W, acero inox, ABS, policarbonato",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 31,
+    "code": "R2883",
+    "name": "LICUADORA ELECTRICA 6L",
+    "category": "licuadora",
+    "description": "Capacidad 6L, Potencia 1500W, acero inox y ABS",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 32,
+    "code": "R2884",
+    "name": "LICUADORA ENCAPSULADA",
+    "category": "licuadora",
+    "description": "Capacidad 2L, Potencia 1800W, acero inox, ABS y policarbonato",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 33,
+    "code": "R2859",
+    "name": "LICUADORA INTELIGENTE",
+    "category": "licuadora",
+    "description": "Capacidad 1.8L, Potencia 800W, control digital, vidrio",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 34,
+    "code": "R2877",
+    "name": "LICUADORA ELECTRICA",
+    "category": "licuadora",
+    "description": "Capacidad 3L, 6 aspas, Potencia 2600W, policarbonato",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 35,
+    "code": "R2902",
+    "name": "LICUADORA ELÉCTRICA",
+    "category": "licuadora",
+    "description": "Capacidad 1.5L, 4 aspas, Potencia 400W, vidrio",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 36,
+    "code": "R2892",
+    "name": "LICUADORA ELÉCTRICA",
+    "category": "licuadora",
+    "description": "Capacidad 1.5L, 4 aspas, Potencia 400W, vidrio",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 37,
+    "code": "R2880",
+    "name": "LICUADORA ELECTRICA",
+    "category": "licuadora",
+    "description": "Capacidad 3L, Potencia 2600W, acero inox, policarbonato",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 38,
+    "code": "R2922",
+    "name": "LICUADORA ELÉCTRICA",
+    "category": "licuadora",
+    "description": "Capacidad 2L, Potencia 1500W, manual y regulador de tiempo",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 39,
+    "code": "R2942",
+    "name": "LICUADORA ELÉCTRICA DIGITAL",
+    "category": "licuadora",
+    "description": "Capacidad 2L, Potencia 1200W, control digital",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 40,
+    "code": "R2941",
+    "name": "LICUADORA ENCAPSULADA",
+    "category": "licuadora",
+    "description": "Capacidad 2L, Potencia 1200W, control digital",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 41,
+    "code": "R2942-M",
+    "name": "LICUADORA ELÉCTRICA MANUAL",
+    "category": "licuadora",
+    "description": "Capacidad 2L, Potencia 1200W, control manual",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 42,
+    "code": "R2940",
+    "name": "LICUADORA ENCAPSULADA",
+    "category": "licuadora",
+    "description": "Capacidad 2L, Potencia 1200W, control manual",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 43,
+    "code": "R784",
+    "name": "LICUADORA DE MANO",
+    "category": "licuadora",
+    "description": "4 aspas, Potencia 1600W (máx 2 min), ABS",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 44,
+    "code": "R3010",
+    "name": "SET LICUADORA DE MANO",
+    "category": "licuadora",
+    "description": "Incluye licuadora, batidor y procesador, Potencia 1600W",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 45,
+    "code": "R791",
+    "name": "LICUADORA DE MANO",
+    "category": "licuadora",
+    "description": "4 aspas, Potencia 1200W, acero inox y ABS",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 46,
+    "code": "R3005",
+    "name": "SET LICUADORA DE MANO",
+    "category": "licuadora",
+    "description": "Incluye: licuar, batir, procesar, Potencia 1600W",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 47,
+    "code": "R2905",
+    "name": "LICUADORA PERSONAL 2 EN 1",
+    "category": "licuadora",
+    "description": "Capacidad 600ML + 1.5L, Potencia 350W, acero inox y acrílico",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 48,
+    "code": "R3023",
+    "name": "LICUADORA DE MANO",
+    "category": "licuadora",
+    "description": "4 aspas, Potencia 1000W (máx 2 min), acero inox y ABS",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 49,
+    "code": "R3022",
+    "name": "SET LICUADORA DE MANO",
+    "category": "licuadora",
+    "description": "Incluye: licuar, batir, procesar, espumar, Potencia 1000W",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 50,
+    "code": "R3102",
+    "name": "LICUADORA DE MANO",
+    "category": "licuadora",
+    "description": "4 aspas, Potencia 400W (máx 2 min), acero inox y ABS",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 51,
+    "code": "R793",
+    "name": "LICUADORA DE MANO",
+    "category": "licuadora",
+    "description": "4 aspas, Potencia 800W, colores: negro, rojo",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 52,
+    "code": "R2736",
+    "name": "EXPRIMIDOR LENTO",
+    "category": "extractora",
+    "description": "Capacidad 600ML, Potencia 250W, ABS y acero inox",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 53,
+    "code": "R2700",
+    "name": "EXTRACTORA ELECTRICA",
+    "category": "extractora",
+    "description": "Capacidad 400ML, Potencia 250W, ABS y acero inox",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 54,
+    "code": "R2733",
+    "name": "EXTRACTOR PRENSADO FRIO",
+    "category": "extractora",
+    "description": "Capacidad 1.7L, Potencia 300W, ABS y acero inox",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 55,
+    "code": "R2700-DIG",
+    "name": "EXTRACTORA ELECTRICA DIGITAL",
+    "category": "extractora",
+    "description": "Capacidad 1L, Potencia 800W, control digital",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 56,
+    "code": "R2838",
+    "name": "EXTRACTOR PRENSADO FRIO",
+    "category": "extractora",
+    "description": "Capacidad 200ML, Potencia 150W, ABS y acero inox",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 57,
+    "code": "R2852",
+    "name": "EXTRACTORA ELECTRICA",
+    "category": "extractora",
+    "description": "Capacidad 600ML, Potencia 800W, ABS y acero inox",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 58,
+    "code": "R2815",
+    "name": "EXTRACTORA ELECTRICA",
+    "category": "extractora",
+    "description": "Capacidad 600ML, Potencia 800W, ABS y acero inox",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 59,
+    "code": "R2806",
+    "name": "EXTRACTORA MULTIFUNCIONAL",
+    "category": "extractora",
+    "description": "Capacidad 600ML, Potencia 800W, ABS y vidrio",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 60,
+    "code": "R624",
+    "name": "MAQUINA EXPRIMIDOR",
+    "category": "extractora",
+    "description": "Capacidad 300ML, Potencia 100W, acero inox y ABS",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 61,
+    "code": "R7106",
+    "name": "MOLINO",
+    "category": "molinillo",
+    "description": "Capacidad 250g, 8 aspas, Potencia 200W, acero inox y acrílico",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 62,
+    "code": "R7162",
+    "name": "MOLINO 500GR",
+    "category": "molinillo",
+    "description": "Capacidad 500g, 3 aspas, Potencia 1800W, acero inox",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 63,
+    "code": "R7143",
+    "name": "MOLINILLO",
+    "category": "molinillo",
+    "description": "Capacidad 200g, 8 aspas, Potencia 300W, acero inox y ABS",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 64,
+    "code": "R7156",
+    "name": "MOLINO 100GR",
+    "category": "molinillo",
+    "description": "Capacidad 100g, 3 aspas, Potencia 650W, acero inox",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 65,
+    "code": "R7128",
+    "name": "MOLINO 200GR",
+    "category": "molinillo",
+    "description": "Capacidad 200g, 3 aspas, Potencia 1480W, acero inox",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 66,
+    "code": "R5157",
+    "name": "HORNO ELECTRICO DE 48L",
+    "category": "horno",
+    "description": "Capacidad 48L, Potencia 2000W, control digital, ABS y vidrio",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 67,
+    "code": "R5322",
+    "name": "HORNO ELECTRICO 68L",
+    "category": "horno",
+    "description": "Capacidad 68L, Potencia 2200W, control manual, acero inox",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 68,
+    "code": "R5323",
+    "name": "HORNO ELECTRICO DE 7L",
+    "category": "horno",
+    "description": "Capacidad 7L, Potencia 700W, regulador de temperatura",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 69,
+    "code": "R5316",
+    "name": "HORNO ELECTRICO 38L",
+    "category": "horno",
+    "description": "Capacidad 38L, Potencia 1700W, control manual",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 70,
+    "code": "R5308",
+    "name": "HORNO ELECTRICO 3 EN 1",
+    "category": "horno",
+    "description": "Capacidad 7L, Potencia 1050W, regulador de temperatura",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 71,
+    "code": "R500",
+    "name": "HORNO KEKERO",
+    "category": "horno",
+    "description": "Capacidad 500g, Potencia 1800W, ABS, acero inox, antiadherente",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 72,
+    "code": "R5270",
+    "name": "FREIDORA DE AIRE DUAL 9L",
+    "category": "freidora-aire",
+    "description": "Capacidad 9L, Potencia 2000W, control digital, antiadherente",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 73,
+    "code": "R5332",
+    "name": "FREIDORA DE AIRE 4L",
+    "category": "freidora-aire",
+    "description": "Capacidad 4L, Potencia 1300W, control manual, antiadherente",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 74,
+    "code": "R5342",
+    "name": "FREIDORA DE AIRE DUAL 9L",
+    "category": "freidora-aire",
+    "description": "Capacidad 9L, Potencia 2500W, control digital, antiadherente",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 75,
+    "code": "R5302",
+    "name": "FREIDORA DE AIRE ALOGENO 12L",
+    "category": "freidora-aire",
+    "description": "Capacidad 12L, Potencia 3500W, control manual, vidrio",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 76,
+    "code": "R5389",
+    "name": "FREIDORA ELÉCTRICA 4L",
+    "category": "freidora-aire",
+    "description": "Capacidad 4L, Potencia 1700W, control digital",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 77,
+    "code": "R5398",
+    "name": "FREIDORA DE AIRE 10L",
+    "category": "freidora-aire",
+    "description": "Capacidad 10L, Potencia 2150W, control digital, antiadherente",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 78,
+    "code": "R5345",
+    "name": "FREIDORA DE AIRE 8L",
+    "category": "freidora-aire",
+    "description": "Capacidad 8L, Potencia 1800W, control digital, antiadherente",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 79,
+    "code": "R5275",
+    "name": "FREIDORA DE AIRE 10L",
+    "category": "freidora-aire",
+    "description": "Capacidad 10L, Potencia 1800W, control manual, antiadherente",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 80,
+    "code": "R5291",
+    "name": "FREIDORA DE AIRE 8L",
+    "category": "freidora-aire",
+    "description": "Capacidad 8L, Potencia 1800W, doble calor, control digital",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 81,
+    "code": "R5387",
+    "name": "FREIDORA DE AIRE 8L",
+    "category": "freidora-aire",
+    "description": "Capacidad 8L, Potencia 1700W, control digital, antiadherente",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 82,
+    "code": "R5284",
+    "name": "FREIDORA DE AIRE DOBLE 6L+6L",
+    "category": "freidora-aire",
+    "description": "Capacidad 6L+6L, Potencia 2800W, control digital",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 83,
+    "code": "R5399",
+    "name": "FREIDORA DE AIRE DOBLE 7L+7L",
+    "category": "freidora-aire",
+    "description": "Capacidad 7L+7L, Potencia 2800W, control digital",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 84,
+    "code": "R5396",
+    "name": "FREIDORA DE AIRE DOBLE 6L+6L",
+    "category": "freidora-aire",
+    "description": "Capacidad 6L+6L, Potencia 2400W, control digital",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 85,
+    "code": "R5280",
+    "name": "FREIDORA DE AIRE DOBLE 6L+6L",
+    "category": "freidora-aire",
+    "description": "Capacidad 6L+6L, Potencia 2800W, control digital",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 86,
+    "code": "R5221",
+    "name": "FREIDORA ELECTRICA DOBLE 5.5L",
+    "category": "freidora-aire",
+    "description": "Capacidad 5.5L+5.5L, Potencia 2500W, control manual",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 87,
+    "code": "R5220",
+    "name": "FREIDORA ELECTRICA 5.5L",
+    "category": "freidora-aire",
+    "description": "Capacidad 5.5L, Potencia 2500W, control manual",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 88,
+    "code": "R6800",
+    "name": "DESHIDRATADOR",
+    "category": "cocinas",
+    "description": "5 niveles, Potencia 360W, control manual, ABS y acrílico",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 89,
+    "code": "R0112",
+    "name": "ARROCERA MULTIFUNCIONAL",
+    "category": "arrocera",
+    "description": "Capacidad 5L (~1.8Kg), Potencia 900W, control digital",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 90,
+    "code": "R0111",
+    "name": "ARROCERA MULTIFUNCIONAL",
+    "category": "arrocera",
+    "description": "Capacidad 5L (~1.8Kg), Potencia 900W, control digital",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 91,
+    "code": "R0100",
+    "name": "ARROCERA MULTIFUNCIONAL",
+    "category": "arrocera",
+    "description": "Capacidad 5L (~1.8Kg), Potencia 900W, control manual",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 92,
+    "code": "R0168",
+    "name": "OLLA PRESION",
+    "category": "olla-presion",
+    "description": "Capacidad 6L (~2Kg), Potencia 1000W, control manual",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 93,
+    "code": "R172",
+    "name": "OLLA PRESION MULTIFUNCIONAL",
+    "category": "olla-presion",
+    "description": "Capacidad 6L (~2Kg), Potencia 900W, control digital",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 94,
+    "code": "R171",
+    "name": "OLLA PRESION MULTIFUNCIONAL",
+    "category": "olla-presion",
+    "description": "Capacidad 6L (~2Kg), Potencia 1000W, control digital",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 95,
+    "code": "R8102",
+    "name": "COCINA DE INDUCCIÓN",
+    "category": "cocinas",
+    "description": "1 hornilla, Potencia 3500W, control manual, acero inox",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 96,
+    "code": "R528",
+    "name": "CREPERA ELECTRICA",
+    "category": "cocinas",
+    "description": "Diámetro 31CM, Potencia 1200W, antiadherente, incluye accesorios",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 97,
+    "code": "R8010",
+    "name": "COCINA ELECTRICA BASIC",
+    "category": "cocinas",
+    "description": "1 hornilla, Potencia 1000W, regulador de temperatura",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 98,
+    "code": "R8020",
+    "name": "COCINA 2 HORNILLAS BASIC",
+    "category": "cocinas",
+    "description": "2 hornillas, Potencia 1000W, regulador de temperatura",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 99,
+    "code": "R8104",
+    "name": "COCINA INFRARROJO",
+    "category": "cocinas",
+    "description": "1 hornilla, Potencia 2200W, control digital",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 100,
+    "code": "R8050",
+    "name": "COCINA INFRARROJO 2 HORNILLAS",
+    "category": "cocinas",
+    "description": "2 hornillas, Potencia 3500W, control digital",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 101,
+    "code": "R8026",
+    "name": "COCINA INFRARROJO",
+    "category": "cocinas",
+    "description": "1 hornilla, Potencia 3500W, control digital",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 102,
+    "code": "R8017",
+    "name": "COCINA DE INDUCCIÓN",
+    "category": "cocinas",
+    "description": "1 hornilla, Potencia 2000W, control manual, cerámica",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 103,
+    "code": "R5414",
+    "name": "PARRILLA ELECTRICA 70CM",
+    "category": "parrillas",
+    "description": "70CM, Potencia 1800W, automático, antiadherente",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 104,
+    "code": "R5415",
+    "name": "PARRILLA ELECTRICA 90CM",
+    "category": "parrillas",
+    "description": "90CM, Potencia 1800W, automático, antiadherente",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 105,
+    "code": "R5413",
+    "name": "PARRILLA ELECTRICA 2 EN 1",
+    "category": "parrillas",
+    "description": "3 divisiones, Potencia 1800W, automático, antiadherente",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 106,
+    "code": "R5425",
+    "name": "PARRILLA PIEDRA DE MARMOL",
+    "category": "parrillas",
+    "description": "Incluye 1 piedra mármol, 1 grill y 8 bandejas, Potencia 1100W",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 107,
+    "code": "R5411",
+    "name": "OLLA ELECTRICA 2 EN 1",
+    "category": "parrillas",
+    "description": "Capacidad 7L, Potencia 1350W, control manual, antiadherente",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 108,
+    "code": "R5477",
+    "name": "OLLA ELECTRICA 2 EN 1",
+    "category": "parrillas",
+    "description": "70CM, Potencia 1800W, automático, antiadherente",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 109,
+    "code": "R9012",
+    "name": "MAQUINA POP CORN",
+    "category": "donuts",
+    "description": "Capacidad 50g, Potencia 1200W, control manual",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 110,
+    "code": "R0005",
+    "name": "MAQUINA POP CORN",
+    "category": "donuts",
+    "description": "Capacidad 90g, Potencia 700W, control manual",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 111,
+    "code": "R2503",
+    "name": "WAFLERA",
+    "category": "wafleras",
+    "description": "Potencia 800W, acero inox y vidrio, control manual",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 112,
+    "code": "R2224",
+    "name": "WAFLERA FLOR",
+    "category": "wafleras",
+    "description": "Medida 16CM, Potencia 1000W, antiadherente",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 113,
+    "code": "R205",
+    "name": "WAFLERA EN DUO",
+    "category": "wafleras",
+    "description": "2 moldes, Potencia 600W, ABS y antiadherente",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 114,
+    "code": "R284H",
+    "name": "WAFLERA",
+    "category": "wafleras",
+    "description": "2 moldes, Potencia 750W, ABS y antiadherente",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 115,
+    "code": "R257H",
+    "name": "WAFLERA",
+    "category": "wafleras",
+    "description": "2 hornillas, Potencia 750W, ABS y antiadherente",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 116,
+    "code": "R2511",
+    "name": "MAQUINA YOGUIS 6",
+    "category": "wafleras",
+    "description": "6 yoguis, Potencia 580W, ABS y antiadherente",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 117,
+    "code": "R2500",
+    "name": "MAQUINA YOGUIS 3",
+    "category": "wafleras",
+    "description": "3 yoguis, Potencia 750W, ABS y antiadherente",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 118,
+    "code": "R2223",
+    "name": "WAFFLE CONO DE HELADO",
+    "category": "wafleras",
+    "description": "Doble / 4 panes, Potencia 1500W, ABS y antiadherente",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 119,
+    "code": "R2519",
+    "name": "WAFLERA BURBUJA",
+    "category": "wafleras",
+    "description": "Diámetro 18CM, Potencia 1000W, ABS y antiadherente",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 120,
+    "code": "R257S",
+    "name": "SANDWICHERA",
+    "category": "wafleras",
+    "description": "2 hornillas, Potencia 750W, ABS y antiadherente",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 121,
+    "code": "R2518",
+    "name": "SANDWICHERA",
+    "category": "wafleras",
+    "description": "1 hornilla, Potencia 100W, ABS y antiadherente",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 122,
+    "code": "R209",
+    "name": "SANDWICHERA 10 EN 1",
+    "category": "wafleras",
+    "description": "10 placas intercambiables, Potencia 800W",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 123,
+    "code": "R244",
+    "name": "SANDWICHERA 3 EN 1",
+    "category": "wafleras",
+    "description": "3 placas intercambiables, Potencia 800W",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 124,
+    "code": "R555",
+    "name": "SANDWICHERA 5 EN 1",
+    "category": "wafleras",
+    "description": "5 placas intercambiables, Potencia 800W",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 125,
+    "code": "R257T",
+    "name": "SANDWICHERA GRILL",
+    "category": "wafleras",
+    "description": "Potencia 750W, acero inox y antiadherente",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 126,
+    "code": "R2504",
+    "name": "MAQUINA DONUTS",
+    "category": "donuts",
+    "description": "Tamaño 10CM, Potencia 500W, control manual",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 127,
+    "code": "R2203",
+    "name": "MAQUINA DE BOCADILLO",
+    "category": "donuts",
+    "description": "6 agujeros, Potencia 600W, control manual",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 128,
+    "code": "R2228",
+    "name": "MAQUINA DONUTS",
+    "category": "donuts",
+    "description": "2 hornillas de 10CM, Potencia 750W",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 129,
+    "code": "R2200",
+    "name": "MAQUINA DONUTS X16",
+    "category": "donuts",
+    "description": "16 donuts de 5CM, Potencia 1400W",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 130,
+    "code": "R2210",
+    "name": "MAQUINA DONUTS X7",
+    "category": "donuts",
+    "description": "7 donuts de 5.3CM, Potencia 1000W",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 131,
+    "code": "R588",
+    "name": "MAQUINA DONUTS X6",
+    "category": "donuts",
+    "description": "6 agujeros de 5CM, Potencia 750W",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 132,
+    "code": "R510",
+    "name": "MAQUINA PAN CAKE",
+    "category": "donuts",
+    "description": "4 unidades, Potencia 1400W",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 133,
+    "code": "R10023",
+    "name": "BALANZA",
+    "category": "balanza",
+    "description": "Capacidad hasta 5Kg, ABS y vidrio templado, modo pilas",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 134,
+    "code": "R10004",
+    "name": "BALANZA GRAMERA",
+    "category": "balanza",
+    "description": "Capacidad hasta 5Kg, vidrio templado, modo pilas",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 135,
+    "code": "R10040",
+    "name": "BALANZA",
+    "category": "balanza",
+    "description": "Capacidad hasta 40Kg, ABS, modo cargador",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 136,
+    "code": "R10015",
+    "name": "BALANZA GRAMERA",
+    "category": "balanza",
+    "description": "Capacidad hasta 10Kg, ABS, modo pilas",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 137,
+    "code": "R507",
+    "name": "TOSTADORA ELECTRICA",
+    "category": "cocinas",
+    "description": "2 panes, Potencia 750W",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 138,
+    "code": "R2683",
+    "name": "MAQUINA GRILL",
+    "category": "parrillas",
+    "description": "2 hornillas, Potencia 2000W, acero inox",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 139,
+    "code": "R0053",
+    "name": "HERVIDORA DE HUEVO",
+    "category": "hervidor",
+    "description": "7 huevos, Potencia 350W",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 140,
+    "code": "R11006",
+    "name": "MAQUINA DISPENSADOR DIGITAL",
+    "category": "dispensador",
+    "description": "2.7L, Potencia 800W, control digital",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 141,
+    "code": "R11007",
+    "name": "MAQUINA DISPENSADOR DIGITAL",
+    "category": "dispensador",
+    "description": "2.5L, Potencia 600W, control digital",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 142,
+    "code": "R11018",
+    "name": "MAQUINA DISPENSADOR",
+    "category": "dispensador",
+    "description": "Organizador manual, Potencia 645W",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 143,
+    "code": "R11008",
+    "name": "DISPENSADOR DE AGUA DIGITAL",
+    "category": "dispensador-agua",
+    "description": "2.5L, Potencia 2600W, control digital",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 144,
+    "code": "R1190",
+    "name": "CALEFACTOR ROTATIVO",
+    "category": "calefactor",
+    "description": "Rotativo 90 grados, Potencia 2000W",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 145,
+    "code": "R1183",
+    "name": "CALEFACTOR 2 EN 1",
+    "category": "calefactor",
+    "description": "Estático manual, Potencia 2000W",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 146,
+    "code": "R917",
+    "name": "VENTILADOR 3 EN 1",
+    "category": "ventilador",
+    "description": "Con accesorios, Potencia 400W",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 147,
+    "code": "R920",
+    "name": "VENTILADOR ELECTRICO",
+    "category": "ventilador",
+    "description": "2 ventiladores, Potencia 400W",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 148,
+    "code": "R943",
+    "name": "AIRE ACONDICIONADO PORTATIL",
+    "category": "ventilador",
+    "description": "7L, Potencia 65W, control manual",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 149,
+    "code": "R1320A",
+    "name": "PLANCHA ELECTRICA",
+    "category": "plancha",
+    "description": "Base cerámica, vaporizador, Potencia 1200W",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 150,
+    "code": "R1232",
+    "name": "PLANCHA ELÉCTRICA",
+    "category": "plancha",
+    "description": "Cerámica, Potencia 2600W",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 151,
+    "code": "R18001",
+    "name": "PLANCHA VAPORIZADOR",
+    "category": "plancha",
+    "description": "Acero inox, Potencia 2000W, manual",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 152,
+    "code": "R1330",
+    "name": "PLANCHA VAPORIZADOR",
+    "category": "plancha",
+    "description": "Potencia 1500W, con accesorios",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 153,
+    "code": "R3048",
+    "name": "PLANCHA VAPORIZADOR",
+    "category": "plancha",
+    "description": "Potencia 2000W, vapor vertical/horizontal",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 154,
+    "code": "R1326",
+    "name": "PLANCHA VAPORIZADOR PORTATIL",
+    "category": "plancha",
+    "description": "Portátil, Potencia 110W",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 155,
+    "code": "R20000",
+    "name": "ASPIRADORA ROBOT",
+    "category": "aspiradora",
+    "description": "Recargable, automática con cargador",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 156,
+    "code": "R8673",
+    "name": "ASPIRADORA 2 EN 1",
+    "category": "aspiradora",
+    "description": "Manual, Potencia 600W, color azul",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 157,
+    "code": "R8672",
+    "name": "ASPIRADORA 3 EN 1",
+    "category": "aspiradora",
+    "description": "Potencia 600W, uso múltiple",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 158,
+    "code": "R8758",
+    "name": "ASPIRADORA ELECTRICA",
+    "category": "aspiradora",
+    "description": "Potencia 800W, alta potencia",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 159,
+    "code": "R8675",
+    "name": "ASPIRADORA 3 EN 1 RECARGABLE",
+    "category": "aspiradora",
+    "description": "Inalámbrica, Potencia 120W",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 160,
+    "code": "R4043",
+    "name": "AFEITADORA LED",
+    "category": "afeitadora",
+    "description": "Pantalla LED, 3 tipos de cambio, Potencia 3W",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 161,
+    "code": "R4088",
+    "name": "AFEITADORA USB",
+    "category": "afeitadora",
+    "description": "Acero inox, carga USB, Potencia 5W",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 162,
+    "code": "R419",
+    "name": "PLANCHA DE CABELLO",
+    "category": "planchas-cabello",
+    "description": "Cerámica 200g, Potencia 45W",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 163,
+    "code": "R454",
+    "name": "PLANCHA DE CABELLO",
+    "category": "planchas-cabello",
+    "description": "Cerámica 200g, Potencia 45W",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 164,
+    "code": "R4409",
+    "name": "PLANCHA CABELLO LED",
+    "category": "planchas-cabello",
+    "description": "Pantalla LED, 220g, Potencia 50W",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 165,
+    "code": "R4012",
+    "name": "PLANCHA CABELLO PROFESIONAL",
+    "category": "planchas-cabello",
+    "description": "Pantalla LED, 230g, Potencia 55W",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 166,
+    "code": "R603",
+    "name": "RIZADOR 2 EN 1",
+    "category": "planchas-cabello",
+    "description": "Cerámica, Potencia 35W, 200g",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 167,
+    "code": "R0414",
+    "name": "RIZADOR DE CABELLO",
+    "category": "planchas-cabello",
+    "description": "Cerámica, Potencia 53W, 200g",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 168,
+    "code": "R0432",
+    "name": "RIZADOR DE CABELLO",
+    "category": "planchas-cabello",
+    "description": "Cerámica, Potencia 30W, 200g",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 169,
+    "code": "R4556",
+    "name": "SECADOR DE CABELLO",
+    "category": "secadora-cabello",
+    "description": "Potencia 800W, solo caliente",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 170,
+    "code": "R4567",
+    "name": "SECADOR PROFESIONAL",
+    "category": "secadora-cabello",
+    "description": "Potencia 1600W, caliente y frío",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 171,
+    "code": "R4554",
+    "name": "SECADOR DE CABELLO",
+    "category": "secadora-cabello",
+    "description": "Potencia 900W, caliente y frío",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 172,
+    "code": "R4573",
+    "name": "PEINE 3 EN 1",
+    "category": "planchas-cabello",
+    "description": "3 cepillos intercambiables, Potencia 1200W",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 173,
+    "code": "R12000",
+    "name": "HUMIDIFICADOR 4L",
+    "category": "ventilador",
+    "description": "Capacidad 4L, Potencia 24W",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 174,
+    "code": "R15200",
+    "name": "SECADORA DE ZAPATOS",
+    "category": "secadora-cabello",
+    "description": "1 par, Potencia 160W",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 175,
+    "code": "R7829",
+    "name": "HERVIDOR ELÉCTRICO",
+    "category": "hervidor",
+    "description": "Acero inox, 2L, apagado automático, Potencia 2000W",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 176,
+    "code": "R7863",
+    "name": "HERVIDORA ELÉCTRICA VIDRIO",
+    "category": "hervidor",
+    "description": "Vidrio 2L, colores: celeste/rosado/blanco, Potencia 2000W",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 177,
+    "code": "R7327",
+    "name": "HERVIDOR TETERA 5L",
+    "category": "hervidor",
+    "description": "Acero inox, gran capacidad 5L, Potencia 2000W",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 178,
+    "code": "R7928",
+    "name": "HERVIDOR ELECTRICO VIDRIO",
+    "category": "hervidor",
+    "description": "Vidrio y acero, 2L, Potencia 1800W",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 179,
+    "code": "R7984",
+    "name": "HERVIDORA ELECTRICA",
+    "category": "hervidor",
+    "description": "Acero inox, 1.5L, Potencia 1500W, colores: plomo/negro",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 180,
+    "code": "R7115",
+    "name": "TETERA ELÉCTRICA 6L",
+    "category": "hervidor",
+    "description": "Cerámica y acero, extra grande 6L, Potencia 1800W",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 181,
+    "code": "R19000",
+    "name": "SET TOSTADORA + HERVIDORA",
+    "category": "hervidor",
+    "description": "Hervidora 1.7L + tostadora 2 panes, set completo",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 182,
+    "code": "R7315",
+    "name": "HERVIDOR ELÉCTRICO",
+    "category": "hervidor",
+    "description": "Acero inox, 2L, Potencia 1500W, colores: crema/negro",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 183,
+    "code": "R7816",
+    "name": "HERVIDOR ELÉCTRICO BASIC",
+    "category": "hervidor",
+    "description": "Acero inox, 2L, Potencia 1500W",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 184,
+    "code": "R7411",
+    "name": "HERVIDOR ELECTRICO VIDRIO",
+    "category": "hervidor",
+    "description": "Vidrio y acero, 2L, Potencia 1500W",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 185,
+    "code": "R7204",
+    "name": "HERVIDOR ELECTRICO VIDRIO",
+    "category": "hervidor",
+    "description": "Vidrio y acero, 2L, Potencia 1500W",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 186,
+    "code": "R7214",
+    "name": "HERVIDOR ELÉCTRICO DOBLE",
+    "category": "hervidor",
+    "description": "Base con 2 jarras (2L + 0.8L), vidrio y acero, Potencia 1500W",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 187,
+    "code": "R7898",
+    "name": "HERVIDOR ELÉCTRICO DOBLE PRO",
+    "category": "hervidor",
+    "description": "Base con 2 jarras (2L + 0.8L), diseño especial, Potencia 1500W",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 188,
+    "code": "R7940",
+    "name": "HERVIDORA ELECTRICA PRO",
+    "category": "hervidor",
+    "description": "Acero inox, 1.7L, alta potencia 2200W",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 189,
+    "code": "R103",
+    "name": "TAZA ELÉCTRICA",
+    "category": "hervidor",
+    "description": "Acero inox, 300ML, portátil, Potencia 600W",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 190,
+    "code": "R7951",
+    "name": "HERVIDORA ELECTRICA PRO",
+    "category": "hervidor",
+    "description": "Acero inox, 1.7L, Potencia 2200W",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 191,
+    "code": "R78001",
+    "name": "MAQUINA SLUSHIE",
+    "category": "maquina-hielo",
+    "description": "Capacidad 3L, Potencia 200W, control digital, acero inox",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 192,
+    "code": "R120",
+    "name": "CAFETERA ELÉCTRICA 600ML",
+    "category": "cafetera",
+    "description": "Vidrio y acero, 600ML, apagado automático",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 193,
+    "code": "R121",
+    "name": "CAFETERA ELÉCTRICA 1.2L",
+    "category": "cafetera",
+    "description": "2L de capacidad, apagado automático, Potencia 680W",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 194,
+    "code": "R1950",
+    "name": "CAFETERA ENCAPSULADA 3 EN 1",
+    "category": "cafetera",
+    "description": "Compatible con cápsulas, 1L, Potencia 1400W",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 195,
+    "code": "R106",
+    "name": "CAFETERA ENCAPSULADA 3 EN 1",
+    "category": "cafetera",
+    "description": "3 en 1, 1L, Potencia 1400W",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 196,
+    "code": "R7524",
+    "name": "CAFETERA ELÉCTRICA",
+    "category": "cafetera",
+    "description": "1.7L, sin filtro, Potencia 1000W, apagado automático",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 197,
+    "code": "R110",
+    "name": "CAFETERA 2 EN 1",
+    "category": "cafetera",
+    "description": "1.2L, digital, Potencia 1050W, diseño compacto",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 198,
+    "code": "R104",
+    "name": "MAQUINA DE CAFÉ DIGITAL",
+    "category": "maquina-cafe",
+    "description": "2L, digital, Potencia 850W",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 199,
+    "code": "R0208",
+    "name": "MAQUINA DE CAFÉ",
+    "category": "maquina-cafe",
+    "description": "1.2L, digital, Potencia 1300W, alta presión",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 200,
+    "code": "R0200",
+    "name": "MAQUINA DE CAFÉ DIGITAL PRO",
+    "category": "maquina-cafe",
+    "description": "1.8L, digital, Potencia 1350W, acero inox",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 201,
+    "code": "R0303",
+    "name": "MAQUINA DE HIELO INOX",
+    "category": "maquina-hielo",
+    "description": "1.5L, 24h activo, Potencia 150W, acero inox",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 202,
+    "code": "R0310",
+    "name": "MAQUINA DE HIELO",
+    "category": "maquina-hielo",
+    "description": "1.5L, 24h activo, Potencia 85W, ahorro energía",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  },
+  {
+    "id": 203,
+    "code": "R0302",
+    "name": "MAQUINA DE HIELO",
+    "category": "maquina-hielo",
+    "description": "1.5L, 24h activo, Potencia 150W, ABS/inox",
+    "price": 0,
+    "oldPrice": 0,
+    "featured": false
+  }
+]
