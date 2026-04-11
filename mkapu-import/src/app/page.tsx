@@ -100,6 +100,7 @@ function HeroAccordion() {
                 className={`hacc__panel${isActive ? " hacc__panel--active" : ""}`}
                 onMouseEnter={() => setActiveIdx(idx)}
                 onClick={() => setActiveIdx(idx)}
+                onTouchStart={() => setActiveIdx(idx)}
                 role="listitem"
                 aria-label={item.title}
                 style={{ "--panel-color": item.color } as React.CSSProperties}
@@ -126,6 +127,7 @@ function HeroAccordion() {
         .hacc__stat { display:flex; flex-direction:column; gap:2px; }
         .hacc__stat strong { font-size:1.4rem; font-weight:900; color:#fff; }
         .hacc__stat span { font-size:0.7rem; color:#555; text-transform:uppercase; letter-spacing:0.07em; }
+
         .hacc__accordion { display:flex; gap:10px; height:480px; align-items:stretch; }
         .hacc__panel { position:relative; border-radius:18px; overflow:hidden; cursor:pointer; flex:0 0 56px; transition:flex 0.6s cubic-bezier(0.4,0,0.2,1); }
         .hacc__panel--active { flex:1 1 0%; }
@@ -137,8 +139,42 @@ function HeroAccordion() {
         .hacc__panel-title { font-size:0.95rem; font-weight:800; color:#fff; text-shadow:0 1px 6px rgba(0,0,0,0.6); opacity:0; animation:fadeIn 0.3s 0.2s ease forwards; }
         @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
         .hacc__panel--active::after { content:""; position:absolute; inset:0; border-radius:18px; border:2px solid var(--panel-color,#e05c2a); opacity:0.6; pointer-events:none; }
-        @media (max-width:900px) { .hacc__inner { grid-template-columns:1fr; gap:2.5rem; } .hacc__accordion { height:320px; } }
-        @media (max-width:500px) { .hacc { padding:4rem 1rem 3rem; } .hacc__accordion { height:240px; gap:6px; } .hacc__panel { flex:0 0 38px; border-radius:12px; } .hacc__stats { gap:1.25rem; } }
+
+        @media (max-width:900px) {
+          .hacc__inner { grid-template-columns:1fr; gap:2.5rem; }
+          .hacc__accordion { height:320px; }
+        }
+
+        @media (max-width:500px) {
+          .hacc { padding:4rem 1rem 3rem; }
+
+          .hacc__accordion {
+            height:300px;
+            gap:8px;
+            overflow:hidden;
+          }
+
+          .hacc__panel {
+            flex:0 0 22px;
+            min-width:22px;
+            border-radius:12px;
+          }
+
+          .hacc__panel--active {
+            flex:1 1 auto;
+          }
+
+          .hacc__panel-label {
+            left:12px;
+            bottom:12px;
+          }
+
+          .hacc__panel-title {
+            font-size:0.82rem;
+          }
+
+          .hacc__stats { gap:1rem; }
+        }
       `}</style>
     </section>
   );
@@ -242,7 +278,7 @@ export default function HomePage() {
         products={featured.length > 0 ? featured : (productsData as any[]).slice(0, 10)}
         href="/productos"
       />
-      {/* Videos */}
+
       <section className="vid">
         <div className="vid__inner">
           <div className="vid__head">
@@ -291,7 +327,6 @@ export default function HomePage() {
         href="/productos?cat=refrigeracion"
       />
 
-      {/* Por qué elegirnos */}
       <section className="why">
         <div className="why__inner">
           <div className="why__head">
@@ -314,12 +349,9 @@ export default function HomePage() {
         </div>
       </section>
 
-
-      {/* ── Todos los estilos globales de HomePage en un solo bloque ── */}
       <style jsx>{`
         .home { overflow-x:hidden; }
 
-        /* WHY */
         .why { background:#0d0d0d; padding:96px 40px; }
         .why__inner { max-width:1100px; margin:0 auto; }
         .why__head { margin-bottom:72px; }
@@ -339,7 +371,6 @@ export default function HomePage() {
         .why__card-title { font-family:'Syne',sans-serif; font-size:15px; font-weight:700; color:#fff; margin-bottom:12px; letter-spacing:-0.01em; }
         .why__card-desc { font-size:13.5px; color:rgba(255,255,255,0.45); line-height:1.65; }
 
-        /* VIDEO */
         .vid { padding:4.5rem 1.5rem; background:#0f0f0f; }
         .vid__inner { max-width:780px; margin:0 auto; }
         .vid__head { text-align:center; margin-bottom:2rem; }
