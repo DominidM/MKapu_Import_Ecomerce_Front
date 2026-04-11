@@ -5,9 +5,13 @@
     "name": "BATIDORA PEDESTAL 8L",
     "category": "batidora",
     "description": "Capacidad 8L, Potencia 1400W, Acero inoxidable, incluye accesorios",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 385,
+    "pricemCaja": 1500,
+    "unidadcaja": 4,
+    "priceMayorista": 380,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775887781/8f1b0138-8baa-4c84-bf77-fd1250ad01b6.png"
   },
   {
     "id": 2,
@@ -15,9 +19,13 @@
     "name": "BATIDORA 2 EN 1",
     "category": "batidora",
     "description": "Capacidad 6L, Potencia 1300W, ABS y acero inoxidable, incluye accesorios",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 445,
+    "pricemCaja": 1740,
+    "unidadcaja": 4,
+    "priceMayorista": 440,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775887852/88e127ab-1e2b-4942-8a2c-99b8cddf218b.png"
   },
   {
     "id": 3,
@@ -25,9 +33,13 @@
     "name": "BATIDORA PEDESTAL DIGITAL",
     "category": "batidora",
     "description": "Capacidad 8L, Potencia 1800W, ABS y acero inoxidable, incluye accesorios",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 480,
+    "pricemCaja": 1880,
+    "unidadcaja": 4,
+    "priceMayorista": 475,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775887959/a5cf8e9d-d17b-4788-bb25-68dace929d3a.png"
   },
   {
     "id": 4,
@@ -35,9 +47,13 @@
     "name": "BATIDORA PEDESTAL",
     "category": "batidora",
     "description": "Capacidad 5L, Potencia 1000W, ABS y acero inoxidable, incluye accesorios",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 350,
+    "pricemCaja": 1360,
+    "unidadcaja": 4,
+    "priceMayorista": 345,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775888030/f5d9cf65-75d9-42e6-8e8a-4b4b6d7c91c2.png"
   },
   {
     "id": 5,
@@ -45,9 +61,13 @@
     "name": "BATIDORA DE MANO",
     "category": "batidora",
     "description": "Manual, Potencia 620W, ABS y acero inoxidable, incluye accesorios",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 73,
+    "pricemCaja": 992,
+    "unidadcaja": 16,
+    "priceMayorista": 67,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775888129/aacb2520-a149-4ffc-b7c0-189e5eeb9163.png"
   },
   {
     "id": 6,
@@ -55,9 +75,13 @@
     "name": "BATIDORA DE MANO",
     "category": "batidora",
     "description": "Manual, Potencia 150W, ABS y acero inoxidable",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 60,
+    "pricemCaja": 1200,
+    "unidadcaja": 24,
+    "priceMayorista": 55,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775888637/0edd0d04-69e8-4f0c-8746-c59ecaf5d181.png"
   },
   {
     "id": 7,
@@ -65,9 +89,13 @@
     "name": "BATIDORA DE MANO",
     "category": "batidora",
     "description": "Manual, Potencia 800W, ABS y acero inoxidable",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 70,
+    "pricemCaja": 1240,
+    "unidadcaja": 20,
+    "priceMayorista": 65,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775888702/58c98a8d-9624-4eb8-869b-a1faa44d3a2b.png"
   },
   {
     "id": 8,
@@ -75,9 +103,13 @@
     "name": "BATIDORA DE MANO",
     "category": "batidora",
     "description": "Manual, Potencia 270W, ABS y acero inoxidable",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 22,
+    "pricemCaja": 408,
+    "unidadcaja": 24,
+    "priceMayorista": 19,
+    "unidadMayorista": 3,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775888764/c50705dd-105c-4c2e-adaf-d4397e4595dd.png"
   },
   {
     "id": 9,
@@ -85,9 +117,13 @@
     "name": "BATIDORA DE MANO",
     "category": "batidora",
     "description": "Manual, Potencia 800W, ABS y acero inoxidable",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 70,
+    "pricemCaja": 1120,
+    "unidadcaja": 20,
+    "priceMayorista": 65,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775888840/c78398a9-0c97-479a-87b8-3502c59b4ff9.png"
   },
   {
     "id": 10,
@@ -97,7 +133,8 @@
     "description": "Potencia 300W, incluye gancho batidor, colores: blanco, amarillo, rojo",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 11,
@@ -105,9 +142,13 @@
     "name": "PROCESADOR 3L",
     "category": "procesador",
     "description": "4 aspas, Potencia 1000W, ABS y acero inoxidable",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 45,
+    "pricemCaja": 608,
+    "unidadcaja": 16,
+    "priceMayorista": 42,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775888939/265fa78a-8557-49fd-bc88-a5dcffaf104d.png"
   },
   {
     "id": 12,
@@ -115,9 +156,13 @@
     "name": "PROCESADOR 3L",
     "category": "procesador",
     "description": "4 aspas, Potencia 300W, ABS y vidrio",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 63,
+    "pricemCaja": 440,
+    "unidadcaja": 8,
+    "priceMayorista": 59,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775888998/8ce08161-012f-4484-8d21-664c19bfb293.png"
   },
   {
     "id": 13,
@@ -125,9 +170,13 @@
     "name": "PROCESADOR 3L",
     "category": "procesador",
     "description": "4 aspas, Potencia 800W, ABS y acrílico",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 37,
+    "pricemCaja": 512,
+    "unidadcaja": 16,
+    "priceMayorista": 35,
+    "unidadMayorista": 3,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775889055/a046b889-f3c3-4109-97ff-093f00833eb5.png"
   },
   {
     "id": 14,
@@ -137,7 +186,8 @@
     "description": "4 aspas gruesas, Potencia 1000W, ABS y acero inoxidable",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 15,
@@ -145,9 +195,13 @@
     "name": "PROCESADOR 6L",
     "category": "procesador",
     "description": "4 aspas, Potencia 1000W, ABS y acero inoxidable",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 95,
+    "pricemCaja": 510,
+    "unidadcaja": 6,
+    "priceMayorista": 90,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775889349/83c61084-fb0d-4883-8f75-6d42da55117e.png"
   },
   {
     "id": 16,
@@ -155,9 +209,13 @@
     "name": "PROCESADOR 8L",
     "category": "procesador",
     "description": "4 aspas gruesas, Potencia 1000W, ABS y acero inoxidable",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 130,
+    "pricemCaja": 720,
+    "unidadcaja": 6,
+    "priceMayorista": 125,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775889415/48c3c031-f972-491c-93e8-e93cb6bb1cc3.png"
   },
   {
     "id": 17,
@@ -165,9 +223,13 @@
     "name": "MAQUINA PROCESADOR 10L",
     "category": "procesador",
     "description": "4 aspas gruesas, Potencia 1000W, ABS y acero inoxidable",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 170,
+    "pricemCaja": 960,
+    "unidadcaja": 6,
+    "priceMayorista": 165,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775889530/9c5fa159-785c-4ee1-ab5c-cf9bc56693fa.png"
   },
   {
     "id": 18,
@@ -175,9 +237,13 @@
     "name": "MAQUINA PROCESADOR 3L",
     "category": "procesador",
     "description": "4 aspas, Potencia 300W, ABS y acero inoxidable",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 63,
+    "pricemCaja": 432,
+    "unidadcaja": 8,
+    "priceMayorista": 58,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775889636/f97ffd77-4f82-40aa-9fd7-0a1962786431.png"
   },
   {
     "id": 19,
@@ -185,9 +251,13 @@
     "name": "PROCESADOR DIGITAL 5L",
     "category": "procesador",
     "description": "5 aspas, Potencia 500W, ABS y acero inoxidable",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 75,
+    "pricemCaja": 816,
+    "unidadcaja": 12,
+    "priceMayorista": 70,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775890719/7a2beab2-875d-4c97-8d69-b545f9afe46c.png"
   },
   {
     "id": 20,
@@ -195,9 +265,13 @@
     "name": "PROCESADOR 3L",
     "category": "procesador",
     "description": "4 aspas, Potencia 300W, vidrio y acero inoxidable",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 63,
+    "pricemCaja": 440,
+    "unidadcaja": 8,
+    "priceMayorista": 58,
+    "unidadMayorista": 3,
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 21,
@@ -205,9 +279,13 @@
     "name": "PROCESADOR 3 EN 1",
     "category": "procesador",
     "description": "4 aspas, Potencia 300W, vidrio y ABS",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 95,
+    "pricemCaja": 640,
+    "unidadcaja": 8,
+    "priceMayorista": 90,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775892809/a1e681dc-922d-4993-8ac3-c3ef2842b1fe.png"
   },
   {
     "id": 22,
@@ -215,9 +293,13 @@
     "name": "PROCESADOR 3L",
     "category": "procesador",
     "description": "4 aspas, Potencia 400W, ABS y acero inoxidable",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 63,
+    "pricemCaja": 440,
+    "unidadcaja": 8,
+    "priceMayorista": 58,
+    "unidadMayorista": 3,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775892873/091b1e5f-68fb-4cca-9f1f-99c45b8df5ee.png"
   },
   {
     "id": 23,
@@ -227,7 +309,8 @@
     "description": "Capacidad 750ML, Potencia 600W, ABS y acrílico",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 24,
@@ -235,9 +318,13 @@
     "name": "LICUADORA ELECTRICA",
     "category": "licuadora",
     "description": "Manual, Potencia 2300W, ABS, policarbonato y acero inoxidable",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 125,
+    "pricemCaja": 625,
+    "unidadcaja": 6,
+    "priceMayorista": 120,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775892984/6d7d1039-af95-4a54-9e5e-bf3c2280e677.png"
   },
   {
     "id": 25,
@@ -245,9 +332,13 @@
     "name": "LICUADORA ELÉCTRICA",
     "category": "licuadora",
     "description": "Capacidad 1.25L, Potencia 750W, ABS, acero inoxidable y vidrio",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 140,
+    "pricemCaja": 780,
+    "unidadcaja": 6,
+    "priceMayorista": 135,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775893231/4c11c24c-1bb4-4ee8-a3ee-31b2b6637752.png"
   },
   {
     "id": 26,
@@ -255,9 +346,13 @@
     "name": "LICUADORA ELÉCTRICA",
     "category": "licuadora",
     "description": "Capacidad 1.25L, Potencia 500W, ABS, acero inox y vidrio",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 172,
+    "pricemCaja": 648,
+    "unidadcaja": 4,
+    "priceMayorista": 167,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775893541/db8dad94-e31a-4dff-aa82-7cc928ffe9c2.png"
   },
   {
     "id": 27,
@@ -265,9 +360,13 @@
     "name": "LICUADORA ELÉCTRICA",
     "category": "licuadora",
     "description": "Capacidad 1.25L, 4 aspas, Potencia 600W para hielo",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 180,
+    "pricemCaja": 1020,
+    "unidadcaja": 6,
+    "priceMayorista": 175,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775893598/4d97c859-6943-4111-bea5-09eb665122fc.png"
   },
   {
     "id": 28,
@@ -275,9 +374,13 @@
     "name": "LICUADORA ELÉCTRICA",
     "category": "licuadora",
     "description": "Capacidad 1.5L, Potencia 500W, acero inox, ABS, vidrio pirex",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 140,
+    "pricemCaja": 780,
+    "unidadcaja": 4,
+    "priceMayorista": 135,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775893882/caba6c81-6d88-4881-a6eb-4fa467cbc2f1.png"
   },
   {
     "id": 29,
@@ -285,9 +388,13 @@
     "name": "LICUADORA ELECTRICA",
     "category": "licuadora",
     "description": "Capacidad 2L, Potencia 2600W, acero inox, ABS, policarbonato",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 145,
+    "pricemCaja": 545,
+    "unidadcaja": 4,
+    "priceMayorista": 140,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775893942/5f43f873-5d63-4257-bec7-6b205ad858fd.png"
   },
   {
     "id": 30,
@@ -295,9 +402,13 @@
     "name": "LICUADORA ELÉCTRICA",
     "category": "licuadora",
     "description": "Capacidad 3L, Potencia 2600W, acero inox, ABS, policarbonato",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 139,
+    "pricemCaja": 480,
+    "unidadcaja": 4,
+    "priceMayorista": 125,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775893993/55577e78-e8b3-4f0b-b4bf-40daa79f17d9.png"
   },
   {
     "id": 31,
@@ -305,9 +416,13 @@
     "name": "LICUADORA ELECTRICA 6L",
     "category": "licuadora",
     "description": "Capacidad 6L, Potencia 1500W, acero inox y ABS",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 550,
+    "pricemCaja": 2140,
+    "unidadcaja": 6,
+    "priceMayorista": 545,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775894066/2802d4b7-b9bd-4f73-9b21-7b7c8506e95a.png"
   },
   {
     "id": 32,
@@ -315,9 +430,13 @@
     "name": "LICUADORA ENCAPSULADA",
     "category": "licuadora",
     "description": "Capacidad 2L, Potencia 1800W, acero inox, ABS y policarbonato",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 460,
+    "pricemCaja": 1780,
+    "unidadcaja": 4,
+    "priceMayorista": 452,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775894145/c09a8a47-2428-463b-bc00-80006379c322.png"
   },
   {
     "id": 33,
@@ -327,7 +446,8 @@
     "description": "Capacidad 1.8L, Potencia 800W, control digital, vidrio",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 34,
@@ -337,7 +457,8 @@
     "description": "Capacidad 3L, 6 aspas, Potencia 2600W, policarbonato",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 35,
@@ -347,7 +468,8 @@
     "description": "Capacidad 1.5L, 4 aspas, Potencia 400W, vidrio",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 36,
@@ -357,7 +479,8 @@
     "description": "Capacidad 1.5L, 4 aspas, Potencia 400W, vidrio",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 37,
@@ -367,7 +490,8 @@
     "description": "Capacidad 3L, Potencia 2600W, acero inox, policarbonato",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 38,
@@ -377,7 +501,8 @@
     "description": "Capacidad 2L, Potencia 1500W, manual y regulador de tiempo",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 39,
@@ -387,7 +512,8 @@
     "description": "Capacidad 2L, Potencia 1200W, control digital",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 40,
@@ -397,7 +523,8 @@
     "description": "Capacidad 2L, Potencia 1200W, control digital",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 41,
@@ -407,7 +534,8 @@
     "description": "Capacidad 2L, Potencia 1200W, control manual",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 42,
@@ -417,7 +545,8 @@
     "description": "Capacidad 2L, Potencia 1200W, control manual",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 43,
@@ -427,7 +556,8 @@
     "description": "4 aspas, Potencia 1600W (máx 2 min), ABS",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 44,
@@ -437,7 +567,8 @@
     "description": "Incluye licuadora, batidor y procesador, Potencia 1600W",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 45,
@@ -447,7 +578,8 @@
     "description": "4 aspas, Potencia 1200W, acero inox y ABS",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 46,
@@ -457,7 +589,8 @@
     "description": "Incluye: licuar, batir, procesar, Potencia 1600W",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 47,
@@ -467,7 +600,8 @@
     "description": "Capacidad 600ML + 1.5L, Potencia 350W, acero inox y acrílico",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 48,
@@ -477,7 +611,8 @@
     "description": "4 aspas, Potencia 1000W (máx 2 min), acero inox y ABS",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 49,
@@ -487,7 +622,8 @@
     "description": "Incluye: licuar, batir, procesar, espumar, Potencia 1000W",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 50,
@@ -497,7 +633,8 @@
     "description": "4 aspas, Potencia 400W (máx 2 min), acero inox y ABS",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 51,
@@ -507,7 +644,8 @@
     "description": "4 aspas, Potencia 800W, colores: negro, rojo",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 52,
@@ -517,7 +655,8 @@
     "description": "Capacidad 600ML, Potencia 250W, ABS y acero inox",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 53,
@@ -527,7 +666,8 @@
     "description": "Capacidad 400ML, Potencia 250W, ABS y acero inox",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 54,
@@ -537,7 +677,8 @@
     "description": "Capacidad 1.7L, Potencia 300W, ABS y acero inox",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 55,
@@ -547,7 +688,8 @@
     "description": "Capacidad 1L, Potencia 800W, control digital",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 56,
@@ -557,7 +699,8 @@
     "description": "Capacidad 200ML, Potencia 150W, ABS y acero inox",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 57,
@@ -567,7 +710,8 @@
     "description": "Capacidad 600ML, Potencia 800W, ABS y acero inox",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 58,
@@ -577,7 +721,8 @@
     "description": "Capacidad 600ML, Potencia 800W, ABS y acero inox",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 59,
@@ -587,7 +732,8 @@
     "description": "Capacidad 600ML, Potencia 800W, ABS y vidrio",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 60,
@@ -597,7 +743,8 @@
     "description": "Capacidad 300ML, Potencia 100W, acero inox y ABS",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 61,
@@ -607,7 +754,8 @@
     "description": "Capacidad 250g, 8 aspas, Potencia 200W, acero inox y acrílico",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 62,
@@ -617,7 +765,8 @@
     "description": "Capacidad 500g, 3 aspas, Potencia 1800W, acero inox",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 63,
@@ -627,7 +776,8 @@
     "description": "Capacidad 200g, 8 aspas, Potencia 300W, acero inox y ABS",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 64,
@@ -637,7 +787,8 @@
     "description": "Capacidad 100g, 3 aspas, Potencia 650W, acero inox",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 65,
@@ -647,17 +798,22 @@
     "description": "Capacidad 200g, 3 aspas, Potencia 1480W, acero inox",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 66,
     "code": "R5157",
-    "name": "HORNO ELECTRICO DE 48L",
+    "name": "HORNO ELECTRICO 48L",
     "category": "horno",
     "description": "Capacidad 48L, Potencia 2000W, control digital, ABS y vidrio",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 435,
+    "pricemCaja": 1696,
+    "unidadcaja": 4,
+    "priceMayorista": 429,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775864308/R5157_h6iveb.png"
   },
   {
     "id": 67,
@@ -665,19 +821,27 @@
     "name": "HORNO ELECTRICO 68L",
     "category": "horno",
     "description": "Capacidad 68L, Potencia 2200W, control manual, acero inox",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 320,
+    "pricemCaja": 1180,
+    "unidadcaja": 4,
+    "priceMayorista": 320,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775864535/R5322_jsxmeq.png"
   },
   {
     "id": 68,
     "code": "R5323",
-    "name": "HORNO ELECTRICO DE 7L",
+    "name": "HORNO ELECTRICO 7L",
     "category": "horno",
     "description": "Capacidad 7L, Potencia 700W, regulador de temperatura",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 99,
+    "pricemCaja": 720,
+    "unidadcaja": 8,
+    "priceMayorista": 95,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775864680/R5323_vrzxtu.png"
   },
   {
     "id": 69,
@@ -685,9 +849,13 @@
     "name": "HORNO ELECTRICO 38L",
     "category": "horno",
     "description": "Capacidad 38L, Potencia 1700W, control manual",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 210,
+    "pricemCaja": 765,
+    "unidadcaja": 4,
+    "priceMayorista": 205,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775864801/R5316_mcoe0i.png"
   },
   {
     "id": 70,
@@ -695,9 +863,13 @@
     "name": "HORNO ELECTRICO 3 EN 1",
     "category": "horno",
     "description": "Capacidad 7L, Potencia 1050W, regulador de temperatura",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 140,
+    "pricemCaja": 520,
+    "unidadcaja": 4,
+    "priceMayorista": 135,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775880325/R5308_jogjs8.png"
   },
   {
     "id": 71,
@@ -705,9 +877,13 @@
     "name": "HORNO KEKERO",
     "category": "horno",
     "description": "Capacidad 500g, Potencia 1800W, ABS, acero inox, antiadherente",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 115,
+    "pricemCaja": 396,
+    "unidadcaja": 4,
+    "priceMayorista": 105,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775865056/R500_kgc3nj.png"
   },
   {
     "id": 72,
@@ -715,9 +891,13 @@
     "name": "FREIDORA DE AIRE DUAL 9L",
     "category": "freidora-aire",
     "description": "Capacidad 9L, Potencia 2000W, control digital, antiadherente",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 330,
+    "pricemCaja": 1196,
+    "unidadcaja": 4,
+    "priceMayorista": 320,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775864979/R5270_qv2co6.png"
   },
   {
     "id": 73,
@@ -725,9 +905,13 @@
     "name": "FREIDORA DE AIRE 4L",
     "category": "freidora-aire",
     "description": "Capacidad 4L, Potencia 1300W, control manual, antiadherente",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 125,
+    "pricemCaja": 460,
+    "unidadcaja": 4,
+    "priceMayorista": 120,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775865138/R5332_hoqk0s.png"
   },
   {
     "id": 74,
@@ -735,9 +919,13 @@
     "name": "FREIDORA DE AIRE DUAL 9L",
     "category": "freidora-aire",
     "description": "Capacidad 9L, Potencia 2500W, control digital, antiadherente",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 365,
+    "pricemCaja": 1360,
+    "unidadcaja": 4,
+    "priceMayorista": 355,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775865315/R5342_dvwyrc.png"
   },
   {
     "id": 75,
@@ -745,9 +933,13 @@
     "name": "FREIDORA DE AIRE ALOGENO 12L",
     "category": "freidora-aire",
     "description": "Capacidad 12L, Potencia 3500W, control manual, vidrio",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 120,
+    "pricemCaja": 456,
+    "unidadcaja": 4,
+    "priceMayorista": 116,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775881095/2c7f940d-47f8-42b6-88ca-08ed3194ad96.png"
   },
   {
     "id": 76,
@@ -755,9 +947,13 @@
     "name": "FREIDORA ELÉCTRICA 4L",
     "category": "freidora-aire",
     "description": "Capacidad 4L, Potencia 1700W, control digital",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 300,
+    "pricemCaja": 1140,
+    "unidadcaja": 4,
+    "priceMayorista": 290,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775880519/53e0cc5c-b977-47fd-8718-bbd7a7cc3f42.png"
   },
   {
     "id": 77,
@@ -765,9 +961,13 @@
     "name": "FREIDORA DE AIRE 10L",
     "category": "freidora-aire",
     "description": "Capacidad 10L, Potencia 2150W, control digital, antiadherente",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 300,
+    "pricemCaja": 1200,
+    "unidadcaja": 4,
+    "priceMayorista": 295,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775880713/91486682-f338-46b9-890b-4df4ceef0ded.png"
   },
   {
     "id": 78,
@@ -775,9 +975,13 @@
     "name": "FREIDORA DE AIRE 8L",
     "category": "freidora-aire",
     "description": "Capacidad 8L, Potencia 1800W, control digital, antiadherente",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 290,
+    "pricemCaja": 1120,
+    "unidadcaja": 4,
+    "priceMayorista": 285,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775880780/a60ec61c-cc4e-4d3c-86f9-e05c8f4aa646.png"
   },
   {
     "id": 79,
@@ -785,9 +989,13 @@
     "name": "FREIDORA DE AIRE 10L",
     "category": "freidora-aire",
     "description": "Capacidad 10L, Potencia 1800W, control manual, antiadherente",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 280,
+    "pricemCaja": 1080,
+    "unidadcaja": 4,
+    "priceMayorista": 275,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775880839/68106f3b-df33-4c96-8ae6-ee72b842158a.png"
   },
   {
     "id": 80,
@@ -795,9 +1003,13 @@
     "name": "FREIDORA DE AIRE 8L",
     "category": "freidora-aire",
     "description": "Capacidad 8L, Potencia 1800W, doble calor, control digital",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 310,
+    "pricemCaja": 1200,
+    "unidadcaja": 4,
+    "priceMayorista": 305,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775880983/a40d158d-829b-4282-9a4d-b06bc84fe9b6.png"
   },
   {
     "id": 81,
@@ -805,9 +1017,13 @@
     "name": "FREIDORA DE AIRE 8L",
     "category": "freidora-aire",
     "description": "Capacidad 8L, Potencia 1700W, control digital, antiadherente",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 280,
+    "pricemCaja": 1080,
+    "unidadcaja": 4,
+    "priceMayorista": 275,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775881221/24f78fb1-fe9f-4199-bbc6-f433c2c64b82.png"
   },
   {
     "id": 82,
@@ -815,9 +1031,13 @@
     "name": "FREIDORA DE AIRE DOBLE 6L+6L",
     "category": "freidora-aire",
     "description": "Capacidad 6L+6L, Potencia 2800W, control digital",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 370,
+    "pricemCaja": 1440,
+    "unidadcaja": 4,
+    "priceMayorista": 365,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775881289/79c6d06f-029b-4aae-92fd-f8071458ac46.png"
   },
   {
     "id": 83,
@@ -825,9 +1045,13 @@
     "name": "FREIDORA DE AIRE DOBLE 7L+7L",
     "category": "freidora-aire",
     "description": "Capacidad 7L+7L, Potencia 2800W, control digital",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 390,
+    "pricemCaja": 1520,
+    "unidadcaja": 4,
+    "priceMayorista": 385,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775881380/087383aa-4d36-4e71-a8f1-b19936465631.png"
   },
   {
     "id": 84,
@@ -835,9 +1059,13 @@
     "name": "FREIDORA DE AIRE DOBLE 6L+6L",
     "category": "freidora-aire",
     "description": "Capacidad 6L+6L, Potencia 2400W, control digital",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 350,
+    "pricemCaja": 1360,
+    "unidadcaja": 4,
+    "priceMayorista": 345,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775881448/f27967d3-e840-4684-9fb3-f20c62fd0d9c.png"
   },
   {
     "id": 85,
@@ -845,9 +1073,13 @@
     "name": "FREIDORA DE AIRE DOBLE 6L+6L",
     "category": "freidora-aire",
     "description": "Capacidad 6L+6L, Potencia 2800W, control digital",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 380,
+    "pricemCaja": 1480,
+    "unidadcaja": 4,
+    "priceMayorista": 375,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775881579/c11ed1a2-45b7-439f-8f53-6de23eea0cfb.png"
   },
   {
     "id": 86,
@@ -855,9 +1087,13 @@
     "name": "FREIDORA ELECTRICA DOBLE 5.5L",
     "category": "freidora-aire",
     "description": "Capacidad 5.5L+5.5L, Potencia 2500W, control manual",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 195,
+    "pricemCaja": 740,
+    "unidadcaja": 4,
+    "priceMayorista": 190,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775883616/636137f0-be34-4002-90cc-3579640dca30.png"
   },
   {
     "id": 87,
@@ -865,9 +1101,13 @@
     "name": "FREIDORA ELECTRICA 5.5L",
     "category": "freidora-aire",
     "description": "Capacidad 5.5L, Potencia 2500W, control manual",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 120,
+    "pricemCaja": 440,
+    "unidadcaja": 4,
+    "priceMayorista": 115,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775883675/0256b7ee-3831-482b-bee2-33dbc7f1a1ec.png"
   },
   {
     "id": 88,
@@ -875,9 +1115,13 @@
     "name": "DESHIDRATADOR",
     "category": "cocinas",
     "description": "5 niveles, Potencia 360W, control manual, ABS y acrílico",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 110,
+    "pricemCaja": 386,
+    "unidadcaja": 4,
+    "priceMayorista": 100,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775880639/f0dcf633-299f-402b-bf09-f4b24cdde3aa.png"
   },
   {
     "id": 89,
@@ -885,9 +1129,13 @@
     "name": "ARROCERA MULTIFUNCIONAL",
     "category": "arrocera",
     "description": "Capacidad 5L (~1.8Kg), Potencia 900W, control digital",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 115,
+    "pricemCaja": 420,
+    "unidadcaja": 4,
+    "priceMayorista": 110,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775881686/d314a73e-e68e-4bf0-bffb-668b0bcb9bbd.png"
   },
   {
     "id": 90,
@@ -895,9 +1143,13 @@
     "name": "ARROCERA MULTIFUNCIONAL",
     "category": "arrocera",
     "description": "Capacidad 5L (~1.8Kg), Potencia 900W, control digital",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 115,
+    "pricemCaja": 420,
+    "unidadcaja": 4,
+    "priceMayorista": 110,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775881744/664cd453-e6f3-4c3e-81b7-33744519a39a.png"
   },
   {
     "id": 91,
@@ -905,9 +1157,13 @@
     "name": "ARROCERA MULTIFUNCIONAL",
     "category": "arrocera",
     "description": "Capacidad 5L (~1.8Kg), Potencia 900W, control manual",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 110,
+    "pricemCaja": 594,
+    "unidadcaja": 6,
+    "priceMayorista": 105,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775881981/fa1f00d7-a9cc-4974-a6e0-0aa6fb578482.png"
   },
   {
     "id": 92,
@@ -915,9 +1171,13 @@
     "name": "OLLA PRESION",
     "category": "olla-presion",
     "description": "Capacidad 6L (~2Kg), Potencia 1000W, control manual",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 210,
+    "pricemCaja": 796,
+    "unidadcaja": 4,
+    "priceMayorista": 205,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775881866/f126cd05-9ee8-4f0b-98bc-0c5bddf92d09.png"
   },
   {
     "id": 93,
@@ -925,9 +1185,13 @@
     "name": "OLLA PRESION MULTIFUNCIONAL",
     "category": "olla-presion",
     "description": "Capacidad 6L (~2Kg), Potencia 900W, control digital",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 210,
+    "pricemCaja": 780,
+    "unidadcaja": 4,
+    "priceMayorista": 200,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775881920/11a57142-0118-4593-820f-5fa360a6f1a4.png"
   },
   {
     "id": 94,
@@ -935,9 +1199,13 @@
     "name": "OLLA PRESION MULTIFUNCIONAL",
     "category": "olla-presion",
     "description": "Capacidad 6L (~2Kg), Potencia 1000W, control digital",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 256,
+    "pricemCaja": 940,
+    "unidadcaja": 4,
+    "priceMayorista": 247,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775882046/0b4a5fa7-4e81-41c1-ab24-c249346e97f4.png"
   },
   {
     "id": 95,
@@ -945,9 +1213,13 @@
     "name": "COCINA DE INDUCCIÓN",
     "category": "cocinas",
     "description": "1 hornilla, Potencia 3500W, control manual, acero inox",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 115,
+    "pricemCaja": 525,
+    "unidadcaja": 5,
+    "priceMayorista": 110,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775882177/452b8b0b-8a00-47ea-8be2-af97fecf7d05.png"
   },
   {
     "id": 96,
@@ -955,9 +1227,13 @@
     "name": "CREPERA ELECTRICA",
     "category": "cocinas",
     "description": "Diámetro 31CM, Potencia 1200W, antiadherente, incluye accesorios",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 70,
+    "pricemCaja": 464,
+    "unidadcaja": 8,
+    "priceMayorista": 65,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775882118/ca22ac7e-a039-4cd3-b5cb-f8d77e547302.png"
   },
   {
     "id": 97,
@@ -965,9 +1241,13 @@
     "name": "COCINA ELECTRICA BASIC",
     "category": "cocinas",
     "description": "1 hornilla, Potencia 1000W, regulador de temperatura",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 20,
+    "pricemCaja": 408,
+    "unidadcaja": 24,
+    "priceMayorista": 18,
+    "unidadMayorista": 3,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775882252/19c888a9-3d79-4391-a325-55e644a7a0f5.png"
   },
   {
     "id": 98,
@@ -975,9 +1255,13 @@
     "name": "COCINA 2 HORNILLAS BASIC",
     "category": "cocinas",
     "description": "2 hornillas, Potencia 1000W, regulador de temperatura",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 37,
+    "pricemCaja": 354,
+    "unidadcaja": 12,
+    "priceMayorista": 34,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775882338/20930d4e-462e-4cd8-b7a0-f3cc941e7356.png"
   },
   {
     "id": 99,
@@ -985,9 +1269,13 @@
     "name": "COCINA INFRARROJO",
     "category": "cocinas",
     "description": "1 hornilla, Potencia 2200W, control digital",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 75,
+    "pricemCaja": 650,
+    "unidadcaja": 10,
+    "priceMayorista": 70,
+    "unidadMayorista": 3,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775882395/6bf75215-aad5-46c2-a553-be481960025f.png"
   },
   {
     "id": 100,
@@ -995,9 +1283,13 @@
     "name": "COCINA INFRARROJO 2 HORNILLAS",
     "category": "cocinas",
     "description": "2 hornillas, Potencia 3500W, control digital",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 245,
+    "pricemCaja": 705,
+    "unidadcaja": 3,
+    "priceMayorista": 240,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775882458/d072dd53-8660-4ab5-9252-e5f1ca0d7ed4.png"
   },
   {
     "id": 101,
@@ -1005,9 +1297,13 @@
     "name": "COCINA INFRARROJO",
     "category": "cocinas",
     "description": "1 hornilla, Potencia 3500W, control digital",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 95,
+    "pricemCaja": 632,
+    "unidadcaja": 8,
+    "priceMayorista": 85,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775882534/09e02a78-fe7e-43f7-bc00-d60ba95744f7.png"
   },
   {
     "id": 102,
@@ -1015,9 +1311,13 @@
     "name": "COCINA DE INDUCCIÓN",
     "category": "cocinas",
     "description": "1 hornilla, Potencia 2000W, control manual, cerámica",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 85,
+    "pricemCaja": 450,
+    "unidadcaja": 6,
+    "priceMayorista": 80,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775882592/c41cf33b-c1e8-4fa8-a5cc-136f7a9a8a4f.png"
   },
   {
     "id": 103,
@@ -1025,9 +1325,13 @@
     "name": "PARRILLA ELECTRICA 70CM",
     "category": "parrillas",
     "description": "70CM, Potencia 1800W, automático, antiadherente",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 125,
+    "pricemCaja": 460,
+    "unidadcaja": 4,
+    "priceMayorista": 120,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775882639/00ab885a-a2b2-44a6-b001-571e65dd6da1.png"
   },
   {
     "id": 104,
@@ -1035,19 +1339,73 @@
     "name": "PARRILLA ELECTRICA 90CM",
     "category": "parrillas",
     "description": "90CM, Potencia 1800W, automático, antiadherente",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 140,
+    "pricemCaja": 366,
+    "unidadcaja": 3,
+    "priceMayorista": 130,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775882695/5fc4c275-2881-4ab6-95a1-53648f82e483.png"
   },
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
   {
     "id": 105,
     "code": "R5413",
     "name": "PARRILLA ELECTRICA 2 EN 1",
     "category": "parrillas",
     "description": "3 divisiones, Potencia 1800W, automático, antiadherente",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 115,
+    "pricemCaja": 570,
+    "unidadcaja": 6,
+    "priceMayorista": 110,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775882944/d975d8bf-5650-4042-ae0b-a2e7b2baeef7.png"
   },
   {
     "id": 106,
@@ -1055,9 +1413,13 @@
     "name": "PARRILLA PIEDRA DE MARMOL",
     "category": "parrillas",
     "description": "Incluye 1 piedra mármol, 1 grill y 8 bandejas, Potencia 1100W",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 150,
+    "pricemCaja": 540,
+    "unidadcaja": 4,
+    "priceMayorista": 145,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775883007/f7aa1228-5605-4605-827d-b80bfa05fff8.png"
   },
   {
     "id": 107,
@@ -1065,9 +1427,13 @@
     "name": "OLLA ELECTRICA 2 EN 1",
     "category": "parrillas",
     "description": "Capacidad 7L, Potencia 1350W, control manual, antiadherente",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 110,
+    "pricemCaja": 510,
+    "unidadcaja": 6,
+    "priceMayorista": 100,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775883248/dc80bcac-e698-4121-bdcf-f388de31396c.png"
   },
   {
     "id": 108,
@@ -1075,9 +1441,13 @@
     "name": "OLLA ELECTRICA 2 EN 1",
     "category": "parrillas",
     "description": "70CM, Potencia 1800W, automático, antiadherente",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 120,
+    "pricemCaja": 428,
+    "unidadcaja": 4,
+    "priceMayorista": 110,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775883320/3a99d7b5-7c34-4575-9907-32f1024a602b.png"
   },
   {
     "id": 109,
@@ -1085,9 +1455,13 @@
     "name": "MAQUINA POP CORN",
     "category": "donuts",
     "description": "Capacidad 50g, Potencia 1200W, control manual",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 58,
+    "pricemCaja": 495,
+    "unidadcaja": 10,
+    "priceMayorista": 55,
+    "unidadMayorista": 3,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775883365/05c8c17a-a99f-4400-b042-5e33492d7762.png"
   },
   {
     "id": 110,
@@ -1095,9 +1469,13 @@
     "name": "MAQUINA POP CORN",
     "category": "donuts",
     "description": "Capacidad 90g, Potencia 700W, control manual",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 95,
+    "pricemCaja": 696,
+    "unidadcaja": 8,
+    "priceMayorista": 90,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775883413/53ba36c3-a4f6-4032-97ef-9f3eae21966a.png"
   },
   {
     "id": 111,
@@ -1105,9 +1483,13 @@
     "name": "WAFLERA",
     "category": "wafleras",
     "description": "Potencia 800W, acero inox y vidrio, control manual",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 95,
+    "pricemCaja": 850,
+    "unidadcaja": 10,
+    "priceMayorista": 90,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775884185/a5cfbce4-770d-46c8-8c40-2e564386c8dd.png"
   },
   {
     "id": 112,
@@ -1115,9 +1497,13 @@
     "name": "WAFLERA FLOR",
     "category": "wafleras",
     "description": "Medida 16CM, Potencia 1000W, antiadherente",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 60,
+    "pricemCaja": 490,
+    "unidadcaja": 10,
+    "priceMayorista": 55,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775884422/4f531e24-cde5-4c21-a3c1-c4d06202de01.png"
   },
   {
     "id": 113,
@@ -1125,9 +1511,13 @@
     "name": "WAFLERA EN DUO",
     "category": "wafleras",
     "description": "2 moldes, Potencia 600W, ABS y antiadherente",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 65,
+    "pricemCaja": 580,
+    "unidadcaja": 10,
+    "priceMayorista": 61,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775884473/fbad1401-d3a9-4ea0-b750-5147708697d1.png"
   },
   {
     "id": 114,
@@ -1135,9 +1525,13 @@
     "name": "WAFLERA",
     "category": "wafleras",
     "description": "2 moldes, Potencia 750W, ABS y antiadherente",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 42,
+    "pricemCaja": 370,
+    "unidadcaja": 10,
+    "priceMayorista": 39,
+    "unidadMayorista": 3,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775884528/b5e902ab-15b8-4720-9779-a30cd4d30133.png"
   },
   {
     "id": 115,
@@ -1145,9 +1539,13 @@
     "name": "WAFLERA",
     "category": "wafleras",
     "description": "2 hornillas, Potencia 750W, ABS y antiadherente",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 45,
+    "pricemCaja": 390,
+    "unidadcaja": 10,
+    "priceMayorista": 42,
+    "unidadMayorista": 3,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775884704/dd10994c-6482-40b3-bf5c-76ee29ee9c80.png"
   },
   {
     "id": 116,
@@ -1155,9 +1553,13 @@
     "name": "MAQUINA YOGUIS 6",
     "category": "wafleras",
     "description": "6 yoguis, Potencia 580W, ABS y antiadherente",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 48,
+    "pricemCaja": 415,
+    "unidadcaja": 10,
+    "priceMayorista": 45,
+    "unidadMayorista": 3,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775884772/76cc6b33-a716-4424-8be6-97be0e99a77b.png"
   },
   {
     "id": 117,
@@ -1165,9 +1567,13 @@
     "name": "MAQUINA YOGUIS 3",
     "category": "wafleras",
     "description": "3 yoguis, Potencia 750W, ABS y antiadherente",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 58,
+    "pricemCaja": 490,
+    "unidadcaja": 10,
+    "priceMayorista": 54,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775884858/2c1e6825-dca2-4267-a4e9-6e072973e3fa.png"
   },
   {
     "id": 118,
@@ -1175,9 +1581,13 @@
     "name": "WAFFLE CONO DE HELADO",
     "category": "wafleras",
     "description": "Doble / 4 panes, Potencia 1500W, ABS y antiadherente",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 58,
+    "pricemCaja": 490,
+    "unidadcaja": 10,
+    "priceMayorista": 55,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775886439/cf46a89e-5184-4dff-b3fe-e3e9a9a885c0.png"
   },
   {
     "id": 119,
@@ -1185,9 +1595,13 @@
     "name": "WAFLERA BURBUJA",
     "category": "wafleras",
     "description": "Diámetro 18CM, Potencia 1000W, ABS y antiadherente",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 60,
+    "pricemCaja": 530,
+    "unidadcaja": 10,
+    "priceMayorista": 56,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775886817/5355777e-a7e6-4a48-a741-b3f767beb0ac.png"
   },
   {
     "id": 120,
@@ -1195,9 +1609,13 @@
     "name": "SANDWICHERA",
     "category": "wafleras",
     "description": "2 hornillas, Potencia 750W, ABS y antiadherente",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 45,
+    "pricemCaja": 380,
+    "unidadcaja": 10,
+    "priceMayorista": 42,
+    "unidadMayorista": 3,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775883873/bcffe393-70c9-4a5b-a6d4-8aaaf281ae33.png"
   },
   {
     "id": 121,
@@ -1205,9 +1623,13 @@
     "name": "SANDWICHERA",
     "category": "wafleras",
     "description": "1 hornilla, Potencia 100W, ABS y antiadherente",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 55,
+    "pricemCaja": 510,
+    "unidadcaja": 10,
+    "priceMayorista": 53,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775884039/9e035805-29a2-4188-a914-b62fcb5c2d99.png"
   },
   {
     "id": 122,
@@ -1215,9 +1637,13 @@
     "name": "SANDWICHERA 10 EN 1",
     "category": "wafleras",
     "description": "10 placas intercambiables, Potencia 800W",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 180,
+    "pricemCaja": 680,
+    "unidadcaja": 4,
+    "priceMayorista": 175,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775885914/3ee9c897-9e31-47b4-8de8-916ccf6dcb50.png"
   },
   {
     "id": 123,
@@ -1225,9 +1651,13 @@
     "name": "SANDWICHERA 3 EN 1",
     "category": "wafleras",
     "description": "3 placas intercambiables, Potencia 800W",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 100,
+    "pricemCaja": 720,
+    "unidadcaja": 8,
+    "priceMayorista": 95,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775885995/e82916bb-0a3a-4e2a-814c-a5f957cac5a2.png"
   },
   {
     "id": 124,
@@ -1235,9 +1665,13 @@
     "name": "SANDWICHERA 5 EN 1",
     "category": "wafleras",
     "description": "5 placas intercambiables, Potencia 800W",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 125,
+    "pricemCaja": 920,
+    "unidadcaja": 8,
+    "priceMayorista": 120,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775886086/2c3686bf-8ad8-439f-a9ad-409bad3c5635.png"
   },
   {
     "id": 125,
@@ -1245,9 +1679,13 @@
     "name": "SANDWICHERA GRILL",
     "category": "wafleras",
     "description": "Potencia 750W, acero inox y antiadherente",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 45,
+    "pricemCaja": 370,
+    "unidadcaja": 10,
+    "priceMayorista": 42,
+    "unidadMayorista": 3,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775886334/eb02e4da-6ba7-4632-8a95-0f6df45f3916.png"
   },
   {
     "id": 126,
@@ -1255,9 +1693,13 @@
     "name": "MAQUINA DONUTS",
     "category": "donuts",
     "description": "Tamaño 10CM, Potencia 500W, control manual",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 45,
+    "pricemCaja": 740,
+    "unidadcaja": 20,
+    "priceMayorista": 40,
+    "unidadMayorista": 3,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775885064/7c0879ce-54a6-4d63-a21b-567c1ec305d3.png"
   },
   {
     "id": 127,
@@ -1265,9 +1707,13 @@
     "name": "MAQUINA DE BOCADILLO",
     "category": "donuts",
     "description": "6 agujeros, Potencia 600W, control manual",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 45,
+    "pricemCaja": 624,
+    "unidadcaja": 16,
+    "priceMayorista": 42,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775885172/a38488f0-d35a-4c88-b159-5907414a3850.png"
   },
   {
     "id": 128,
@@ -1275,9 +1721,13 @@
     "name": "MAQUINA DONUTS",
     "category": "donuts",
     "description": "2 hornillas de 10CM, Potencia 750W",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 50,
+    "pricemCaja": 450,
+    "unidadcaja": 10,
+    "priceMayorista": 48,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775885312/981cf526-8ea1-44a2-88c9-72ff62971d6c.png"
   },
   {
     "id": 129,
@@ -1285,9 +1735,13 @@
     "name": "MAQUINA DONUTS X16",
     "category": "donuts",
     "description": "16 donuts de 5CM, Potencia 1400W",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 85,
+    "pricemCaja": 600,
+    "unidadcaja": 8,
+    "priceMayorista": 80,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775885380/7f251f30-dce7-45d4-84d2-62f01ef7f9af.png"
   },
   {
     "id": 130,
@@ -1295,9 +1749,13 @@
     "name": "MAQUINA DONUTS X7",
     "category": "donuts",
     "description": "7 donuts de 5.3CM, Potencia 1000W",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 58,
+    "pricemCaja": 490,
+    "unidadcaja": 10,
+    "priceMayorista": 55,
+    "unidadMayorista": 3,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775885703/53df6e9e-9318-4f86-a121-ddcd09b0d087.png"
   },
   {
     "id": 131,
@@ -1305,9 +1763,13 @@
     "name": "MAQUINA DONUTS X6",
     "category": "donuts",
     "description": "6 agujeros de 5CM, Potencia 750W",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 45,
+    "pricemCaja": 390,
+    "unidadcaja": 10,
+    "priceMayorista": 42,
+    "unidadMayorista": 3,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775885819/9b04af14-6ce6-4bb4-b7fa-fe2076d7979a.png"
   },
   {
     "id": 132,
@@ -1315,9 +1777,13 @@
     "name": "MAQUINA PAN CAKE",
     "category": "donuts",
     "description": "4 unidades, Potencia 1400W",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 80,
+    "pricemCaja": 576,
+    "unidadcaja": 8,
+    "priceMayorista": 75,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775886200/aa84e350-e3c1-42af-af54-bf349c762a80.png"
   },
   {
     "id": 133,
@@ -1325,9 +1791,13 @@
     "name": "BALANZA",
     "category": "balanza",
     "description": "Capacidad hasta 5Kg, ABS y vidrio templado, modo pilas",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 24,
+    "pricemCaja": 720,
+    "unidadcaja": 40,
+    "priceMayorista": 20,
+    "unidadMayorista": 3,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775887125/5a08e9aa-d8b9-4eed-b396-7e36269c91e3.png"
   },
   {
     "id": 134,
@@ -1335,9 +1805,13 @@
     "name": "BALANZA GRAMERA",
     "category": "balanza",
     "description": "Capacidad hasta 5Kg, vidrio templado, modo pilas",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 28,
+    "pricemCaja": 530,
+    "unidadcaja": 24,
+    "priceMayorista": 25,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775887191/be00957c-1b7a-4212-8bcc-4959c9a3b515.png"
   },
   {
     "id": 135,
@@ -1345,9 +1819,13 @@
     "name": "BALANZA",
     "category": "balanza",
     "description": "Capacidad hasta 40Kg, ABS, modo cargador",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 90,
+    "pricemCaja": 400,
+    "unidadcaja": 5,
+    "priceMayorista": 85,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775887263/2b48133c-12a9-49c4-b752-40b8e2e2669f.png"
   },
   {
     "id": 136,
@@ -1355,9 +1833,13 @@
     "name": "BALANZA GRAMERA",
     "category": "balanza",
     "description": "Capacidad hasta 10Kg, ABS, modo pilas",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 12,
+    "pricemCaja": 294,
+    "unidadcaja": 30,
+    "priceMayorista": 11,
+    "unidadMayorista": 3,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775887321/782ef802-d7ae-4b8a-b4ea-5bd45510dc59.png"
   },
   {
     "id": 137,
@@ -1365,9 +1847,13 @@
     "name": "TOSTADORA ELECTRICA",
     "category": "cocinas",
     "description": "2 panes, Potencia 750W",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 95,
+    "pricemCaja": 1020,
+    "unidadcaja": 12,
+    "priceMayorista": 90,
+    "unidadMayorista": 3,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775883732/5187f7a9-ba8f-4760-a608-b23555f175db.png"
   },
   {
     "id": 138,
@@ -1375,9 +1861,13 @@
     "name": "MAQUINA GRILL",
     "category": "parrillas",
     "description": "2 hornillas, Potencia 2000W, acero inox",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 120,
+    "pricemCaja": 440,
+    "unidadcaja": 4,
+    "priceMayorista": 115,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775883819/15a59560-2e1f-4f92-b3bd-8a6c0dbbd154.png"
   },
   {
     "id": 139,
@@ -1385,9 +1875,13 @@
     "name": "HERVIDORA DE HUEVO",
     "category": "hervidor",
     "description": "7 huevos, Potencia 350W",
-    "price": 0,
-    "oldPrice": 0,
-    "featured": false
+    "price": 50,
+    "pricemCaja": 756,
+    "unidadcaja": 18,
+    "priceMayorista": 45,
+    "unidadMayorista": 3,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775886998/c5bedd49-6581-414e-b562-36b7fe4672bf.png"
   },
   {
     "id": 140,
@@ -1397,7 +1891,8 @@
     "description": "2.7L, Potencia 800W, control digital",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 141,
@@ -1407,7 +1902,8 @@
     "description": "2.5L, Potencia 600W, control digital",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 142,
@@ -1417,7 +1913,8 @@
     "description": "Organizador manual, Potencia 645W",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 143,
@@ -1427,7 +1924,8 @@
     "description": "2.5L, Potencia 2600W, control digital",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 144,
@@ -1437,7 +1935,8 @@
     "description": "Rotativo 90 grados, Potencia 2000W",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 145,
@@ -1447,7 +1946,8 @@
     "description": "Estático manual, Potencia 2000W",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 146,
@@ -1457,7 +1957,8 @@
     "description": "Con accesorios, Potencia 400W",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 147,
@@ -1467,7 +1968,8 @@
     "description": "2 ventiladores, Potencia 400W",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 148,
@@ -1477,7 +1979,8 @@
     "description": "7L, Potencia 65W, control manual",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 149,
@@ -1487,7 +1990,8 @@
     "description": "Base cerámica, vaporizador, Potencia 1200W",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 150,
@@ -1497,7 +2001,8 @@
     "description": "Cerámica, Potencia 2600W",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 151,
@@ -1507,7 +2012,8 @@
     "description": "Acero inox, Potencia 2000W, manual",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 152,
@@ -1517,7 +2023,8 @@
     "description": "Potencia 1500W, con accesorios",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 153,
@@ -1527,7 +2034,8 @@
     "description": "Potencia 2000W, vapor vertical/horizontal",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 154,
@@ -1537,7 +2045,8 @@
     "description": "Portátil, Potencia 110W",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 155,
@@ -1547,7 +2056,8 @@
     "description": "Recargable, automática con cargador",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 156,
@@ -1557,7 +2067,8 @@
     "description": "Manual, Potencia 600W, color azul",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 157,
@@ -1567,7 +2078,8 @@
     "description": "Potencia 600W, uso múltiple",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 158,
@@ -1577,7 +2089,8 @@
     "description": "Potencia 800W, alta potencia",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 159,
@@ -1587,7 +2100,8 @@
     "description": "Inalámbrica, Potencia 120W",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 160,
@@ -1597,7 +2111,8 @@
     "description": "Pantalla LED, 3 tipos de cambio, Potencia 3W",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 161,
@@ -1607,7 +2122,8 @@
     "description": "Acero inox, carga USB, Potencia 5W",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 162,
@@ -1617,7 +2133,8 @@
     "description": "Cerámica 200g, Potencia 45W",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 163,
@@ -1627,7 +2144,8 @@
     "description": "Cerámica 200g, Potencia 45W",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 164,
@@ -1637,7 +2155,8 @@
     "description": "Pantalla LED, 220g, Potencia 50W",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 165,
@@ -1647,7 +2166,8 @@
     "description": "Pantalla LED, 230g, Potencia 55W",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 166,
@@ -1657,7 +2177,8 @@
     "description": "Cerámica, Potencia 35W, 200g",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 167,
@@ -1667,7 +2188,8 @@
     "description": "Cerámica, Potencia 53W, 200g",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 168,
@@ -1677,7 +2199,8 @@
     "description": "Cerámica, Potencia 30W, 200g",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 169,
@@ -1687,7 +2210,8 @@
     "description": "Potencia 800W, solo caliente",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 170,
@@ -1697,7 +2221,8 @@
     "description": "Potencia 1600W, caliente y frío",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 171,
@@ -1707,7 +2232,8 @@
     "description": "Potencia 900W, caliente y frío",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 172,
@@ -1717,7 +2243,8 @@
     "description": "3 cepillos intercambiables, Potencia 1200W",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 173,
@@ -1727,7 +2254,8 @@
     "description": "Capacidad 4L, Potencia 24W",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 174,
@@ -1737,7 +2265,8 @@
     "description": "1 par, Potencia 160W",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 175,
@@ -1747,7 +2276,8 @@
     "description": "Acero inox, 2L, apagado automático, Potencia 2000W",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 176,
@@ -1757,7 +2287,8 @@
     "description": "Vidrio 2L, colores: celeste/rosado/blanco, Potencia 2000W",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 177,
@@ -1767,7 +2298,8 @@
     "description": "Acero inox, gran capacidad 5L, Potencia 2000W",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 178,
@@ -1777,7 +2309,8 @@
     "description": "Vidrio y acero, 2L, Potencia 1800W",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 179,
@@ -1787,7 +2320,8 @@
     "description": "Acero inox, 1.5L, Potencia 1500W, colores: plomo/negro",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 180,
@@ -1797,7 +2331,8 @@
     "description": "Cerámica y acero, extra grande 6L, Potencia 1800W",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 181,
@@ -1807,7 +2342,8 @@
     "description": "Hervidora 1.7L + tostadora 2 panes, set completo",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 182,
@@ -1817,7 +2353,8 @@
     "description": "Acero inox, 2L, Potencia 1500W, colores: crema/negro",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 183,
@@ -1827,7 +2364,8 @@
     "description": "Acero inox, 2L, Potencia 1500W",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 184,
@@ -1837,7 +2375,8 @@
     "description": "Vidrio y acero, 2L, Potencia 1500W",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 185,
@@ -1847,7 +2386,8 @@
     "description": "Vidrio y acero, 2L, Potencia 1500W",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 186,
@@ -1857,7 +2397,8 @@
     "description": "Base con 2 jarras (2L + 0.8L), vidrio y acero, Potencia 1500W",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 187,
@@ -1867,7 +2408,8 @@
     "description": "Base con 2 jarras (2L + 0.8L), diseño especial, Potencia 1500W",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 188,
@@ -1877,7 +2419,8 @@
     "description": "Acero inox, 1.7L, alta potencia 2200W",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 189,
@@ -1887,7 +2430,8 @@
     "description": "Acero inox, 300ML, portátil, Potencia 600W",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 190,
@@ -1897,7 +2441,8 @@
     "description": "Acero inox, 1.7L, Potencia 2200W",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 191,
@@ -1907,7 +2452,8 @@
     "description": "Capacidad 3L, Potencia 200W, control digital, acero inox",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 192,
@@ -1917,7 +2463,8 @@
     "description": "Vidrio y acero, 600ML, apagado automático",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 193,
@@ -1927,7 +2474,8 @@
     "description": "2L de capacidad, apagado automático, Potencia 680W",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 194,
@@ -1937,7 +2485,8 @@
     "description": "Compatible con cápsulas, 1L, Potencia 1400W",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 195,
@@ -1947,7 +2496,8 @@
     "description": "3 en 1, 1L, Potencia 1400W",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 196,
@@ -1957,7 +2507,8 @@
     "description": "1.7L, sin filtro, Potencia 1000W, apagado automático",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 197,
@@ -1967,7 +2518,8 @@
     "description": "1.2L, digital, Potencia 1050W, diseño compacto",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 198,
@@ -1977,7 +2529,8 @@
     "description": "2L, digital, Potencia 850W",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 199,
@@ -1987,7 +2540,8 @@
     "description": "1.2L, digital, Potencia 1300W, alta presión",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 200,
@@ -1997,7 +2551,8 @@
     "description": "1.8L, digital, Potencia 1350W, acero inox",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 201,
@@ -2007,7 +2562,8 @@
     "description": "1.5L, 24h activo, Potencia 150W, acero inox",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 202,
@@ -2017,7 +2573,8 @@
     "description": "1.5L, 24h activo, Potencia 85W, ahorro energía",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
   },
   {
     "id": 203,
@@ -2027,6 +2584,21 @@
     "description": "1.5L, 24h activo, Potencia 150W, ABS/inox",
     "price": 0,
     "oldPrice": 0,
-    "featured": false
+    "featured": false,
+    "imageUrl": ""
+  },
+  {
+    "id": 204,
+    "code": "R7724",
+    "name": "MAQUINA PROCESADOR 15L",
+    "category": "procesador",
+    "description": "15L, 4 Aspas gruesas, Potencia 1000w",
+    "price": 180,
+    "pricemCaja": 680,
+    "unidadcaja": 4,
+    "priceMayorista": 175,
+    "unidadMayorista": 2,
+    "featured": false,
+    "imageUrl": "https://res.cloudinary.com/dxuk9bogw/image/upload/v1775889257/29f9eaed-cbab-4183-8b94-f412310fae6e.png"
   }
 ]

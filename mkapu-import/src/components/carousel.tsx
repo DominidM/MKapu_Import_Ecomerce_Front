@@ -47,8 +47,12 @@ export default function Carousel({ products, title = "Destacados" }: Props) {
     setActiveIdx(idx);
   }
 
-  function prev() { scrollTo(Math.max(activeIdx - 1, 0)); }
-  function next() { scrollTo(Math.min(activeIdx + 1, total - 1)); }
+  function prev() {
+    scrollTo(Math.max(activeIdx - 1, 0));
+  }
+  function next() {
+    scrollTo(Math.min(activeIdx + 1, total - 1));
+  }
 
   function onMouseDown(e: React.MouseEvent) {
     if (!trackRef.current) return;
@@ -64,15 +68,31 @@ export default function Carousel({ products, title = "Destacados" }: Props) {
     trackRef.current.scrollLeft = scrollLeft - (x - startX) * 1.2;
   }
 
-  function onMouseUp() { setIsDragging(false); }
+  function onMouseUp() {
+    setIsDragging(false);
+  }
 
   return (
     <section className="carousel">
       <div className="carousel__header">
         <h2 className="carousel__title">{title}</h2>
         <div className="carousel__nav">
-          <button className="carousel__arrow" onClick={prev} disabled={activeIdx === 0} aria-label="Anterior">‹</button>
-          <button className="carousel__arrow" onClick={next} disabled={activeIdx >= total - 1} aria-label="Siguiente">›</button>
+          <button
+            className="carousel__arrow"
+            onClick={prev}
+            disabled={activeIdx === 0}
+            aria-label="Anterior"
+          >
+            ‹
+          </button>
+          <button
+            className="carousel__arrow"
+            onClick={next}
+            disabled={activeIdx >= total - 1}
+            aria-label="Siguiente"
+          >
+            ›
+          </button>
         </div>
       </div>
 
@@ -105,7 +125,10 @@ export default function Carousel({ products, title = "Destacados" }: Props) {
       </div>
 
       <style jsx>{`
-        .carousel { --accent: #e05c2a; width: 100%; }
+        .carousel {
+          --accent: #e05c2a;
+          width: 100%;
+        }
 
         .carousel__header {
           display: flex;
@@ -122,10 +145,14 @@ export default function Carousel({ products, title = "Destacados" }: Props) {
           margin: 0;
         }
 
-        .carousel__nav { display: flex; gap: 6px; }
+        .carousel__nav {
+          display: flex;
+          gap: 6px;
+        }
 
         .carousel__arrow {
-          width: 36px; height: 36px;
+          width: 36px;
+          height: 36px;
           border-radius: 50%;
           border: 1.5px solid #e0d8d0;
           background: #fff;
@@ -135,7 +162,10 @@ export default function Carousel({ products, title = "Destacados" }: Props) {
           display: flex;
           align-items: center;
           justify-content: center;
-          transition: background 0.15s, border-color 0.15s, transform 0.12s;
+          transition:
+            background 0.15s,
+            border-color 0.15s,
+            transform 0.12s;
           padding-bottom: 1px;
         }
 
@@ -146,7 +176,10 @@ export default function Carousel({ products, title = "Destacados" }: Props) {
           transform: scale(1.08);
         }
 
-        .carousel__arrow:disabled { opacity: 0.35; cursor: default; }
+        .carousel__arrow:disabled {
+          opacity: 0.35;
+          cursor: default;
+        }
 
         .carousel__track {
           display: flex;
@@ -161,8 +194,13 @@ export default function Carousel({ products, title = "Destacados" }: Props) {
           user-select: none;
         }
 
-        .carousel__track::-webkit-scrollbar { display: none; }
-        .carousel__track--dragging { cursor: grabbing; scroll-snap-type: none; }
+        .carousel__track::-webkit-scrollbar {
+          display: none;
+        }
+        .carousel__track--dragging {
+          cursor: grabbing;
+          scroll-snap-type: none;
+        }
 
         .carousel__slide {
           scroll-snap-align: start;
@@ -177,13 +215,16 @@ export default function Carousel({ products, title = "Destacados" }: Props) {
         }
 
         .carousel__dot {
-          width: 7px; height: 7px;
+          width: 7px;
+          height: 7px;
           border-radius: 50%;
           border: none;
           background: #d9d3cc;
           cursor: pointer;
           padding: 0;
-          transition: background 0.2s, width 0.2s;
+          transition:
+            background 0.2s,
+            width 0.2s;
         }
 
         .carousel__dot--active {
