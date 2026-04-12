@@ -144,7 +144,7 @@ export default function Navbar() {
 
           {/* Right */}
           <div className="nb__right">
-            {/* Socials */}
+            {/* Socials cc*/}
             <div className="nb__socials">
               <a href="https://www.instagram.com/mkapu.import" target="_blank" rel="noopener noreferrer" className="nb__social" aria-label="Instagram">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
