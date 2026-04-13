@@ -5,6 +5,7 @@ import { CartProvider } from "@/app/context/CartContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,6 +39,7 @@ export default function RootLayout({
           <Footer />
           <WhatsAppButton />
         </CartProvider>
+        <SpeedInsights />
       </body>
     </html>
   );
