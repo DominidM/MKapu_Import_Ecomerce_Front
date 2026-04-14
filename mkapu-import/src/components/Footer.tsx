@@ -47,17 +47,37 @@ export default function Footer() {
               contacto@mkapu.com
             </a>
           </div>
+
+          <div className="footer__col">
+            <h4 className="footer__col-title">Legal</h4>
+            <Link href="/terminos-y-condiciones" className="footer__link">
+              Términos y Condiciones
+            </Link>
+            <Link href="/politica-de-privacidad" className="footer__link">
+              Política de Privacidad
+            </Link>
+            <Link
+              href="/libro-de-reclamaciones"
+              className="footer__link footer__link--reclamos"
+            >
+              <img
+                src="https://res.cloudinary.com/dxuk9bogw/image/upload/v1776155530/7f85d794-58b5-47d0-850d-d06179563fb2.png"
+                alt="Libro de Reclamaciones"
+                className="footer__reclamos-img"
+              />
+            </Link>
+          </div>
         </div>
       </div>
 
       <div className="footer__bottom">
         <p>
-          © {new Date().getFullYear()} Mkapu Import. Todos los derechos
-          reservados.     |       Designed & Built by SolveGrades
+          © {new Date().getFullYear()} MKAPU IMPORT S.A.C. Todos los derechos
+          reservados. | Designed & Built by SolveGrades
         </p>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .footer {
           background: #1a1a1a;
           color: #ccc;
@@ -138,8 +158,21 @@ export default function Footer() {
         .footer__link:hover {
           color: #fff;
         }
+
         .footer__link--wsp:hover {
           color: #25d366;
+        }
+
+        .footer__link--reclamos:hover {
+          opacity: 0.85;
+        }
+
+        .footer__reclamos-img {
+          width: 120px;
+          height: auto;
+          border-radius: 4px;
+          display: block;
+          margin-top: 0.25rem;
         }
 
         .footer__bottom {
