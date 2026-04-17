@@ -30,6 +30,17 @@ export default function RootLayout({
 
   return (
     <html lang="es" data-scroll-behavior="smooth" suppressHydrationWarning>
+      <head>
+        <link 
+          rel="icon" 
+          href="https://res.cloudinary.com/dxuk9bogw/image/upload/w_32,h_32,c_fill/v1767836605/474716814_581641201299027_4444346315622797816_n_karlgu.png"
+          type="image/png"
+        />
+        <link 
+          rel="apple-touch-icon"
+          href="https://res.cloudinary.com/dxuk9bogw/image/upload/w_180,h_180,c_fill/v1767836605/474716814_581641201299027_4444346315622797816_n_karlgu.png"
+        />
+      </head>
       <body
         suppressHydrationWarning
         style={{ minHeight: "100vh", display: "flex", flexDirection: "column", margin: 0, padding: 0 }}
