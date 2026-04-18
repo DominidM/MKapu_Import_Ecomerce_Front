@@ -27,7 +27,8 @@ export default function HeroAccordion() {
           <p className="hacc__desc">{active.desc}. Directo del fabricante, con garantía y soporte técnico en Lima.</p>
         </div>
 
-        <div className="hacc__accordion" role="list">
+        {/* ── Desktop: acordeón horizontal ── */}
+        <div className="hacc__accordion hacc__accordion--desktop" role="list">
           {ACCORDION_ITEMS.map((item, idx) => {
             const isActive = idx === activeIdx;
             return (
@@ -50,6 +51,31 @@ export default function HeroAccordion() {
             );
           })}
         </div>
+
+        {/* ── Mobile: tabs + imagen grande ── */}
+        <div className="hacc__mobile">
+          <div className="hacc__tabs">
+            {ACCORDION_ITEMS.map((item, idx) => (
+              <button
+                key={item.id}
+                className={`hacc__tab${idx === activeIdx ? " hacc__tab--active" : ""}`}
+                onClick={() => setActiveIdx(idx)}
+                style={{ ["--tab-color" as any]: item.color }}
+              >
+                {item.title}
+              </button>
+            ))}
+          </div>
+          <div className="hacc__bigimg-wrap">
+            <img
+              src={active.imageUrl}
+              alt={active.title}
+              className="hacc__bigimg"
+            />
+            <div className="hacc__panel-overlay" />
+            <span className="hacc__bigimg-label">{active.title}</span>
+          </div>
+        </div>
       </div>
 
       <style jsx>{`
@@ -58,6 +84,8 @@ export default function HeroAccordion() {
         .hacc__eyebrow { display:inline-block; font-size:.72rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:#f5a623; background:rgba(224,92,42,.12); border:1px solid rgba(224,92,42,.25); border-radius:99px; padding:4px 14px; margin-bottom:1.25rem; }
         .hacc__title { font-size:clamp(2rem,4.5vw,3.4rem); font-weight:900; line-height:1.1; letter-spacing:-.035em; color:#fff; margin:0 0 1.1rem; }
         .hacc__desc { font-size:1rem; color:#999; line-height:1.65; margin:0; max-width:420px; }
+
+        /* ── Acordeón desktop ── */
         .hacc__accordion { display:flex; gap:10px; height:480px; align-items:stretch; }
         .hacc__panel { position:relative; border-radius:18px; overflow:hidden; cursor:pointer; flex:0 0 56px; transition:flex .6s cubic-bezier(.4,0,.2,1); }
         .hacc__panel--active { flex:1 1 0%; }
@@ -65,6 +93,61 @@ export default function HeroAccordion() {
         .hacc__panel-overlay { position:absolute; inset:0; background:linear-gradient(to top,rgba(0,0,0,.75) 0%,rgba(0,0,0,.1) 60%,transparent 100%); }
         .hacc__panel-label { position:absolute; bottom:20px; left:20px; }
         .hacc__panel-title { font-size:.95rem; font-weight:800; color:#fff; }
+
+        /* ── Mobile: oculto por defecto ── */
+        .hacc__mobile { display:none; }
+
+        /* ── Tablet / Mobile ── */
+        @media (max-width: 768px) {
+          .hacc__inner { grid-template-columns:1fr; gap:2rem; }
+          .hacc__accordion--desktop { display:none; }
+          .hacc__mobile { display:block; }
+
+          .hacc__tabs {
+            display:flex;
+            flex-wrap:wrap;
+            gap:8px;
+            margin-bottom:1rem;
+          }
+          .hacc__tab {
+            background:rgba(255,255,255,.07);
+            border:1px solid rgba(255,255,255,.12);
+            border-radius:99px;
+            color:#ccc;
+            font-size:.75rem;
+            font-weight:700;
+            padding:6px 14px;
+            cursor:pointer;
+            transition:background .2s, color .2s, border-color .2s;
+          }
+          .hacc__tab--active {
+            background:var(--tab-color);
+            border-color:var(--tab-color);
+            color:#fff;
+          }
+
+          .hacc__bigimg-wrap {
+            position:relative;
+            width:100%;
+            height:260px;
+            border-radius:18px;
+            overflow:hidden;
+          }
+          .hacc__bigimg {
+            width:100%;
+            height:100%;
+            object-fit:cover;
+            display:block;
+          }
+          .hacc__bigimg-label {
+            position:absolute;
+            bottom:16px;
+            left:18px;
+            font-size:1.1rem;
+            font-weight:800;
+            color:#fff;
+          }
+        }
       `}</style>
     </section>
   );
