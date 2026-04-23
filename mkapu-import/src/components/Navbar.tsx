@@ -66,7 +66,6 @@ export default function Navbar({ categories = [] }: NavbarProps) {
     }
     if (fetchedRef.current) return;
     fetchedRef.current = true;
-
     fetch("/api/categorias")
       .then((r) => r.json())
       .then((data: string[]) => setCats(data))
@@ -75,39 +74,30 @@ export default function Navbar({ categories = [] }: NavbarProps) {
 
   useEffect(() => {
     let mounted = true;
-
     async function checkAuthAndRole() {
       const { data: userData } = await supabase.auth.getUser();
       const user = userData.user;
-
       if (!mounted) return;
-
       if (!user) {
         setIsLogged(false);
         setIsAdmin(false);
         setAuthChecked(true);
         return;
       }
-
       setIsLogged(true);
-
       const { data: profile } = await supabase
         .from("profiles")
         .select("role")
         .eq("id", user.id)
         .maybeSingle();
-
       if (!mounted) return;
       setIsAdmin(profile?.role === "admin");
       setAuthChecked(true);
     }
-
     checkAuthAndRole();
-
     const { data: sub } = supabase.auth.onAuthStateChange(() => {
       checkAuthAndRole();
     });
-
     return () => {
       mounted = false;
       sub.subscription.unsubscribe();
@@ -136,6 +126,21 @@ export default function Navbar({ categories = [] }: NavbarProps) {
   function closeMega() {
     megaTimeout.current = setTimeout(() => setMegaOpen(false), 180);
   }
+
+  // Estilos inline para los nav links (evita ser pisado por globals.css)
+  const navLinkStyle: React.CSSProperties = {
+    display: "flex",
+    alignItems: "center",
+    padding: "6px 14px",
+    fontSize: "0.9rem",
+    fontWeight: 700,
+    color: "#ffffff",
+    textDecoration: "none",
+    borderRadius: "8px",
+    whiteSpace: "nowrap",
+    background: "transparent",
+    letterSpacing: "0.01em",
+  };
 
   return (
     <>
@@ -218,6 +223,59 @@ export default function Navbar({ categories = [] }: NavbarProps) {
               </div>
             )}
           </div>
+
+          {/* ✅ LINKS DESKTOP — estilos inline para evitar globals.css */}
+          <nav
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "2px",
+              flexShrink: 0,
+            }}
+          >
+            <Link
+              href="/blog"
+              style={navLinkStyle}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "#f5a623";
+                e.currentTarget.style.color = "#1a1a1a";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "transparent";
+                e.currentTarget.style.color = "#ffffff";
+              }}
+            >
+              Blog
+            </Link>
+            <Link
+              href="/quienes-somos"
+              style={navLinkStyle}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "#f5a623";
+                e.currentTarget.style.color = "#1a1a1a";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "transparent";
+                e.currentTarget.style.color = "#ffffff";
+              }}
+            >
+              Quiénes Somos
+            </Link>
+            <Link
+              href="/contacto"
+              style={navLinkStyle}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "#f5a623";
+                e.currentTarget.style.color = "#1a1a1a";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "transparent";
+                e.currentTarget.style.color = "#ffffff";
+              }}
+            >
+              Contacto
+            </Link>
+          </nav>
 
           <form className="nb__search" onSubmit={handleSearch}>
             <input
@@ -490,6 +548,33 @@ export default function Navbar({ categories = [] }: NavbarProps) {
               </div>
             </div>
 
+            <div className="nb__mobile-section">
+              <p className="nb__mobile-label">Páginas</p>
+              <div className="nb__mobile-pages">
+                <Link
+                  href="/blog"
+                  className="nb__mobile-page"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  📝 Blog
+                </Link>
+                <Link
+                  href="/quienes-somos"
+                  className="nb__mobile-page"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  👥 Quiénes Somos
+                </Link>
+                <Link
+                  href="/contacto"
+                  className="nb__mobile-page"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  📬 Contacto
+                </Link>
+              </div>
+            </div>
+
             <div className="nb__mobile-socials">
               {!isLogged && (
                 <Link
@@ -500,7 +585,6 @@ export default function Navbar({ categories = [] }: NavbarProps) {
                   Ingresar Admin
                 </Link>
               )}
-
               {isLogged && isAdmin && (
                 <>
                   <Link
@@ -519,7 +603,6 @@ export default function Navbar({ categories = [] }: NavbarProps) {
                   </button>
                 </>
               )}
-
               <a
                 href="https://www.instagram.com/mkapu.import"
                 target="_blank"
@@ -566,7 +649,7 @@ export default function Navbar({ categories = [] }: NavbarProps) {
           height: 64px;
           display: flex;
           align-items: center;
-          gap: 1rem;
+          gap: 0.6rem;
         }
         .nb__logo {
           display: flex;
@@ -602,7 +685,7 @@ export default function Navbar({ categories = [] }: NavbarProps) {
           color: #fff;
           border: none;
           border-radius: 10px;
-          padding: 0.5rem 1rem;
+          padding: 0.5rem 0.85rem;
           font-size: 0.86rem;
           font-weight: 700;
           cursor: pointer;
@@ -687,7 +770,7 @@ export default function Navbar({ categories = [] }: NavbarProps) {
         }
         .nb__search {
           flex: 1;
-          max-width: 440px;
+          max-width: 320px;
           display: flex;
           align-items: center;
           background: #2a2a2a;
@@ -800,7 +883,6 @@ export default function Navbar({ categories = [] }: NavbarProps) {
           border: 2px solid #f5a623;
           animation: badgeIn 0.2s ease;
         }
-
         .nb__admin-btn {
           display: inline-flex !important;
           align-items: center;
@@ -842,7 +924,6 @@ export default function Navbar({ categories = [] }: NavbarProps) {
           border-color: #777;
           color: #fff !important;
         }
-
         @keyframes badgeIn {
           from {
             transform: scale(0.4);
@@ -853,7 +934,6 @@ export default function Navbar({ categories = [] }: NavbarProps) {
             opacity: 1;
           }
         }
-
         .nb__burger {
           display: none;
           background: none;
@@ -867,7 +947,6 @@ export default function Navbar({ categories = [] }: NavbarProps) {
         .nb__burger:hover {
           background: #2a2a2a;
         }
-
         .nb__mobile {
           background: #111;
           border-top: 1px solid #2a2a2a;
@@ -886,7 +965,6 @@ export default function Navbar({ categories = [] }: NavbarProps) {
             transform: translateY(0);
           }
         }
-
         .nb__mobile-search {
           display: flex;
           align-items: center;
@@ -908,7 +986,6 @@ export default function Navbar({ categories = [] }: NavbarProps) {
         .nb__mobile-input::placeholder {
           color: #555;
         }
-
         .nb__mobile-section {
           margin-bottom: 1.25rem;
         }
@@ -955,7 +1032,30 @@ export default function Navbar({ categories = [] }: NavbarProps) {
         .nb__mobile-cat--all:hover {
           background: #b77c1b;
         }
-
+        .nb__mobile-pages {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+        }
+        .nb__mobile-page {
+          display: block;
+          padding: 0.55rem 0.75rem;
+          font-size: 0.85rem;
+          font-weight: 600;
+          color: #ccc;
+          text-decoration: none;
+          background: #1e1e1e;
+          border-radius: 8px;
+          border: 1px solid #2a2a2a;
+          transition:
+            background 0.15s,
+            color 0.15s;
+        }
+        .nb__mobile-page:hover {
+          background: #f5a623;
+          color: #fff;
+          border-color: #f5a623;
+        }
         .nb__mobile-socials {
           display: flex;
           gap: 10px;
@@ -980,16 +1080,21 @@ export default function Navbar({ categories = [] }: NavbarProps) {
         .nb__mobile-logout {
           color: #ddd;
         }
-
+        @media (max-width: 860px) {
+          nav[style] {
+            display: none !important;
+          }
+        }
         @media (max-width: 768px) {
           .nb__inner {
             padding: 0 1rem;
+            gap: 0.5rem;
           }
           .nb__cat-trigger {
             display: none;
           }
           .nb__search {
-            max-width: 360px;
+            max-width: 260px;
           }
           .nb__socials {
             display: none;
@@ -1010,10 +1115,12 @@ export default function Navbar({ categories = [] }: NavbarProps) {
             padding: 1rem;
           }
         }
-
         @media (max-width: 480px) {
           .nb__mobile-cats {
             grid-template-columns: 1fr;
+          }
+          .nb__search {
+            display: none;
           }
         }
       `}</style>
