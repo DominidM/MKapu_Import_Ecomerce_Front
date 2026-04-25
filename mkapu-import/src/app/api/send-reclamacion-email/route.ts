@@ -1,13 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
-import nodemailer from "nodemailer";
 export const runtime = 'edge';
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD,
-  },
-});
+
+import { NextRequest, NextResponse } from "next/server";
+import { Resend } from 'resend';
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: NextRequest) {
   try {
@@ -54,20 +50,25 @@ export async function POST(req: NextRequest) {
       </div>
     `;
 
-    await transporter.sendMail({
-      from: `"Mkapu Import" <${process.env.EMAIL_USER}>`,
-      to: email,
+    const { data, error } = await resend.emails.send({
+      from: 'Mkapu Import <onboarding@resend.dev>',
+      to: [email],
       subject: `✅ Reclamación recibida - Ticket ${ticket}`,
       html: htmlContent,
     });
 
-    console.log("Email enviado exitosamente a:", email);
+    if (error) {
+      console.error("Error de Resend:", error);
+      return NextResponse.json({ error: "Error en el servicio de correo" }, { status: 400 });
+    }
 
-    return NextResponse.json({ success: true });
+    console.log("Email enviado exitosamente a:", email);
+    return NextResponse.json({ success: true, data });
+
   } catch (error) {
-    console.error("Error sending email:", error);
+    console.error("Error de servidor enviando email:", error);
     return NextResponse.json(
-      { error: "Error al enviar email" },
+      { error: "Error interno al enviar email" },
       { status: 500 }
     );
   }
