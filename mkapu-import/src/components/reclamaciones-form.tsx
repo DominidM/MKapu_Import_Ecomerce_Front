@@ -88,6 +88,7 @@ export default function ReclamacionesForm() {
       const ticket = data?.[0]?.ticket;
       
       try {
+        alert("¡El código nuevo se está ejecutando! Intentando enviar correo...");
         console.log("Enviando petición a /api/notificar-ticket...");
         
         const emailRes = await fetch("/api/notificar-ticket", {
