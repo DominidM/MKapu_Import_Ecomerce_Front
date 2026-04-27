@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 export async function POST(req: NextRequest) {
   try {
+    // 🚨 1. INICIALIZAMOS RESEND AQUÍ ADENTRO 🚨
+    const resend = new Resend(process.env.RESEND_API_KEY);
+
     const { nombres, apellidos, email, tipo, ticket } = await req.json();
 
     const fechaRespuesta = new Date();
@@ -57,7 +58,8 @@ export async function POST(req: NextRequest) {
 
     if (error) {
       console.error("Error de Resend:", error);
-      return NextResponse.json({ error: "Error en el servicio de correo" }, { status: 400 });
+      // 🚨 2. DEVOLVEMOS EL DETALLE DEL ERROR AL FRONTEND 🚨
+      return NextResponse.json({ error: "Error en el servicio de correo", detalle: error }, { status: 400 });
     }
 
     console.log("Email enviado exitosamente a:", email);
@@ -66,7 +68,7 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error("Error de servidor enviando email:", error);
     return NextResponse.json(
-      { error: "Error interno al enviar email" },
+      { error: "Error interno al enviar email", detalle: String(error) },
       { status: 500 }
     );
   }
