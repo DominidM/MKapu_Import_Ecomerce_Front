@@ -46,6 +46,9 @@ export default function ReclamacionesForm() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    console.log("=== DEBUG SUPABASE ===");
+    console.log("URL:", process.env.NEXT_PUBLIC_SUPABASE_URL);
+    console.log("Llave real en el navegador:", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.substring(0, 15) + "...");
     setStatus("loading");
     setErrorMsg("");
 
@@ -86,8 +89,9 @@ export default function ReclamacionesForm() {
       }
 
       const ticket = data?.[0]?.ticket;
-      try {
-        await fetch("/api/send-reclamacion-email", {
+      
+      try {        
+        const emailRes = await fetch("/api/notificar-ticket", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -95,11 +99,16 @@ export default function ReclamacionesForm() {
             apellidos: form.apellidos,
             email: form.email,
             tipo: form.tipo,
-            ticket,
+            ticket: ticket || "0000",
           }),
         });
+
+        const textData = await emailRes.text();
+        console.log("Status de respuesta:", emailRes.status);
+        console.log("Cuerpo de respuesta:", textData);
+
       } catch (err) {
-        console.error("Error enviando email:", err);
+        console.error("❌ El navegador bloqueó la petición (Probablemente un AdBlocker o error de red):", err);
       }
 
       setStatus("success");

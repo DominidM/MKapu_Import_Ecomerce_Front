@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Heart, ShoppingCart, MessageCircle, ImageOff } from "lucide-react";
 import { useCart } from "@/app/context/CartContext";
 
@@ -60,6 +61,7 @@ function calcTotal(qty: number, p: Product): number {
 }
 
 export default function ProductCard({ product }: Props) {
+  const router = useRouter();
   const { addItem, items, updateQty, removeItem } = useCart();
   const [wishlisted, setWishlisted] = useState(false);
   const [added, setAdded]           = useState(false);
@@ -108,11 +110,15 @@ export default function ProductCard({ product }: Props) {
     activeTier === "mayorista" ? `Precio mayorista (≥${product.unidad_mayorista} und.)` :
     "Precio por unidad";
 
+  function handleCardClick() {
+    router.push(`/productos/${product.id}`);
+  }
+
   return (
     <article className={`pcard${added ? " pcard--pop" : ""}`}>
 
       {/* IMAGEN */}
-      <div className="pcard__media">
+      <div className="pcard__media" onClick={handleCardClick} style={{cursor: 'pointer'}}>
         {hasImage ? (
           <img src={product.image_url} alt={product.name} className="pcard__img" loading="lazy" onError={() => setImgError(true)} />
         ) : (
@@ -127,14 +133,14 @@ export default function ProductCard({ product }: Props) {
       </div>
 
       {/* INFO */}
-      <div className="pcard__body">
+      <div className="pcard__body" onClick={handleCardClick} style={{cursor: 'pointer'}}>
         <p className="pcard__cat">{product.category.replace(/-/g, " ")}</p>
         <h3 className="pcard__name">{product.name}</h3>
         <p className="pcard__desc">{product.description || "\u00a0"}</p>
       </div>
 
       {/* PRECIOS — 3 filas fijas */}
-      <div className="pcard__tiers">
+      <div className="pcard__tiers" onClick={handleCardClick} style={{cursor: 'pointer'}}>
 
         {/* Unidad */}
         <div className={`pcard__tier${activeTier === "unidad" && qty > 0 ? " pcard__tier--on" : ""}`}>
