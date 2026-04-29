@@ -4,7 +4,17 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
-import { Package, AlertCircle, Home, LogOut, Menu, Tag, Users, Video } from "lucide-react";
+import {
+  Package,
+  AlertCircle,
+  Home,
+  LogOut,
+  Menu,
+  Tag,
+  Users,
+  Video,
+  Image,
+} from "lucide-react";
 
 export default function AdminLayout({
   children,
@@ -31,15 +41,14 @@ export default function AdminLayout({
         return;
       }
 
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", userData.user.id)
+      const { data: empleado } = await supabase
+        .from("empleados") // ✅ tabla correcta
+        .select("id, activo")
+        .eq("email", user.email)
         .single();
 
-      if (!profile || profile.role !== "admin") {
-        router.push("/admin/login");
-        return;
+      if (!empleado || !empleado.activo) {
+        return NextResponse.redirect(new URL("/admin/login", request.url));
       }
 
       setIsAuthenticated(true);
@@ -84,6 +93,8 @@ export default function AdminLayout({
     { name: "Colaboradores", icon: Users, href: "/admin/colaboradores" },
     { name: "Videos", icon: Video, href: "/admin/videos" },
     { name: "Reclamaciones", icon: AlertCircle, href: "/admin/reclamos" },
+    { name: "Empleados", icon: Users, href: "/admin/empleados" },
+    { name: "Banners", icon: Image, href: "/admin/banners" },
   ];
   async function logout() {
     await supabase.auth.signOut();
