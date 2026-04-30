@@ -18,7 +18,7 @@ export default function PageHero({ title, subtitle, image, dark = false }: PageH
         .page-hero {
           position: relative;
           width: 100%;
-          height: 800px;
+          height: 280px;
           background: #1a1a1a;
           background-size: cover;
           background-position: center;
@@ -56,7 +56,7 @@ export default function PageHero({ title, subtitle, image, dark = false }: PageH
         }
         @media (max-width: 768px) {
           .page-hero {
-            height: 300px;
+            height: 200px;
           }
         }
       `}</style>
