@@ -17,29 +17,49 @@ export default function AdminLoginPage() {
     setLoading(true);
     setError("");
 
+    // 1. Login con Supabase Auth
     const { error: signInError } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
     if (signInError) {
-      setError(signInError.message);
+      setError("Credenciales incorrectas.");
       setLoading(false);
       return;
     }
 
-    const { data: userData } = await supabase.auth.getUser();
-    const userId = userData.user?.id;
-
-    const { data: profile, error: profileError } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", userId)
+    // 2. Verificar que existe en empleados y obtener password hash
+    const { data: empleado, error: empleadoError } = await supabase
+      .from("empleados")
+      .select("id, nombre, activo, password")
+      .eq("email", email)
       .single();
 
-    if (profileError || !profile || profile.role !== "admin") {
+    if (empleadoError || !empleado) {
       await supabase.auth.signOut();
       setError("No tienes permisos de administrador.");
+      setLoading(false);
+      return;
+    }
+
+    if (!empleado.activo) {
+      await supabase.auth.signOut();
+      setError("Tu cuenta está desactivada. Contacta soporte.");
+      setLoading(false);
+      return;
+    }
+
+    // 3. Verificar password encriptado con pgcrypto via RPC
+    const { data: passwordValido, error: rpcError } = await supabase
+      .rpc("verificar_password", {
+        input_password: password,
+        hashed_password: empleado.password,
+      });
+
+    if (rpcError || !passwordValido) {
+      await supabase.auth.signOut();
+      setError("Credenciales incorrectas.");
       setLoading(false);
       return;
     }
@@ -54,7 +74,6 @@ export default function AdminLoginPage() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "linear-gradient(135deg, #f5f5f5 0%, #fff 100%)",
         padding: "1rem",
         backgroundImage: `url('https://res.cloudinary.com/dxuk9bogw/image/upload/v1775939505/ebb81f5c-ffd5-40c8-9b4f-6b0de4dd9bd4.png')`,
         backgroundSize: "cover",
@@ -63,6 +82,7 @@ export default function AdminLoginPage() {
         position: "relative",
       }}
     >
+      {/* Overlay oscuro */}
       <div
         style={{
           position: "absolute",
@@ -72,6 +92,7 @@ export default function AdminLoginPage() {
         }}
       />
 
+      {/* Card */}
       <div
         style={{
           background: "#fff",
@@ -84,6 +105,7 @@ export default function AdminLoginPage() {
           zIndex: 2,
         }}
       >
+        {/* Header */}
         <div style={{ textAlign: "center", marginBottom: "2rem" }}>
           <h1
             style={{
@@ -95,17 +117,12 @@ export default function AdminLoginPage() {
           >
             Admin Login
           </h1>
-          <p
-            style={{
-              fontSize: "0.9rem",
-              color: "#666",
-              margin: 0,
-            }}
-          >
+          <p style={{ fontSize: "0.9rem", color: "#666", margin: 0 }}>
             Accede a tu panel de control
           </p>
         </div>
 
+        {/* Error */}
         {error && (
           <div
             style={{
@@ -116,13 +133,19 @@ export default function AdminLoginPage() {
               marginBottom: "1.5rem",
               fontSize: "0.9rem",
               color: "#c33",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
             }}
           >
+            <span>⚠️</span>
             {error}
           </div>
         )}
 
+        {/* Form */}
         <form onSubmit={onSubmit} style={{ display: "grid", gap: "1.25rem" }}>
+          {/* Email */}
           <div>
             <label
               style={{
@@ -133,11 +156,11 @@ export default function AdminLoginPage() {
                 marginBottom: "0.5rem",
               }}
             >
-              Usuario
+              Correo electrónico
             </label>
             <input
               type="email"
-              placeholder="Ingresa tu usuario"
+              placeholder="ejemplo@correo.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -163,6 +186,7 @@ export default function AdminLoginPage() {
             />
           </div>
 
+          {/* Password */}
           <div>
             <label
               style={{
@@ -177,7 +201,7 @@ export default function AdminLoginPage() {
             </label>
             <input
               type="password"
-              placeholder="Contraseña"
+              placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -203,6 +227,7 @@ export default function AdminLoginPage() {
             />
           </div>
 
+          {/* Submit */}
           <button
             type="submit"
             disabled={loading}
@@ -218,6 +243,10 @@ export default function AdminLoginPage() {
               transition: "all 0.2s",
               marginTop: "0.5rem",
               opacity: loading ? 0.7 : 1,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "0.5rem",
             }}
             onMouseEnter={(e) => {
               if (!loading) {
@@ -228,15 +257,33 @@ export default function AdminLoginPage() {
               }
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.background = "#f5a623";
+              e.currentTarget.style.background = loading ? "#ccc" : "#f5a623";
               e.currentTarget.style.transform = "translateY(0)";
               e.currentTarget.style.boxShadow = "none";
             }}
           >
-            {loading ? "Ingresando..." : "Ingresar"}
+            {loading ? (
+              <>
+                <span
+                  style={{
+                    width: "16px",
+                    height: "16px",
+                    border: "2px solid #fff",
+                    borderTopColor: "transparent",
+                    borderRadius: "50%",
+                    display: "inline-block",
+                    animation: "spin 0.6s linear infinite",
+                  }}
+                />
+                Ingresando...
+              </>
+            ) : (
+              "Ingresar"
+            )}
           </button>
         </form>
 
+        {/* Footer */}
         <div
           style={{
             marginTop: "1.5rem",
@@ -254,13 +301,19 @@ export default function AdminLoginPage() {
               color: "#f5a623",
               textDecoration: "none",
               fontWeight: 600,
-              cursor: "pointer",
             }}
           >
             Contacta soporte
           </Link>
         </div>
       </div>
+
+      {/* Spinner keyframe */}
+      <style>{`
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 }

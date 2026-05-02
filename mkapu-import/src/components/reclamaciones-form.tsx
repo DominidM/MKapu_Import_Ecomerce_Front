@@ -89,8 +89,8 @@ export default function ReclamacionesForm() {
       }
 
       const ticket = data?.[0]?.ticket;
-      
-      try {        
+
+      try {
         const emailRes = await fetch("/api/notificar-ticket", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -100,6 +100,13 @@ export default function ReclamacionesForm() {
             email: form.email,
             tipo: form.tipo,
             ticket: ticket || "0000",
+            dni: form.dni,
+            direccion: form.direccion,
+            telefono: form.telefono,
+            producto: form.producto,
+            monto: form.monto,
+            descripcion: form.descripcion,
+            pedido: form.pedido
           }),
         });
 
@@ -108,7 +115,7 @@ export default function ReclamacionesForm() {
         console.log("Cuerpo de respuesta:", textData);
 
       } catch (err) {
-        console.error("❌ El navegador bloqueó la petición (Probablemente un AdBlocker o error de red):", err);
+        console.error("❌ Falló la petición a la API:", err);
       }
 
       setStatus("success");
