@@ -26,11 +26,19 @@ export type Categoria = {
 
 export type Reclamacion = {
   id?: number;
-  nombre: string;
+  ticket?: string;
+  nombres: string;
+  apellidos: string;
+  dni?: string;
   email: string;
   telefono?: string;
+  direccion?: string;
   tipo: string;
+  fecha_consumo?: string;
+  producto?: string;
+  monto?: number;
   descripcion: string;
+  pedido?: string;
   created_at?: string;
 };
 
