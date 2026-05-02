@@ -36,19 +36,20 @@ export default function AdminLayout({
       }
 
       const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) {
+      if (!userData?.user) {
         router.push("/admin/login");
         return;
       }
 
       const { data: empleado } = await supabase
-        .from("empleados") // ✅ tabla correcta
+        .from("empleados")
         .select("id, activo")
-        .eq("email", user.email)
+        .eq("email", userData.user.email) // ✅ Variable corregida
         .single();
 
       if (!empleado || !empleado.activo) {
-        return NextResponse.redirect(new URL("/admin/login", request.url));
+        router.push("/admin/login"); // ✅ Redirección correcta de cliente
+        return;
       }
 
       setIsAuthenticated(true);
@@ -96,6 +97,7 @@ export default function AdminLayout({
     { name: "Empleados", icon: Users, href: "/admin/empleados" },
     { name: "Banners", icon: Image, href: "/admin/banners" },
   ];
+
   async function logout() {
     await supabase.auth.signOut();
     router.push("/admin/login");
