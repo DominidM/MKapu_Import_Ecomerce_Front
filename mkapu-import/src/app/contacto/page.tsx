@@ -16,10 +16,8 @@ export default function ContactoPage() {
     setEnviando(true);
     setErrorMsg("");
 
-    try {
-      console.log("Enviando petición a /api/notificar-contacto...");
-      
-      const res = await fetch("/api/notificar-ticket", {
+    try {      
+      const res = await fetch("/api/notificar-contacto", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
