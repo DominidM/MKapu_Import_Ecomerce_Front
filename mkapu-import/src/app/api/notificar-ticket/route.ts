@@ -91,7 +91,11 @@ export async function POST(req: NextRequest) {
     });
 
     if (!emailJsReq.ok) {
-       await emailJsReq.text();
+       const emailJsError = await emailJsReq.text();
+       return NextResponse.json({ 
+         error: "EmailJS bloqueó el envío en producción", 
+         detalle: emailJsError 
+       }, { status: 400 });
     }
 
     const htmlInterno = `
