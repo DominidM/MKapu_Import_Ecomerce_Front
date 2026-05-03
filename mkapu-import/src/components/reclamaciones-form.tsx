@@ -46,9 +46,6 @@ export default function ReclamacionesForm() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("=== DEBUG SUPABASE ===");
-    console.log("URL:", process.env.NEXT_PUBLIC_SUPABASE_URL);
-    console.log("Llave real en el navegador:", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.substring(0, 15) + "...");
     setStatus("loading");
     setErrorMsg("");
 
@@ -109,10 +106,6 @@ export default function ReclamacionesForm() {
             pedido: form.pedido
           }),
         });
-
-        const textData = await emailRes.text();
-        console.log("Status de respuesta:", emailRes.status);
-        console.log("Cuerpo de respuesta:", textData);
 
       } catch (err) {
         console.error("❌ Falló la petición a la API:", err);
