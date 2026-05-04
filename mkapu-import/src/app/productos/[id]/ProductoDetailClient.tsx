@@ -230,7 +230,7 @@ export default function ProductoDetailClient({ producto }: Props) {
           <div className="detail-visual-card">
             <div className="detail-visual-toolbar">
               <span className="detail-chip detail-chip--soft">
-                {producto.category?.replace(/-/g, " ") || "Sin categoria"}
+                {producto.category_name ?? `Categoría ${producto.category}`}
               </span>
               {producto.is_new && (
                 <span className="detail-badge detail-badge--new">Nuevo</span>
@@ -344,7 +344,7 @@ export default function ProductoDetailClient({ producto }: Props) {
             <div className="detail-meta-card">
               <span className="detail-meta-label">Categoria</span>
               <strong>
-                {producto.category?.replace(/-/g, " ") || "General"}
+                {producto.category_name ?? `Categoría ${producto.category}`}
               </strong>
             </div>
             <div className="detail-meta-card">

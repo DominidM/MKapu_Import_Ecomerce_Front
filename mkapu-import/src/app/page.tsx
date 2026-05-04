@@ -5,6 +5,8 @@ import CollaboratorsCarousel from "@/components/CollaboratorsCarousel";
 import VideoSection from "@/components/VideoSection";
 import HeroAccordion from "@/components/HeroAccordion";
 import { getProductos, getProductosNuevos } from "@/lib/queries";
+import HomeSecciones from "@/components/HomeSecciones";
+
 
 type AnyProduct = any;
 
@@ -26,10 +28,19 @@ function toCarouselProduct(p: AnyProduct) {
 }
 
 function CarouselSection({
-  tag, title, subtitle, products, href, dark = false,
+  tag,
+  title,
+  subtitle,
+  products,
+  href,
+  dark = false,
 }: {
-  tag?: string; title: string; subtitle?: string;
-  products: AnyProduct[]; href: string; dark?: boolean;
+  tag?: string;
+  title: string;
+  subtitle?: string;
+  products: AnyProduct[];
+  href: string;
+  dark?: boolean;
 }) {
   if (products.length === 0) return null;
   return (
@@ -42,7 +53,9 @@ function CarouselSection({
         </div>
         <Carousel products={products.map(toCarouselProduct)} title="" />
         <div className="csec__foot">
-          <Link href={href} className="csec__link">Ver todos →</Link>
+          <Link href={href} className="csec__link">
+            Ver todos →
+          </Link>
         </div>
       </div>
       <style>{`
@@ -118,10 +131,10 @@ export default async function HomePage() {
     getProductosNuevos(),
   ]);
 
-  const featured      = products.filter((p: AnyProduct) => p.featured);
-  const hornos        = byCategory(products, "horno");
+  const featured = products.filter((p: AnyProduct) => p.featured);
+  const hornos = byCategory(products, "horno");
   const freidorasAire = byCategory(products, "freidora-aire");
-  const maquinaHielo  = byCategory(products, "maquina-hielo");
+  const maquinaHielo = byCategory(products, "maquina-hielo");
   const refrigeracion = byCategory(products, "refrigeracion");
 
   return (
@@ -129,20 +142,11 @@ export default async function HomePage() {
       <HeroAccordion />
 
       <CarouselSection
-        tag="Nuevo"
-        title="Recién Agregados"
-        subtitle="Los equipos más solicitados por restaurantes y hoteles de Lima."
-        products={featured.length > 0 ? featured : products.slice(0, 4)}
-        href="/productos"
-      />
-
-      <CarouselSection
         tag="Más vendidos"
         title="Productos destacados"
         subtitle="Los equipos más solicitados por restaurantes y hoteles de Lima."
         products={featured.length > 0 ? featured : products.slice(0, 10)}
         href="/productos"
-        dark
       />
 
       <CarouselSection
@@ -156,46 +160,15 @@ export default async function HomePage() {
 
       <BrandsCarousel />
 
-      <CarouselSection
-        tag="Categoría"
-        title="Hornos"
-        subtitle="Hornos eléctricos y a gas para cocinas profesionales."
-        products={hornos}
-        href="/productos?cat=horno"
-      />
-
-      <CarouselSection
-        tag="Tendencia"
-        title="Freidoras de Aire"
-        subtitle="Cocina saludable sin aceite. Todos nuestros productos con garantía de 60 días."
-        products={freidorasAire}
-        href="/productos?cat=freidora-aire"
-        dark
-      />
-
-      <CarouselSection
-        tag="Categoría"
-        title="Máquinas de Hielo"
-        subtitle="Producción continua 24h, potencia industrial, fácil mantenimiento."
-        products={maquinaHielo}
-        href="/productos?cat=maquina-hielo"
-      />
-
-      <CarouselSection
-        tag="Categoría"
-        title="Refrigeración"
-        subtitle="Cámaras frías, vitrinas exhibidoras y equipos de conservación."
-        products={refrigeracion}
-        href="/productos?cat=refrigeracion"
-        dark
-      />
+      <HomeSecciones />
 
       <section className="why">
         <div className="why__inner">
           <div className="why__head">
             <span className="why__tag">¿Por qué elegirnos?</span>
             <h2 className="why__title">
-              Importación directa,<br />
+              Importación directa,
+              <br />
               <em>calidad garantizada</em>
             </h2>
           </div>

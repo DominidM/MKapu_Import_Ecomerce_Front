@@ -17,6 +17,7 @@ import {
   FileText,
   FolderTree,
   Info,
+  LayoutDashboard,
 } from "lucide-react";
 
 export default function AdminLayout({
@@ -102,6 +103,7 @@ export default function AdminLayout({
     { name: "Blog", icon: FileText, href: "/admin/blog" },
     { name: "Categorías", icon: FolderTree, href: "/admin/categorias" },
     { name: "Sobre Nosotros", icon: Info, href: "/admin/sobre-nosotros" },
+    { name: "Secciones Home", icon: LayoutDashboard, href: "/admin/home" },
   ];
 
   async function logout() {

@@ -44,28 +44,41 @@ export type ProductoImagen = {
 export async function getProductos(): Promise<Producto[]> {
   const { data, error } = await supabase
     .from("productos")
-    .select("*")
+    .select("*, categorias(name)")
     .order("id", { ascending: true });
 
   if (error) {
     console.error("Error fetching productos:", error.message);
     return [];
   }
-  return data ?? [];
+
+  return (data ?? []).map((p: any) => ({
+    ...p,
+    category_name: p.categorias?.name ?? null,
+    categorias: undefined,
+  }));
 }
 
-export async function getProductosByCategoria(category: string | number): Promise<Producto[]> {
+export async function getProductosByCategoria(
+  category: string | number,
+): Promise<Producto[]> {
   const { data, error } = await supabase
     .from("productos")
-    .select("*")
+    .select("*, categorias(name)")
     .eq("category", category)
+    .eq("activo", true)
     .order("id", { ascending: true });
 
   if (error) {
     console.error("Error fetching productos by category:", error.message);
     return [];
   }
-  return data ?? [];
+
+  return (data ?? []).map((p: any) => ({
+    ...p,
+    category_name: p.categorias?.name ?? null,
+    categorias: undefined,
+  }));
 }
 
 export async function searchProductos(query: string): Promise<Producto[]> {
@@ -82,7 +95,9 @@ export async function searchProductos(query: string): Promise<Producto[]> {
   return data ?? [];
 }
 
-export async function getProductoBySlug(slug: string): Promise<Producto | null> {
+export async function getProductoBySlug(
+  slug: string,
+): Promise<Producto | null> {
   const { data, error } = await supabase
     .from("productos")
     .select("*")
@@ -139,7 +154,9 @@ export async function getProductosNuevos(limit = 10): Promise<Producto[]> {
   return data ?? [];
 }
 
-export async function getProductoImagenes(productoId: number): Promise<ProductoImagen[]> {
+export async function getProductoImagenes(
+  productoId: number,
+): Promise<ProductoImagen[]> {
   const { data, error } = await supabase
     .from("producto_imagenes")
     .select("*")
@@ -175,7 +192,10 @@ export async function getCategoriasFromProductos(): Promise<string[]> {
       .select("category");
 
     if (prodError) {
-      console.error("Error fetching productos for categories:", prodError.message);
+      console.error(
+        "Error fetching productos for categories:",
+        prodError.message,
+      );
       return [];
     }
 
@@ -189,15 +209,15 @@ export async function getCategoriasFromProductos(): Promise<string[]> {
     }
 
     const catMap = new Map(
-      (categorias ?? []).map((c: any) => [String(c.id), c.name])
+      (categorias ?? []).map((c: any) => [String(c.id), c.name]),
     );
 
     const uniqueCatIds = Array.from(
       new Set(
         (productos ?? [])
           .map((p: any) => p.category)
-          .filter((c): c is string | number => Boolean(c))
-      )
+          .filter((c): c is string | number => Boolean(c)),
+      ),
     );
 
     return uniqueCatIds

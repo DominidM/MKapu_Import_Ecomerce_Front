@@ -4,11 +4,18 @@ import QuienesSomosClient from "./QuienesSomosClient";
 export const revalidate = 60;
 
 export default async function QuienesSomosPage() {
-  const { data: secciones } = await supabase
-    .from("quienes_somos_secciones")
-    .select("*")
-    .eq("activo", true)
-    .order("orden");
+  const [{ data: secciones }, { data: bannerData }] = await Promise.all([
+    supabase
+      .from("quienes_somos_secciones")
+      .select("*")
+      .eq("activo", true)
+      .order("orden"),
+    supabase
+      .from("banners_config")
+      .select("titulo, subtitulo, image_url, activo")
+      .eq("ruta", "/quienes-somos")
+      .single(),
+  ]);
 
   const seccionesWithImages = await Promise.all(
     (secciones || []).map(async (seccion) => {
@@ -18,12 +25,14 @@ export default async function QuienesSomosPage() {
         .eq("seccion_id", seccion.id)
         .order("orden");
 
-      return {
-        ...seccion,
-        imagenes: imagenes || [],
-      };
+      return { ...seccion, imagenes: imagenes || [] };
     }),
   );
 
-  return <QuienesSomosClient secciones={seccionesWithImages} />;
+  return (
+    <QuienesSomosClient
+      secciones={seccionesWithImages}
+      banner={bannerData ?? null}
+    />
+  );
 }
