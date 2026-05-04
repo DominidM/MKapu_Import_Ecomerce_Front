@@ -4,7 +4,8 @@ export interface Producto {
   id: number;
   code: string;
   name: string;
-  category: string;
+  category: number;
+  category_name?: string;
   description?: string;
   price: number;
   price_caja?: number;
@@ -15,13 +16,14 @@ export interface Producto {
   image_url?: string;
   activo?: boolean;
   created_at?: string;
+  is_new?: boolean;
 }
 
 export type Categoria = {
-  id: string;
-  nombre: string;
+  id: number;
+  name: string;
   slug: string;
-  imagen?: string;
+  activo?: boolean;
 };
 
 export type Reclamacion = {
@@ -44,5 +46,5 @@ export type Reclamacion = {
 
 export const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
 );

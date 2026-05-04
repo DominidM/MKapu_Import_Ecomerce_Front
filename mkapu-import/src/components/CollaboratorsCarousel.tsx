@@ -2,6 +2,8 @@
 import { useEffect, useRef, useState } from "react";
 import { getColaboradores, Colaborador } from "@/lib/queries";
 
+const SCROLL_THRESHOLD = 5;
+
 export default function CollaboratorsCarousel() {
   const [colaboradores, setColaboradores] = useState<Colaborador[]>([]);
   const trackRef = useRef<HTMLDivElement>(null);
@@ -10,9 +12,11 @@ export default function CollaboratorsCarousel() {
     getColaboradores().then(setColaboradores);
   }, []);
 
+  const shouldScroll = colaboradores.length > SCROLL_THRESHOLD;
+
   useEffect(() => {
     const track = trackRef.current;
-    if (!track || colaboradores.length === 0) return;
+    if (!track || colaboradores.length === 0 || !shouldScroll) return;
     let pos = 0;
     const speed = 0.4;
     let raf: number;
@@ -24,11 +28,11 @@ export default function CollaboratorsCarousel() {
     };
     raf = requestAnimationFrame(step);
     return () => cancelAnimationFrame(raf);
-  }, [colaboradores]);
+  }, [colaboradores, shouldScroll]);
 
   if (colaboradores.length === 0) return null;
 
-  const doubled = [...colaboradores, ...colaboradores];
+  const items = shouldScroll ? [...colaboradores, ...colaboradores] : colaboradores;
 
   return (
     <section className="collab-section">
@@ -36,9 +40,19 @@ export default function CollaboratorsCarousel() {
         <span className="collab-tag">Colaboraciones</span>
         <h2 className="collab-title">Con quienes hemos trabajado</h2>
       </div>
-      <div className="collab-wrapper">
-        <div className="collab-track" ref={trackRef}>
-          {doubled.map((c, i) => (
+
+      <div className={`collab-wrapper ${shouldScroll ? "collab-wrapper--scroll" : ""}`}>
+        {shouldScroll && (
+          <>
+            <div className="collab-fade collab-fade--left" />
+            <div className="collab-fade collab-fade--right" />
+          </>
+        )}
+        <div
+          className={`collab-track ${!shouldScroll ? "collab-track--static" : ""}`}
+          ref={trackRef}
+        >
+          {items.map((c, i) => (
             <div key={`${c.id}-${i}`} className="collab-item">
               {c.url ? (
                 <a href={c.url} target="_blank" rel="noopener noreferrer" className="collab-link">
@@ -61,16 +75,19 @@ export default function CollaboratorsCarousel() {
           ))}
         </div>
       </div>
+
       <style>{`
         .collab-section {
           padding: 4rem 1.5rem;
           background: #f5f5f5;
           overflow: hidden;
         }
+
         .collab-header {
           text-align: center;
           margin-bottom: 2.5rem;
         }
+
         .collab-tag {
           display: inline-block;
           font-size: 0.7rem;
@@ -80,22 +97,61 @@ export default function CollaboratorsCarousel() {
           color: #f5a623;
           margin-bottom: 0.5rem;
         }
+
         .collab-title {
           font-size: clamp(1.4rem, 3vw, 2rem);
           font-weight: 900;
           color: #1a1a1a;
           margin: 0;
         }
+
+        /* Wrapper */
         .collab-wrapper {
           overflow: hidden;
           width: 100%;
         }
+
+        .collab-wrapper--scroll {
+          position: relative;
+        }
+
+        /* Gradientes laterales (solo modo scroll) */
+        .collab-fade {
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          width: 100px;
+          z-index: 2;
+          pointer-events: none;
+        }
+
+        .collab-fade--left {
+          left: 0;
+          background: linear-gradient(to right, #f5f5f5 30%, transparent);
+        }
+
+        .collab-fade--right {
+          right: 0;
+          background: linear-gradient(to left, #f5f5f5 30%, transparent);
+        }
+
+        /* Track */
         .collab-track {
           display: flex;
           gap: 2rem;
           width: max-content;
           will-change: transform;
         }
+
+        /* Modo estático: centrado y wrap en mobile */
+        .collab-track--static {
+          width: 100% !important;
+          justify-content: center;
+          flex-wrap: wrap;
+          gap: 1.5rem;
+        }
+
+        /* Items */
         .collab-item {
           display: flex;
           align-items: center;
@@ -106,11 +162,14 @@ export default function CollaboratorsCarousel() {
           border: 1px solid #e8e8e8;
           border-radius: 12px;
           padding: 1rem 1.5rem;
-          transition: box-shadow 0.2s;
+          transition: box-shadow 0.2s, border-color 0.2s;
         }
+
         .collab-item:hover {
-          box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+          border-color: #f5a623;
         }
+
         .collab-link {
           display: flex;
           align-items: center;
@@ -119,6 +178,8 @@ export default function CollaboratorsCarousel() {
           height: 100%;
           text-decoration: none;
         }
+
+        /* Logo */
         .collab-logo {
           max-height: 52px;
           max-width: 120px;
@@ -127,15 +188,43 @@ export default function CollaboratorsCarousel() {
           opacity: 0.7;
           transition: filter 0.2s, opacity 0.2s;
         }
+
         .collab-item:hover .collab-logo {
           filter: grayscale(0);
           opacity: 1;
         }
+
         .collab-name {
           font-size: 0.9rem;
           font-weight: 700;
           color: #555;
           white-space: nowrap;
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+          .collab-section {
+            padding: 2.5rem 1rem;
+          }
+
+          .collab-item {
+            min-width: 120px;
+            height: 72px;
+            padding: 0.75rem 1rem;
+          }
+
+          .collab-logo {
+            max-height: 40px;
+            max-width: 95px;
+          }
+
+          .collab-fade {
+            width: 60px;
+          }
+
+          .collab-track--static {
+            gap: 1rem;
+          }
         }
       `}</style>
     </section>

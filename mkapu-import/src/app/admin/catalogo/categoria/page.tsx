@@ -31,7 +31,7 @@ export default async function CatalogoPage({
   return (
     <>
       <PageHero
-        title={categoria.nombre} // 🚨 Estaba como "name", ahora es "nombre"
+        title={categoria.name} // 🚨 Estaba como "name", ahora es "nombre"
         subtitle={`${activos.length} producto${activos.length !== 1 ? "s" : ""} disponible${activos.length !== 1 ? "s" : ""} en esta categoría.`}
         dark
       />
@@ -43,7 +43,7 @@ export default async function CatalogoPage({
             <span>›</span>
             <Link href="/productos">Productos</Link>
             <span>›</span>
-            <span>{categoria.nombre}</span> {/* 🚨 También corregido aquí */}
+            <span>{categoria.name}</span> {/* 🚨 También corregido aquí */}
           </div>
 
           {activos.length === 0 ? (
