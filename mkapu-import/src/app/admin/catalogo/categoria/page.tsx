@@ -3,15 +3,14 @@ import Link from "next/link";
 import PageHero from "@/components/PageHero";
 import { getCategorias, getProductosByCategoria } from "@/lib/queries";
 import ProductCard from "@/components/productCard";
+import { Producto, Categoria } from "@/lib/supabase";
 
 export const revalidate = 3600;
 
 export async function generateStaticParams() {
   const categorias = await getCategorias();
-  return categorias.map((c) => ({ categoria: String(c.id) }));
+  return categorias.map((c: Categoria) => ({ categoria: String(c.id) }));
 }
-
-type AnyProduct = any;
 
 export default async function CatalogoPage({
   params,
@@ -21,17 +20,18 @@ export default async function CatalogoPage({
   const { categoria: categoriaParam } = await params;
 
   const categorias = await getCategorias();
-  const categoria = categorias.find((c) => String(c.id) === categoriaParam);
+  const categoria = categorias.find((c: Categoria) => String(c.id) === categoriaParam);
 
   if (!categoria) notFound();
 
   const products = await getProductosByCategoria(categoriaParam);
-  const activos = products.filter((p: AnyProduct) => p.activo !== false);
+  // Usamos el tipo Producto importado en lugar de AnyProduct
+  const activos = products.filter((p: Producto) => p.activo !== false);
 
   return (
     <>
       <PageHero
-        title={categoria.name}
+        title={categoria.nombre} // 🚨 Estaba como "name", ahora es "nombre"
         subtitle={`${activos.length} producto${activos.length !== 1 ? "s" : ""} disponible${activos.length !== 1 ? "s" : ""} en esta categoría.`}
         dark
       />
@@ -43,7 +43,7 @@ export default async function CatalogoPage({
             <span>›</span>
             <Link href="/productos">Productos</Link>
             <span>›</span>
-            <span>{categoria.name}</span>
+            <span>{categoria.nombre}</span> {/* 🚨 También corregido aquí */}
           </div>
 
           {activos.length === 0 ? (
@@ -55,7 +55,7 @@ export default async function CatalogoPage({
             </div>
           ) : (
             <div className="cat-grid">
-              {activos.map((p: AnyProduct) => (
+              {activos.map((p: Producto) => (
                 <ProductCard
                   key={p.id}
                   product={{

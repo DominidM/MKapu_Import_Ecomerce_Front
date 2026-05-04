@@ -36,22 +36,19 @@ export default function AdminLayout({
       }
 
       const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) {
+      if (!userData?.user) {
         router.push("/admin/login");
         return;
       }
 
-      // ✅ FIX 1: usar userData.user.email correctamente
       const { data: empleado } = await supabase
         .from("empleados")
         .select("id, activo")
-        .eq("email", userData.user.email)
+        .eq("email", userData.user.email) // ✅ Variable corregida
         .single();
 
-      // ✅ FIX 2: usar router.push en lugar de NextResponse.redirect
       if (!empleado || !empleado.activo) {
-        await supabase.auth.signOut();
-        router.push("/admin/login");
+        router.push("/admin/login"); // ✅ Redirección correcta de cliente
         return;
       }
 
@@ -124,6 +121,7 @@ export default function AdminLayout({
       `}</style>
 
       <div className="admin-layout">
+        {/* Sidebar */}
         <aside
           style={{
             width: sidebarOpen ? "240px" : "64px",
@@ -138,6 +136,7 @@ export default function AdminLayout({
             flexShrink: 0,
           }}
         >
+          {/* Logo */}
           <div
             style={{
               padding: sidebarOpen ? "20px 16px 18px" : "20px 0 18px",
@@ -154,6 +153,7 @@ export default function AdminLayout({
             {sidebarOpen ? "Panel Admin" : "PA"}
           </div>
 
+          {/* Nav */}
           <nav
             style={{
               flex: 1,
@@ -180,6 +180,7 @@ export default function AdminLayout({
             })}
           </nav>
 
+          {/* Footer buttons */}
           <div
             style={{
               padding: "12px 8px 16px",
@@ -208,6 +209,7 @@ export default function AdminLayout({
           </div>
         </aside>
 
+        {/* Main */}
         <main
           style={{
             flex: 1,
@@ -217,6 +219,7 @@ export default function AdminLayout({
             background: "#f7f7f5",
           }}
         >
+          {/* Topbar */}
           <div
             style={{
               background: "#fff",
@@ -258,6 +261,7 @@ export default function AdminLayout({
             <div style={{ width: "36px" }} />
           </div>
 
+          {/* Content */}
           <div
             className="main-content"
             style={{ flex: 1, overflow: "auto", padding: "28px 32px" }}
