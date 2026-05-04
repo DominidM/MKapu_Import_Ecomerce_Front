@@ -26,10 +26,19 @@ function toCarouselProduct(p: AnyProduct) {
 }
 
 function CarouselSection({
-  tag, title, subtitle, products, href, dark = false,
+  tag,
+  title,
+  subtitle,
+  products,
+  href,
+  dark = false,
 }: {
-  tag?: string; title: string; subtitle?: string;
-  products: AnyProduct[]; href: string; dark?: boolean;
+  tag?: string;
+  title: string;
+  subtitle?: string;
+  products: AnyProduct[];
+  href: string;
+  dark?: boolean;
 }) {
   if (products.length === 0) return null;
   return (
@@ -42,7 +51,9 @@ function CarouselSection({
         </div>
         <Carousel products={products.map(toCarouselProduct)} title="" />
         <div className="csec__foot">
-          <Link href={href} className="csec__link">Ver todos →</Link>
+          <Link href={href} className="csec__link">
+            Ver todos →
+          </Link>
         </div>
       </div>
       <style>{`
@@ -73,25 +84,47 @@ const STATS = [
 const WHY_ITEMS = [
   {
     num: "01",
-    icon: (<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="1" /><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" /><line x1="12" y1="12" x2="12" y2="16" /><line x1="10" y1="14" x2="14" y2="14" /></svg>),
+    icon: (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <rect x="2" y="7" width="20" height="14" rx="1" />
+        <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
+        <line x1="12" y1="12" x2="12" y2="16" />
+        <line x1="10" y1="14" x2="14" y2="14" />
+      </svg>
+    ),
     title: "Directo del fabricante",
     desc: "Sin intermediarios. Precios competitivos con calidad de primera.",
   },
   {
     num: "02",
-    icon: (<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" /></svg>),
+    icon: (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+      </svg>
+    ),
     title: "Soporte técnico local",
     desc: "Equipo en Lima para instalación, mantenimiento y garantía.",
   },
   {
     num: "03",
-    icon: (<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="1" y="3" width="15" height="13" rx="1" /><path d="M16 8h4l3 3v5h-7V8z" /><circle cx="5.5" cy="18.5" r="2.5" /><circle cx="18.5" cy="18.5" r="2.5" /></svg>),
+    icon: (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <rect x="1" y="3" width="15" height="13" rx="1" />
+        <path d="M16 8h4l3 3v5h-7V8z" />
+        <circle cx="5.5" cy="18.5" r="2.5" />
+        <circle cx="18.5" cy="18.5" r="2.5" />
+      </svg>
+    ),
     title: "Despacho rápido",
     desc: "Entrega en Lima Metropolitana en 24–48 horas hábiles.",
   },
   {
     num: "04",
-    icon: (<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>),
+    icon: (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+      </svg>
+    ),
     title: "Asesoría personalizada",
     desc: "Te ayudamos a elegir el equipo ideal para tu negocio.",
   },
@@ -186,16 +219,13 @@ export default async function HomePage() {
         dark
       />
 
-      <VideoSection tipo="video" />
-
-      <CollaboratorsCarousel />
-
       <section className="why">
         <div className="why__inner">
           <div className="why__head">
             <span className="why__tag">¿Por qué elegirnos?</span>
             <h2 className="why__title">
-              Importación directa,<br />
+              Importación directa,
+              <br />
               <em>calidad garantizada</em>
             </h2>
           </div>
@@ -212,19 +242,9 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="section section--video">
-        <div className="section__inner section__inner--narrow">
-          <div className="section__head">
-            <span className="section__tag">Conócenos</span>
-            <h2 className="section__title">Ve nuestros equipos en acción</h2>
-            <p className="section__sub">Mira cómo nuestras máquinas funcionan en entornos reales de trabajo.</p>
-          </div>
-          <div className="videos-row">
-            <video className="video-item" src="https://res.cloudinary.com/dxuk9bogw/video/upload/v1775778735/sssstik_M0s7GjQOyM_2026-04-09-18-51-58_t7gim9.mp4" controls playsInline preload="metadata" aria-label="Video institucional 1" />
-            <video className="video-item" src="https://res.cloudinary.com/dxuk9bogw/video/upload/v1775778675/sssstik_qTDitLuabJ_2026-04-09-18-50-56_ourt9k.mp4" controls playsInline preload="metadata" aria-label="Video institucional 2" />
-          </div>
-        </div>
-      </section>
+      <CollaboratorsCarousel />
+
+      <VideoSection tipo="video" />
 
       <style>{`
         .home { overflow-x: hidden; }
