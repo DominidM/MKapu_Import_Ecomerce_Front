@@ -15,6 +15,7 @@ export interface Producto {
   image_url?: string;
   activo?: boolean;
   created_at?: string;
+  is_new?: boolean;
 }
 
 export type Categoria = {

@@ -26,19 +26,10 @@ function toCarouselProduct(p: AnyProduct) {
 }
 
 function CarouselSection({
-  tag,
-  title,
-  subtitle,
-  products,
-  href,
-  dark = false,
+  tag, title, subtitle, products, href, dark = false,
 }: {
-  tag?: string;
-  title: string;
-  subtitle?: string;
-  products: AnyProduct[];
-  href: string;
-  dark?: boolean;
+  tag?: string; title: string; subtitle?: string;
+  products: AnyProduct[]; href: string; dark?: boolean;
 }) {
   if (products.length === 0) return null;
   return (
@@ -51,9 +42,7 @@ function CarouselSection({
         </div>
         <Carousel products={products.map(toCarouselProduct)} title="" />
         <div className="csec__foot">
-          <Link href={href} className="csec__link">
-            Ver todos →
-          </Link>
+          <Link href={href} className="csec__link">Ver todos →</Link>
         </div>
       </div>
       <style>{`
@@ -73,13 +62,6 @@ function CarouselSection({
     </section>
   );
 }
-
-const STATS = [
-  { value: "9,907+", label: "Ventas realizadas" },
-  { value: "500+", label: "Clientes satisfechos" },
-  { value: "60 días", label: "Garantía en productos" },
-  { value: "24-48h", label: "Entrega en Lima" },
-];
 
 const WHY_ITEMS = [
   {
@@ -136,26 +118,15 @@ export default async function HomePage() {
     getProductosNuevos(),
   ]);
 
-  const featured = products.filter((p: AnyProduct) => p.featured);
-  const hornos = byCategory(products, "horno");
+  const featured      = products.filter((p: AnyProduct) => p.featured);
+  const hornos        = byCategory(products, "horno");
   const freidorasAire = byCategory(products, "freidora-aire");
-  const maquinaHielo = byCategory(products, "maquina-hielo");
+  const maquinaHielo  = byCategory(products, "maquina-hielo");
   const refrigeracion = byCategory(products, "refrigeracion");
 
   return (
     <div className="home">
       <HeroAccordion />
-
-      <section className="stats-bar">
-        <div className="stats-bar__inner">
-          {STATS.map((s) => (
-            <div key={s.label} className="stats-bar__item">
-              <strong className="stats-bar__value">{s.value}</strong>
-              <span className="stats-bar__label">{s.label}</span>
-            </div>
-          ))}
-        </div>
-      </section>
 
       <CarouselSection
         tag="Nuevo"
@@ -224,8 +195,7 @@ export default async function HomePage() {
           <div className="why__head">
             <span className="why__tag">¿Por qué elegirnos?</span>
             <h2 className="why__title">
-              Importación directa,
-              <br />
+              Importación directa,<br />
               <em>calidad garantizada</em>
             </h2>
           </div>
@@ -248,11 +218,6 @@ export default async function HomePage() {
 
       <style>{`
         .home { overflow-x: hidden; }
-        .stats-bar { background: #f5a623; padding: 1.5rem; }
-        .stats-bar__inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; text-align: center; }
-        .stats-bar__value { display: block; font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 900; color: #fff; }
-        .stats-bar__label { font-size: 0.8rem; color: rgba(255,255,255,0.85); font-weight: 500; }
-        @media (max-width: 640px) { .stats-bar__inner { grid-template-columns: repeat(2, 1fr); } }
         .why { background: #0d0d0d; padding: 96px 40px; }
         .why__inner { max-width: 1100px; margin: 0 auto; }
         .why__head { margin-bottom: 72px; }
