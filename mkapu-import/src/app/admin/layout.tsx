@@ -14,6 +14,10 @@ import {
   Users,
   Video,
   Image,
+  FileText,
+  FolderTree,
+  Info,
+  LayoutDashboard,
 } from "lucide-react";
 
 export default function AdminLayout({
@@ -96,6 +100,10 @@ export default function AdminLayout({
     { name: "Reclamaciones", icon: AlertCircle, href: "/admin/reclamos" },
     { name: "Empleados", icon: Users, href: "/admin/empleados" },
     { name: "Banners", icon: Image, href: "/admin/banners" },
+    { name: "Blog", icon: FileText, href: "/admin/blog" },
+    { name: "Categorías", icon: FolderTree, href: "/admin/categorias" },
+    { name: "Sobre Nosotros", icon: Info, href: "/admin/sobre-nosotros" },
+    { name: "Secciones Home", icon: LayoutDashboard, href: "/admin/home" },
   ];
 
   async function logout() {
