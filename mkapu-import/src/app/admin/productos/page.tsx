@@ -1,6 +1,5 @@
-// app/admin/productos/page.tsx
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 import {
@@ -43,6 +42,8 @@ type Categoria = { id: string; name: string };
 type ViewMode = "todos" | "completos" | "incompletos";
 type FormMode = "list" | "create" | "edit";
 
+const ITEMS_PER_PAGE = 10;
+
 const initialForm = {
   code: "",
   name: "",
@@ -62,32 +63,73 @@ const initialForm = {
 
 export default function AdminProductosPage() {
   const [rows, setRows] = useState<Producto[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [form, setForm] = useState(initialForm);
   const [editId, setEditId] = useState<number | null>(null);
   const [formMode, setFormMode] = useState<FormMode>("list");
   const [viewMode, setViewMode] = useState<ViewMode>("todos");
   const [search, setSearch] = useState("");
+  const [searchInput, setSearchInput] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [savedId, setSavedId] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+
+  // Contadores globales para los tabs (independientes de la página)
+  const [totalCompletos, setTotalCompletos] = useState(0);
+  const [totalIncompletos, setTotalIncompletos] = useState(0);
+
   const fileRef = useRef<HTMLInputElement>(null);
   const topRef = useRef<HTMLDivElement>(null);
+  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  async function load() {
+  // ── Carga de categorías (una sola vez) ──────────────────
+  useEffect(() => {
+    supabase
+      .from("categorias")
+      .select("id, name")
+      .then(({ data }) => {
+        if (data) setCategorias(data);
+      });
+  }, []);
+
+  // ── Carga paginada server-side ───────────────────────────
+  const load = useCallback(async () => {
     setLoading(true);
-    const [catRes, prodRes, imgRes, vidRes] = await Promise.all([
-      supabase.from("categorias").select("id, name"),
-      supabase.from("productos").select("*").order("id", { ascending: false }),
+
+    const from = (currentPage - 1) * ITEMS_PER_PAGE;
+    const to = from + ITEMS_PER_PAGE - 1;
+
+    // Query base con filtros
+    let query = supabase
+      .from("productos")
+      .select("*", { count: "exact" })
+      .order("id", { ascending: false })
+      .range(from, to);
+
+    if (search.trim()) {
+      query = query.or(
+        `name.ilike.%${search.trim()}%,code.ilike.%${search.trim()}%`,
+      );
+    }
+    if (selectedCategory) {
+      query = query.eq("category", selectedCategory);
+    }
+    if (viewMode === "completos") {
+      // productos que tienen al menos 1 imagen Y 1 video
+      // se filtra después de traer los datos (ver más abajo)
+    }
+
+    const [prodRes, imgRes, vidRes] = await Promise.all([
+      query,
       supabase.from("producto_imagenes").select("producto_id"),
       supabase.from("producto_videos").select("producto_id"),
     ]);
-    if (catRes.data) setCategorias(catRes.data);
 
+    // Mapas de conteo de media
     const imgCount: Record<number, number> = {};
     const vidCount: Record<number, number> = {};
     (imgRes.data ?? []).forEach((r: { producto_id: number }) => {
@@ -102,17 +144,54 @@ export default function AdminProductosPage() {
       _imgCount: imgCount[p.id] ?? 0,
       _vidCount: vidCount[p.id] ?? 0,
     }));
-    setRows(products);
+
+    // Contadores de tabs usando los datos de media completos
+    const allIds = Object.keys(imgCount).map(Number);
+    const completosSet = new Set(
+      allIds.filter((id) => (imgCount[id] ?? 0) > 0 && (vidCount[id] ?? 0) > 0),
+    );
+
+    // Para viewMode completos/incompletos filtramos en cliente
+    // (son pocos datos en los conteos de media)
+    let finalProducts = products;
+    let finalCount = prodRes.count ?? 0;
+
+    if (viewMode === "completos") {
+      finalProducts = products.filter(
+        (p) => (p._imgCount ?? 0) > 0 && (p._vidCount ?? 0) > 0,
+      );
+    } else if (viewMode === "incompletos") {
+      finalProducts = products.filter(
+        (p) => (p._imgCount ?? 0) === 0 || (p._vidCount ?? 0) === 0,
+      );
+    }
+
+    setRows(finalProducts);
+    setTotalCount(finalCount);
+    setTotalCompletos(completosSet.size);
+    setTotalIncompletos((prodRes.count ?? 0) - completosSet.size);
     setLoading(false);
-  }
+  }, [currentPage, search, selectedCategory, viewMode]);
 
   useEffect(() => {
     load();
-  }, []);
+  }, [load]);
+
+  // Reset página al cambiar filtros
   useEffect(() => {
     setCurrentPage(1);
   }, [search, selectedCategory, viewMode]);
 
+  // Debounce del buscador para no disparar una query por cada letra
+  function handleSearchInput(value: string) {
+    setSearchInput(value);
+    if (searchTimer.current) clearTimeout(searchTimer.current);
+    searchTimer.current = setTimeout(() => {
+      setSearch(value);
+    }, 350);
+  }
+
+  // ── Subir imagen ─────────────────────────────────────────
   async function uploadMainImage(file: File): Promise<string | null> {
     setUploading(true);
     const path = `productos/${Date.now()}.${file.name.split(".").pop()}`;
@@ -127,6 +206,7 @@ export default function AdminProductosPage() {
     return supabase.storage.from("imagenes").getPublicUrl(path).data.publicUrl;
   }
 
+  // ── Guardar producto ─────────────────────────────────────
   async function saveProducto(): Promise<number | null> {
     if (!form.name.trim()) {
       alert("Nombre requerido");
@@ -241,42 +321,15 @@ export default function AdminProductosPage() {
     );
   };
 
-  const isComplete = (p: Producto) =>
-    (p._imgCount ?? 0) > 0 && (p._vidCount ?? 0) > 0;
-  const isIncomplete = (p: Producto) =>
-    (p._imgCount ?? 0) === 0 || (p._vidCount ?? 0) === 0;
+  const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
 
-  const filtered = rows.filter((p) => {
-    const matchSearch =
-      p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.code.toLowerCase().includes(search.toLowerCase());
-    const matchCat =
-      selectedCategory === "" || String(p.category) === selectedCategory;
-    const matchView =
-      viewMode === "todos"
-        ? true
-        : viewMode === "completos"
-          ? isComplete(p)
-          : isIncomplete(p);
-    return matchSearch && matchCat && matchView;
-  });
-
-  const totalPages = Math.ceil(filtered.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedRows = filtered.slice(startIndex, startIndex + itemsPerPage);
-
-  const completos = rows.filter(isComplete).length;
-  const incompletos = rows.filter(isIncomplete).length;
-
-  // ── Render ──────────────────────────────────────────────────────────────
   return (
     <>
       <style>{`
-        /* ── Base ── */
         .ap-inp{width:100%;padding:9px 12px;border:1px solid #e0e0e0;border-radius:8px;font-size:.875rem;background:#fff;color:#1a1a1a;outline:none;box-sizing:border-box;transition:border-color .15s,box-shadow .15s}
         .ap-inp:focus{border-color:#f5a623;box-shadow:0 0 0 3px rgba(245,166,35,.12)}
         .ap-lbl{display:block;font-size:.7rem;font-weight:700;color:#aaa;margin-bottom:5px;text-transform:uppercase;letter-spacing:.06em}
-        /* ── Buttons ── */
         .ap-btn{display:inline-flex;align-items:center;gap:7px;border:none;border-radius:8px;font-weight:700;font-size:.875rem;cursor:pointer;padding:10px 20px;transition:background .15s,opacity .15s;text-decoration:none}
         .ap-btn--primary{background:#f5a623;color:#fff}
         .ap-btn--primary:hover{background:#e69510}
@@ -292,7 +345,6 @@ export default function AdminProductosPage() {
         .ap-btn--delete:hover{background:rgba(220,53,69,.15)}
         .ap-btn--media{background:rgba(99,102,241,.07);color:#6366f1;border:1px solid rgba(99,102,241,.2)}
         .ap-btn--media:hover{background:rgba(99,102,241,.15)}
-        /* ── View Mode Tabs ── */
         .ap-view-tabs{display:flex;gap:0;border:1px solid #e0e0e0;border-radius:10px;overflow:hidden;background:#f9f9f9}
         .ap-view-tab{display:flex;align-items:center;gap:7px;padding:9px 18px;border:none;background:transparent;font-size:.82rem;font-weight:700;color:#888;cursor:pointer;transition:all .15s;white-space:nowrap;border-right:1px solid #e0e0e0}
         .ap-view-tab:last-child{border-right:none}
@@ -300,12 +352,10 @@ export default function AdminProductosPage() {
         .ap-view-tab:hover:not(.ap-view-tab--active){background:#f0f0f0;color:#555}
         .ap-view-tab--warning.ap-view-tab--active{box-shadow:inset 0 -2px 0 #f59e0b;color:#b45309}
         .ap-view-tab--success.ap-view-tab--active{box-shadow:inset 0 -2px 0 #22c55e;color:#166534}
-        /* ── Stats pills ── */
         .ap-count{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;border-radius:20px;font-size:.7rem;font-weight:800;line-height:1}
         .ap-count--default{background:#f0f0f0;color:#666}
         .ap-count--success{background:#dcfce7;color:#166534}
         .ap-count--warning{background:#fef3c7;color:#b45309}
-        /* ── Cards & Table ── */
         .ap-card{background:#fff;border:1px solid #e8e8e8;border-radius:12px;padding:24px;margin-bottom:28px;border-top:3px solid #f5a623}
         .ap-section{background:#fafafa;border:1px solid #e8e8e8;border-radius:10px;padding:16px;margin-bottom:12px}
         .ap-badge{display:inline-flex;align-items:center;padding:2px 10px;border-radius:20px;font-size:.75rem;font-weight:700}
@@ -316,24 +366,18 @@ export default function AdminProductosPage() {
         .ap-row{border-bottom:1px solid #f0f0f0;background:#fff;transition:background .12s}
         .ap-row:last-child{border-bottom:none}
         .ap-row:hover{background:#fafafa!important}
-        /* ── Media mini badges ── */
         .ap-media-pip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:6px;font-size:.72rem;font-weight:700}
         .ap-media-pip--ok{background:#dcfce7;color:#166534}
-        .ap-media-pip--missing{background:#fef3c7;color:#b45309}
         .ap-media-pip--empty{background:#fee2e2;color:#991b1b}
-        /* ── Pager ── */
         .ap-pager{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding:14px 20px;border-top:1px solid #e8e8e8;background:#fafafa;font-size:.875rem;color:#888}
         .ap-page-btn{padding:6px 10px;border:1px solid #e0e0e0;border-radius:6px;background:#fff;color:#666;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .15s}
         .ap-page-btn:hover:not(:disabled){border-color:#f5a623;color:#f5a623}
         .ap-page-btn--active{border:2px solid #f5a623!important;background:#fff8e6!important;color:#f5a623!important;font-weight:700!important}
         .ap-page-btn:disabled{opacity:.4;cursor:not-allowed}
-        /* ── Info boxes ── */
         .ap-info-box{background:#fff8e6;border:1px solid #f5a62333;border-radius:10px;padding:14px 16px;text-align:center;font-size:.875rem;color:#b37400}
         .ap-warn-box{background:#fef3c7;border:1px solid #f59e0b44;border-radius:10px;padding:14px 16px;font-size:.875rem;color:#92400e}
-        /* ── Incomplete row highlight ── */
         .ap-row--incomplete{background:#fffbeb!important}
         .ap-row--incomplete:hover{background:#fef3c7!important}
-        /* ── Animations ── */
         @keyframes ap-spin{to{transform:rotate(360deg)}}
         .ap-spin{animation:ap-spin .8s linear infinite}
         @keyframes ap-fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
@@ -344,12 +388,9 @@ export default function AdminProductosPage() {
         ref={topRef}
         style={{ maxWidth: 1150, margin: "0 auto", padding: "20px" }}
       >
-        {/* ════════════════════════════════════════════════════
-            FORMULARIO (crear / editar)
-        ════════════════════════════════════════════════════ */}
+        {/* ════════ FORMULARIO ════════ */}
         {formMode !== "list" && (
           <div className="ap-card ap-fadein">
-            {/* Header formulario */}
             <div
               style={{
                 display: "flex",
@@ -387,13 +428,12 @@ export default function AdminProductosPage() {
                 className="ap-btn ap-btn--ghost ap-btn--sm"
                 onClick={goToList}
               >
-                <X size={14} />
-                Volver al listado
+                <X size={14} /> Volver al listado
               </button>
             </div>
 
             <form onSubmit={(e) => handleSave(e, false)}>
-              {/* Fila 1: código / nombre / categoría */}
+              {/* Fila 1 */}
               <div
                 style={{
                   display: "grid",
@@ -441,7 +481,7 @@ export default function AdminProductosPage() {
                 </div>
               </div>
 
-              {/* Fila 2: precios */}
+              {/* Fila 2 */}
               <div
                 style={{
                   display: "grid",
@@ -488,7 +528,7 @@ export default function AdminProductosPage() {
                 </div>
               </div>
 
-              {/* Fila 3: mayorista */}
+              {/* Fila 3 */}
               <div
                 style={{
                   display: "grid",
@@ -528,7 +568,7 @@ export default function AdminProductosPage() {
                 </div>
               </div>
 
-              {/* Imagen principal */}
+              {/* Imagen */}
               <div style={{ marginBottom: 16 }}>
                 <label className="ap-lbl">Imagen principal</label>
                 <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
@@ -549,13 +589,11 @@ export default function AdminProductosPage() {
                   >
                     {uploading ? (
                       <>
-                        <Loader2 size={14} className="ap-spin" />
-                        Subiendo...
+                        <Loader2 size={14} className="ap-spin" /> Subiendo...
                       </>
                     ) : (
                       <>
-                        <Upload size={14} />
-                        Subir
+                        <Upload size={14} /> Subir
                       </>
                     )}
                   </button>
@@ -619,7 +657,7 @@ export default function AdminProductosPage() {
                     { key: "featured" as const, label: "⭐ Destacado" },
                     { key: "activo" as const, label: "✅ Activo" },
                     { key: "is_new" as const, label: "🆕 Nuevo" },
-                    { key: "low_stock" as const, label: "⚠️ Últimas unidades" }
+                    { key: "low_stock" as const, label: "⚠️ Últimas unidades" },
                   ] as { key: keyof typeof form; label: string }[]
                 ).map(({ key, label }) => (
                   <label
@@ -655,18 +693,15 @@ export default function AdminProductosPage() {
                 >
                   {saving ? (
                     <>
-                      <Loader2 size={15} className="ap-spin" />
-                      Guardando...
+                      <Loader2 size={15} className="ap-spin" /> Guardando...
                     </>
                   ) : formMode === "create" ? (
                     <>
-                      <PlusCircle size={15} />
-                      Crear y continuar
+                      <PlusCircle size={15} /> Crear y continuar
                     </>
                   ) : (
                     <>
-                      <CheckCircle size={15} />
-                      Guardar cambios
+                      <CheckCircle size={15} /> Guardar cambios
                     </>
                   )}
                 </button>
@@ -676,8 +711,7 @@ export default function AdminProductosPage() {
                   onClick={(e) => handleSave(e, true)}
                   disabled={saving}
                 >
-                  <CheckCircle size={15} />
-                  Guardar y cerrar
+                  <CheckCircle size={15} /> Guardar y cerrar
                 </button>
                 <button
                   type="button"
@@ -685,13 +719,11 @@ export default function AdminProductosPage() {
                   style={{ marginLeft: "auto" }}
                   onClick={goToList}
                 >
-                  <X size={14} />
-                  Cancelar
+                  <X size={14} /> Cancelar
                 </button>
               </div>
             </form>
 
-            {/* Banner post-guardado */}
             {savedId && (
               <div
                 className="ap-section ap-fadein"
@@ -712,8 +744,7 @@ export default function AdminProductosPage() {
                   className="ap-btn ap-btn--primary ap-btn--sm"
                   style={{ textDecoration: "none" }}
                 >
-                  <ImageIcon size={14} />
-                  Ir a galería &amp; videos
+                  <ImageIcon size={14} /> Ir a galería &amp; videos
                 </Link>
               </div>
             )}
@@ -726,12 +757,10 @@ export default function AdminProductosPage() {
           </div>
         )}
 
-        {/* ════════════════════════════════════════════════════
-            LISTADO
-        ════════════════════════════════════════════════════ */}
+        {/* ════════ LISTADO ════════ */}
         {formMode === "list" && (
           <div className="ap-fadein">
-            {/* ── Header principal ── */}
+            {/* Header */}
             <div
               style={{
                 display: "flex",
@@ -760,16 +789,15 @@ export default function AdminProductosPage() {
                     color: "#aaa",
                   }}
                 >
-                  {rows.length} producto{rows.length !== 1 ? "s" : ""} en total
+                  {totalCount} producto{totalCount !== 1 ? "s" : ""} en total
                 </p>
               </div>
               <button className="ap-btn ap-btn--primary" onClick={openCreate}>
-                <PlusCircle size={15} />
-                Nuevo producto
+                <PlusCircle size={15} /> Nuevo producto
               </button>
             </div>
 
-            {/* ── View Mode Selector ── */}
+            {/* View Mode Tabs */}
             <div
               style={{
                 display: "flex",
@@ -784,35 +812,32 @@ export default function AdminProductosPage() {
                   className={`ap-view-tab${viewMode === "todos" ? " ap-view-tab--active" : ""}`}
                   onClick={() => setViewMode("todos")}
                 >
-                  <List size={14} />
-                  Todos
+                  <List size={14} /> Todos
                   <span className="ap-count ap-count--default">
-                    {rows.length}
+                    {totalCount}
                   </span>
                 </button>
                 <button
                   className={`ap-view-tab ap-view-tab--success${viewMode === "completos" ? " ap-view-tab--active" : ""}`}
                   onClick={() => setViewMode("completos")}
                 >
-                  <LayoutGrid size={14} />
-                  Con media
+                  <LayoutGrid size={14} /> Con media
                   <span className="ap-count ap-count--success">
-                    {completos}
+                    {totalCompletos}
                   </span>
                 </button>
                 <button
                   className={`ap-view-tab ap-view-tab--warning${viewMode === "incompletos" ? " ap-view-tab--active" : ""}`}
                   onClick={() => setViewMode("incompletos")}
                 >
-                  <AlertCircle size={14} />
-                  Sin media
+                  <AlertCircle size={14} /> Sin media
                   <span className="ap-count ap-count--warning">
-                    {incompletos}
+                    {totalIncompletos}
                   </span>
                 </button>
               </div>
 
-              {viewMode === "incompletos" && incompletos > 0 && (
+              {viewMode === "incompletos" && totalIncompletos > 0 && (
                 <div
                   className="ap-warn-box"
                   style={{
@@ -825,15 +850,15 @@ export default function AdminProductosPage() {
                 >
                   <AlertCircle size={14} style={{ flexShrink: 0 }} />
                   <span>
-                    <strong>{incompletos}</strong> producto
-                    {incompletos !== 1 ? "s" : ""} sin fotos o videos. Haz clic
-                    en <strong>Media</strong> para completarlos.
+                    <strong>{totalIncompletos}</strong> producto
+                    {totalIncompletos !== 1 ? "s" : ""} sin fotos o videos. Haz
+                    clic en <strong>Media</strong> para completarlos.
                   </span>
                 </div>
               )}
             </div>
 
-            {/* ── Filtros ── */}
+            {/* Filtros */}
             <div
               style={{
                 display: "flex",
@@ -859,8 +884,8 @@ export default function AdminProductosPage() {
                   className="ap-inp"
                   style={{ paddingLeft: 32 }}
                   placeholder="Buscar por nombre o código..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
+                  value={searchInput}
+                  onChange={(e) => handleSearchInput(e.target.value)}
                 />
               </div>
               <select
@@ -881,16 +906,16 @@ export default function AdminProductosPage() {
                   className="ap-btn ap-btn--ghost ap-btn--sm"
                   onClick={() => {
                     setSearch("");
+                    setSearchInput("");
                     setSelectedCategory("");
                   }}
                 >
-                  <X size={14} />
-                  Limpiar
+                  <X size={14} /> Limpiar
                 </button>
               )}
             </div>
 
-            {/* ── Tabla ── */}
+            {/* Tabla */}
             {loading ? (
               <div
                 style={{
@@ -932,7 +957,7 @@ export default function AdminProductosPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {paginatedRows.length === 0 ? (
+                    {rows.length === 0 ? (
                       <tr>
                         <td
                           colSpan={9}
@@ -961,7 +986,7 @@ export default function AdminProductosPage() {
                         </td>
                       </tr>
                     ) : (
-                      paginatedRows.map((p) => {
+                      rows.map((p) => {
                         const hasImg = (p._imgCount ?? 0) > 0;
                         const hasVid = (p._vidCount ?? 0) > 0;
                         const incomplete = !hasImg || !hasVid;
@@ -970,7 +995,6 @@ export default function AdminProductosPage() {
                             key={p.id}
                             className={`ap-row${incomplete && viewMode === "incompletos" ? " ap-row--incomplete" : ""}`}
                           >
-                            {/* Thumbnail */}
                             <td className="ap-td" style={{ width: 52 }}>
                               {p.image_url ? (
                                 <img
@@ -1009,8 +1033,6 @@ export default function AdminProductosPage() {
                                 </div>
                               )}
                             </td>
-
-                            {/* Código */}
                             <td className="ap-td">
                               <code
                                 style={{
@@ -1024,8 +1046,6 @@ export default function AdminProductosPage() {
                                 {p.code}
                               </code>
                             </td>
-
-                            {/* Nombre */}
                             <td
                               className="ap-td"
                               style={{
@@ -1045,16 +1065,12 @@ export default function AdminProductosPage() {
                                 {p.name}
                               </span>
                             </td>
-
-                            {/* Precio */}
                             <td
                               className="ap-td"
                               style={{ fontWeight: 600, whiteSpace: "nowrap" }}
                             >
                               S/ {p.price?.toFixed(2)}
                             </td>
-
-                            {/* Categoría */}
                             <td className="ap-td">
                               <span
                                 style={{
@@ -1068,8 +1084,6 @@ export default function AdminProductosPage() {
                                 {getCategoryName(p.category)}
                               </span>
                             </td>
-
-                            {/* Badges */}
                             <td className="ap-td">
                               <div
                                 style={{
@@ -1104,8 +1118,6 @@ export default function AdminProductosPage() {
                                 )}
                               </div>
                             </td>
-
-                            {/* Estado */}
                             <td className="ap-td">
                               <span
                                 className="ap-badge"
@@ -1117,8 +1129,6 @@ export default function AdminProductosPage() {
                                 {p.activo ? "Activo" : "Inactivo"}
                               </span>
                             </td>
-
-                            {/* Media status */}
                             <td className="ap-td">
                               <div
                                 style={{
@@ -1145,8 +1155,6 @@ export default function AdminProductosPage() {
                                 </span>
                               </div>
                             </td>
-
-                            {/* Acciones */}
                             <td className="ap-td">
                               <div
                                 style={{
@@ -1159,16 +1167,14 @@ export default function AdminProductosPage() {
                                   className="ap-btn ap-btn--sm ap-btn--edit"
                                   onClick={() => onEdit(p)}
                                 >
-                                  <Pencil size={11} />
-                                  Editar
+                                  <Pencil size={11} /> Editar
                                 </button>
                                 <Link
                                   href={`/admin/productos/${p.id}/media`}
                                   className="ap-btn ap-btn--sm ap-btn--media"
                                   style={{ textDecoration: "none" }}
                                 >
-                                  <ImageIcon size={11} />
-                                  Media
+                                  <ImageIcon size={11} /> Media
                                 </Link>
                                 <button
                                   className="ap-btn ap-btn--sm ap-btn--delete"
@@ -1188,14 +1194,9 @@ export default function AdminProductosPage() {
                 {/* Paginador */}
                 <div className="ap-pager">
                   <span>
-                    Mostrando {filtered.length === 0 ? 0 : startIndex + 1}–
-                    {Math.min(startIndex + itemsPerPage, filtered.length)} de{" "}
-                    {filtered.length}
-                    {viewMode !== "todos" && (
-                      <span style={{ marginLeft: 6, color: "#bbb" }}>
-                        (filtrado de {rows.length})
-                      </span>
-                    )}
+                    {totalCount === 0
+                      ? "Sin resultados"
+                      : `Mostrando ${startIndex + 1}–${Math.min(startIndex + ITEMS_PER_PAGE, totalCount)} de ${totalCount}`}
                   </span>
                   <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                     <button
@@ -1205,8 +1206,19 @@ export default function AdminProductosPage() {
                     >
                       ← Anterior
                     </button>
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                      (page) => (
+                    {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
+                      // Ventana deslizante de páginas para no mostrar 100 botones
+                      let page: number;
+                      if (totalPages <= 7) {
+                        page = i + 1;
+                      } else if (currentPage <= 4) {
+                        page = i + 1;
+                      } else if (currentPage >= totalPages - 3) {
+                        page = totalPages - 6 + i;
+                      } else {
+                        page = currentPage - 3 + i;
+                      }
+                      return (
                         <button
                           key={page}
                           className={`ap-page-btn${currentPage === page ? " ap-page-btn--active" : ""}`}
@@ -1214,8 +1226,8 @@ export default function AdminProductosPage() {
                         >
                           {page}
                         </button>
-                      ),
-                    )}
+                      );
+                    })}
                     <button
                       className="ap-page-btn"
                       disabled={currentPage === totalPages || totalPages === 0}
