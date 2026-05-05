@@ -98,7 +98,6 @@ export default function AdminVideosPage() {
     const payload = {
       title: form.title,
       descripcion: form.descripcion || null,
-      youtube_id: null,
       video_url: form.video_url,
       tipo: form.tipo,
       activo: form.activo,

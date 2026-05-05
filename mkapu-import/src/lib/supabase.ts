@@ -17,6 +17,7 @@ export interface Producto {
   activo?: boolean;
   created_at?: string;
   is_new?: boolean;
+  low_stock?: boolean;
 }
 
 export type Categoria = {

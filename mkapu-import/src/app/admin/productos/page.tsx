@@ -35,6 +35,7 @@ type Producto = {
   featured: boolean;
   activo: boolean;
   is_new: boolean;
+  low_stock: boolean;
   _imgCount?: number;
   _vidCount?: number;
 };
@@ -56,6 +57,7 @@ const initialForm = {
   featured: false,
   activo: true,
   is_new: false,
+  low_stock: false,
 };
 
 export default function AdminProductosPage() {
@@ -149,6 +151,7 @@ export default function AdminProductosPage() {
       featured: form.featured,
       activo: form.activo,
       is_new: form.is_new,
+      low_stock: form.low_stock,
     };
     if (editId) {
       const { error } = await supabase
@@ -203,6 +206,7 @@ export default function AdminProductosPage() {
       featured: p.featured ?? false,
       activo: p.activo ?? true,
       is_new: p.is_new ?? false,
+      low_stock: p.low_stock ?? false,
     });
     setFormMode("edit");
     topRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -615,6 +619,7 @@ export default function AdminProductosPage() {
                     { key: "featured" as const, label: "⭐ Destacado" },
                     { key: "activo" as const, label: "✅ Activo" },
                     { key: "is_new" as const, label: "🆕 Nuevo" },
+                    { key: "low_stock" as const, label: "⚠️ Últimas unidades" }
                   ] as { key: keyof typeof form; label: string }[]
                 ).map(({ key, label }) => (
                   <label

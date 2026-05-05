@@ -4,11 +4,18 @@ import BlogList from "./BlogList";
 export const revalidate = 60;
 
 export default async function BlogPage() {
-  const { data: posts } = await supabase
-    .from("vlog_posts")
-    .select("*")
-    .eq("activo", true)
-    .order("fecha_publicacion", { ascending: false });
+  const [{ data: posts }, { data: bannerData }] = await Promise.all([
+    supabase
+      .from("vlog_posts")
+      .select("*")
+      .eq("activo", true)
+      .order("fecha_publicacion", { ascending: false }),
+    supabase
+      .from("banners_config")
+      .select("titulo, subtitulo, image_url, activo")
+      .eq("ruta", "/blog")
+      .single(),
+  ]);
 
   const postsWithImages = await Promise.all(
     (posts || []).map(async (post) => {
@@ -26,5 +33,5 @@ export default async function BlogPage() {
     }),
   );
 
-  return <BlogList posts={postsWithImages} />;
+  return <BlogList posts={postsWithImages} banner={bannerData ?? null} />;
 }

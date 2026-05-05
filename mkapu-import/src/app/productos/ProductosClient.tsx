@@ -38,6 +38,8 @@ export default function ProductosClient({
   );
   const [maxPrice, setMaxPrice] = useState(PRICE_MAX);
   const [onlyFeatured, setOnlyFeatured] = useState(false);
+  const [onlyNew, setOnlyNew] = useState(false);
+  const [onlyLowStock, setOnlyLowStock] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
@@ -58,6 +60,8 @@ export default function ProductosClient({
     setCats([]);
     setMaxPrice(PRICE_MAX);
     setOnlyFeatured(false);
+    setOnlyNew(false);
+    setOnlyLowStock(false);
   }
 
   const normalize = (s?: string | null) =>
@@ -70,17 +74,31 @@ export default function ProductosClient({
 
   const filtered = useMemo(() => {
     let list = initialProducts;
+
     if (cats.length > 0) {
       const selected = new Set(cats.map(normalize));
       list = list.filter((p) => selected.has(normalize(p.category_name)));
     }
-    if (onlyFeatured) list = list.filter((p) => p.featured === true);
+
+    if (onlyFeatured) {
+      list = list.filter((p) => p.featured === true);
+    }
+
+    if (onlyNew) {
+      list = list.filter((p) => p.is_new === true);
+    }
+
+    if (onlyLowStock) {
+      list = list.filter((p) => p.low_stock === true);
+    }
+
     if (maxPrice < PRICE_MAX) {
       list = list.filter((p) => {
         const price = Number(p.price);
         return Number.isFinite(price) && price <= maxPrice;
       });
     }
+
     if (search.trim()) {
       const q = search.toLowerCase();
       list = list.filter(
@@ -89,25 +107,46 @@ export default function ProductosClient({
           p.description?.toLowerCase().includes(q),
       );
     }
+
     return list;
-  }, [cats, onlyFeatured, maxPrice, search, initialProducts, PRICE_MAX]);
+  }, [
+    cats,
+    onlyFeatured,
+    onlyNew,
+    onlyLowStock,
+    maxPrice,
+    search,
+    initialProducts,
+    PRICE_MAX,
+  ]);
 
   const activeFilters =
-    cats.length + (onlyFeatured ? 1 : 0) + (maxPrice < PRICE_MAX ? 1 : 0);
+    cats.length +
+    (onlyFeatured ? 1 : 0) +
+    (onlyNew ? 1 : 0) +
+    (onlyLowStock ? 1 : 0) +
+    (maxPrice < PRICE_MAX ? 1 : 0);
 
   const heroTitulo = banner?.titulo || "Nuestros Productos";
-  const heroSub = banner?.subtitulo || "Equipos de cocina industrial con garantía.";
+  const heroSub =
+    banner?.subtitulo || "Equipos de cocina industrial con garantía.";
   const heroImg = banner?.activo && banner?.image_url ? banner.image_url : null;
 
   return (
     <main style={{ background: "#f8f7f4", minHeight: "100vh" }}>
-
       {/* ── HERO ── */}
-      <section style={{
-        position: "relative", width: "100%", minHeight: "280px",
-        display: "flex", alignItems: "center", justifyContent: "center",
-        background: "#1a1a1a", overflow: "hidden",
-      }}>
+      <section
+        style={{
+          position: "relative",
+          width: "100%",
+          minHeight: "280px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "#1a1a1a",
+          overflow: "hidden",
+        }}
+      >
         {heroImg && (
           <Image
             src={heroImg}
@@ -117,31 +156,55 @@ export default function ProductosClient({
             style={{ objectFit: "cover", objectPosition: "center" }}
           />
         )}
-        <div style={{
-          position: "absolute", inset: 0,
-          background: "linear-gradient(to bottom, rgba(0,0,0,0.55), rgba(0,0,0,0.65))",
-          zIndex: 1,
-        }} />
-        <div style={{
-          position: "relative", zIndex: 2, textAlign: "center",
-          padding: "3.5rem 1.5rem 3rem", maxWidth: "680px",
-        }}>
-          <p style={{
-            fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.15em",
-            textTransform: "uppercase", color: "#f5a623", marginBottom: "0.75rem",
-          }}>
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background:
+              "linear-gradient(to bottom, rgba(0,0,0,0.55), rgba(0,0,0,0.65))",
+            zIndex: 1,
+          }}
+        />
+        <div
+          style={{
+            position: "relative",
+            zIndex: 2,
+            textAlign: "center",
+            padding: "3.5rem 1.5rem 3rem",
+            maxWidth: "680px",
+          }}
+        >
+          <p
+            style={{
+              fontSize: "0.75rem",
+              fontWeight: 700,
+              letterSpacing: "0.15em",
+              textTransform: "uppercase",
+              color: "#f5a623",
+              marginBottom: "0.75rem",
+            }}
+          >
             Catálogo
           </p>
-          <h1 style={{
-            fontSize: "clamp(1.8rem, 4vw, 2.8rem)", fontWeight: 900,
-            color: "#fff", letterSpacing: "-0.02em", marginBottom: "1rem",
-          }}>
+          <h1
+            style={{
+              fontSize: "clamp(1.8rem, 4vw, 2.8rem)",
+              fontWeight: 900,
+              color: "#fff",
+              letterSpacing: "-0.02em",
+              marginBottom: "1rem",
+            }}
+          >
             {heroTitulo}
           </h1>
-          <p style={{
-            fontSize: "1rem", color: "rgba(255,255,255,0.75)",
-            margin: "0 auto", lineHeight: 1.6,
-          }}>
+          <p
+            style={{
+              fontSize: "1rem",
+              color: "rgba(255,255,255,0.75)",
+              margin: "0 auto",
+              lineHeight: 1.6,
+            }}
+          >
             {heroSub}
           </p>
         </div>
@@ -154,7 +217,16 @@ export default function ProductosClient({
           onClick={() => setSidebarOpen(true)}
           aria-label="Abrir filtros"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <line x1="4" y1="6" x2="20" y2="6" />
             <line x1="8" y1="12" x2="20" y2="12" />
             <line x1="12" y1="18" x2="20" y2="18" />
@@ -172,9 +244,17 @@ export default function ProductosClient({
               <h2 className="sidebar__title">Filtros</h2>
               <div className="sidebar__header-actions">
                 {activeFilters > 0 && (
-                  <button className="sidebar__clear" onClick={clearFilters}>Limpiar</button>
+                  <button className="sidebar__clear" onClick={clearFilters}>
+                    Limpiar
+                  </button>
                 )}
-                <button className="sidebar__close" onClick={() => setSidebarOpen(false)} aria-label="Cerrar">×</button>
+                <button
+                  className="sidebar__close"
+                  onClick={() => setSidebarOpen(false)}
+                  aria-label="Cerrar"
+                >
+                  ×
+                </button>
               </div>
             </div>
 
@@ -199,11 +279,17 @@ export default function ProductosClient({
               <label className="sidebar__label">
                 Precio máximo
                 <span className="sidebar__price-val">
-                  {maxPrice >= PRICE_MAX ? "Sin límite" : `S/ ${maxPrice.toLocaleString("es-PE")}`}
+                  {maxPrice >= PRICE_MAX
+                    ? "Sin límite"
+                    : `S/ ${maxPrice.toLocaleString("es-PE")}`}
                 </span>
               </label>
               <input
-                type="range" min={0} max={PRICE_MAX} step={100} value={maxPrice}
+                type="range"
+                min={0}
+                max={PRICE_MAX}
+                step={100}
+                value={maxPrice}
                 onChange={(e) => setMaxPrice(Number(e.target.value))}
                 className="sidebar__range"
               />
@@ -216,42 +302,93 @@ export default function ProductosClient({
             <div className="sidebar__section">
               <label className="sidebar__check-row">
                 <input
-                  type="checkbox" checked={onlyFeatured}
+                  type="checkbox"
+                  checked={onlyFeatured}
                   onChange={(e) => setOnlyFeatured(e.target.checked)}
                   className="sidebar__checkbox"
                 />
                 <span className="sidebar__check-label">Solo destacados ⭐</span>
               </label>
+              <label className="sidebar__check-row" style={{ marginTop: 6 }}>
+                <input
+                  type="checkbox"
+                  checked={onlyNew}
+                  onChange={(e) => setOnlyNew(e.target.checked)}
+                  className="sidebar__checkbox"
+                />
+                <span className="sidebar__check-label">
+                  Solo productos nuevos 🆕
+                </span>
+              </label>
+              <label className="sidebar__check-row" style={{ marginTop: 6 }}>
+                <input
+                  type="checkbox"
+                  checked={onlyLowStock}
+                  onChange={(e) => setOnlyLowStock(e.target.checked)}
+                  className="sidebar__checkbox"
+                />
+                <span className="sidebar__check-label">
+                  Solo últimas unidades ⚠️
+                </span>
+              </label>
             </div>
           </aside>
 
           {sidebarOpen && (
-            <div className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} aria-hidden="true" />
+            <div
+              className="sidebar-backdrop"
+              onClick={() => setSidebarOpen(false)}
+              aria-hidden="true"
+            />
           )}
 
           {/* ── MAIN ── */}
           <main className="productos-main">
             <div className="productos-main__top">
               <p className="productos-main__count">
-                <strong>{filtered.length}</strong> producto{filtered.length !== 1 ? "s" : ""}
+                <strong>{filtered.length}</strong> producto
+                {filtered.length !== 1 ? "s" : ""}
                 {cats.length > 0 && ` en ${cats.join(", ")}`}
               </p>
               {activeFilters > 0 && (
-                <button className="productos-main__clear" onClick={clearFilters}>× Limpiar filtros</button>
+                <button
+                  className="productos-main__clear"
+                  onClick={clearFilters}
+                >
+                  × Limpiar filtros
+                </button>
               )}
             </div>
 
             {search.trim() && (
               <div className="productos-main__search-active">
                 <span className="productos-main__search-chip">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <circle cx="11" cy="11" r="8" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
                   </svg>
                   Buscando: <strong>&ldquo;{search.trim()}&rdquo;</strong>
-                  <button className="productos-main__search-chip-close" onClick={() => setSearch("")} aria-label="Quitar búsqueda">×</button>
+                  <button
+                    className="productos-main__search-chip-close"
+                    onClick={() => setSearch("")}
+                    aria-label="Quitar búsqueda"
+                  >
+                    ×
+                  </button>
                 </span>
                 {cats.length > 0 && (
-                  <span className="productos-main__search-hint">dentro de {cats.join(", ")}</span>
+                  <span className="productos-main__search-hint">
+                    dentro de {cats.join(", ")}
+                  </span>
                 )}
               </div>
             )}
@@ -260,7 +397,9 @@ export default function ProductosClient({
               <div className="productos-empty">
                 <span>😕</span>
                 <p>No se encontraron productos con esos filtros</p>
-                <button onClick={clearFilters} className="productos-empty__btn">Ver todos</button>
+                <button onClick={clearFilters} className="productos-empty__btn">
+                  Ver todos
+                </button>
               </div>
             ) : (
               <div className="productos-grid">
@@ -285,6 +424,7 @@ export default function ProductosClient({
         </div>
       </div>
 
+      {/* estilos iguales que ya tenías */}
       <style jsx>{`
         .productos-page {
           max-width: 1300px;
@@ -292,99 +432,294 @@ export default function ProductosClient({
           padding: 1.5rem 1rem 4rem;
         }
         .productos-main__search-active {
-          display: flex; align-items: center; gap: 8px;
-          flex-wrap: wrap; margin-bottom: 1rem;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-wrap: wrap;
+          margin-bottom: 1rem;
         }
         .productos-main__search-chip {
-          display: inline-flex; align-items: center; gap: 6px;
-          background: #fff8f0; border: 1.5px solid #f5a623;
-          color: #c47a00; font-size: 0.82rem; font-weight: 500;
-          border-radius: 99px; padding: 4px 10px;
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          background: #fff8f0;
+          border: 1.5px solid #f5a623;
+          color: #c47a00;
+          font-size: 0.82rem;
+          font-weight: 500;
+          border-radius: 99px;
+          padding: 4px 10px;
         }
-        .productos-main__search-chip strong { font-weight: 700; color: #1a1a1a; }
+        .productos-main__search-chip strong {
+          font-weight: 700;
+          color: #1a1a1a;
+        }
         .productos-main__search-chip-close {
-          background: none; border: none; cursor: pointer;
-          font-size: 1rem; line-height: 1; color: #c47a00; padding: 0 0 0 2px;
+          background: none;
+          border: none;
+          cursor: pointer;
+          font-size: 1rem;
+          line-height: 1;
+          color: #c47a00;
+          padding: 0 0 0 2px;
         }
-        .productos-main__search-chip-close:hover { color: #e05c2a; }
-        .productos-main__search-hint { font-size: 0.78rem; color: #aaa; font-style: italic; }
+        .productos-main__search-chip-close:hover {
+          color: #e05c2a;
+        }
+        .productos-main__search-hint {
+          font-size: 0.78rem;
+          color: #aaa;
+          font-style: italic;
+        }
         .filter-toggle {
-          display: none; align-items: center; gap: 8px;
-          background: #fff; border: 1.5px solid #e0d8d0; border-radius: 10px;
-          padding: 0.5rem 1rem; font-size: 0.88rem; font-weight: 600;
-          cursor: pointer; margin-bottom: 1rem; position: relative;
-          color: #1a1a1a; transition: border-color 0.15s;
+          display: none;
+          align-items: center;
+          gap: 8px;
+          background: #fff;
+          border: 1.5px solid #e0d8d0;
+          border-radius: 10px;
+          padding: 0.5rem 1rem;
+          font-size: 0.88rem;
+          font-weight: 600;
+          cursor: pointer;
+          margin-bottom: 1rem;
+          position: relative;
+          color: #1a1a1a;
+          transition: border-color 0.15s;
         }
-        .filter-toggle:hover { border-color: #f5a623; color: #f5a623; }
+        .filter-toggle:hover {
+          border-color: #f5a623;
+          color: #f5a623;
+        }
         .filter-toggle__badge {
-          background: #f5a623; color: #fff; font-size: 0.65rem;
-          font-weight: 700; border-radius: 99px; padding: 1px 6px;
-          min-width: 18px; text-align: center;
+          background: #f5a623;
+          color: #fff;
+          font-size: 0.65rem;
+          font-weight: 700;
+          border-radius: 99px;
+          padding: 1px 6px;
+          min-width: 18px;
+          text-align: center;
         }
         .productos-layout {
-          display: grid; grid-template-columns: 240px 1fr;
-          gap: 2rem; align-items: start;
+          display: grid;
+          grid-template-columns: 240px 1fr;
+          gap: 2rem;
+          align-items: start;
         }
         .sidebar {
-          background: #fff; border: 1px solid #ede8e1;
-          border-radius: 16px; padding: 1.25rem;
-          position: sticky; top: 108px;
+          background: #fff;
+          border: 1px solid #ede8e1;
+          border-radius: 16px;
+          padding: 1.25rem;
+          position: sticky;
+          top: 108px;
         }
         .sidebar__header {
-          display: flex; align-items: center;
-          justify-content: space-between; margin-bottom: 1.25rem;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 1.25rem;
         }
-        .sidebar__title { font-size: 1rem; font-weight: 800; color: #1a1a1a; margin: 0; }
-        .sidebar__header-actions { display: flex; align-items: center; gap: 8px; }
-        .sidebar__clear { font-size: 0.75rem; font-weight: 600; color: #e05c2a; background: none; border: none; cursor: pointer; padding: 0; }
-        .sidebar__close { display: none; background: none; border: none; font-size: 1.4rem; cursor: pointer; color: #888; line-height: 1; padding: 0; }
-        .sidebar__section { margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid #f0ebe4; }
-        .sidebar__section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .sidebar__title {
+          font-size: 1rem;
+          font-weight: 800;
+          color: #1a1a1a;
+          margin: 0;
+        }
+        .sidebar__header-actions {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        .sidebar__clear {
+          font-size: 0.75rem;
+          font-weight: 600;
+          color: #e05c2a;
+          background: none;
+          border: none;
+          cursor: pointer;
+          padding: 0;
+        }
+        .sidebar__close {
+          display: none;
+          background: none;
+          border: none;
+          font-size: 1.4rem;
+          cursor: pointer;
+          color: #888;
+          line-height: 1;
+          padding: 0;
+        }
+        .sidebar__section {
+          margin-bottom: 1.5rem;
+          padding-bottom: 1.5rem;
+          border-bottom: 1px solid #f0ebe4;
+        }
+        .sidebar__section:last-child {
+          border-bottom: none;
+          margin-bottom: 0;
+          padding-bottom: 0;
+        }
         .sidebar__label {
-          display: flex; align-items: center; justify-content: space-between;
-          font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
-          letter-spacing: 0.07em; color: #888; margin-bottom: 0.75rem;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          font-size: 0.75rem;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.07em;
+          color: #888;
+          margin-bottom: 0.75rem;
         }
-        .sidebar__price-val { font-size: 0.8rem; font-weight: 700; color: #e05c2a; text-transform: none; letter-spacing: 0; }
-        .sidebar__cats { display: flex; flex-direction: column; gap: 6px; max-height: 240px; overflow-y: auto; scrollbar-width: thin; }
-        .sidebar__check-row { display: flex; align-items: center; gap: 8px; cursor: pointer; }
-        .sidebar__checkbox { width: 15px; height: 15px; accent-color: #e05c2a; cursor: pointer; flex-shrink: 0; }
-        .sidebar__check-label { font-size: 0.85rem; color: #444; text-transform: capitalize; line-height: 1.3; }
-        .sidebar__range { width: 100%; accent-color: #e05c2a; cursor: pointer; }
-        .sidebar__range-labels { display: flex; justify-content: space-between; font-size: 0.72rem; color: #aaa; margin-top: 4px; }
+        .sidebar__price-val {
+          font-size: 0.8rem;
+          font-weight: 700;
+          color: #e05c2a;
+          text-transform: none;
+          letter-spacing: 0;
+        }
+        .sidebar__cats {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+          max-height: 240px;
+          overflow-y: auto;
+          scrollbar-width: thin;
+        }
+        .sidebar__check-row {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          cursor: pointer;
+        }
+        .sidebar__checkbox {
+          width: 15px;
+          height: 15px;
+          accent-color: #e05c2a;
+          cursor: pointer;
+          flex-shrink: 0;
+        }
+        .sidebar__check-label {
+          font-size: 0.85rem;
+          color: #444;
+          text-transform: capitalize;
+          line-height: 1.3;
+        }
+        .sidebar__range {
+          width: 100%;
+          accent-color: #e05c2a;
+          cursor: pointer;
+        }
+        .sidebar__range-labels {
+          display: flex;
+          justify-content: space-between;
+          font-size: 0.72rem;
+          color: #aaa;
+          margin-top: 4px;
+        }
         .productos-main__top {
-          display: flex; align-items: center; justify-content: space-between;
-          margin-bottom: 1.25rem; flex-wrap: wrap; gap: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 1.25rem;
+          flex-wrap: wrap;
+          gap: 8px;
         }
-        .productos-main__count { font-size: 0.85rem; color: #777; margin: 0; }
-        .productos-main__count strong { color: #1a1a1a; }
+        .productos-main__count {
+          font-size: 0.85rem;
+          color: #777;
+          margin: 0;
+        }
+        .productos-main__count strong {
+          color: #1a1a1a;
+        }
         .productos-main__clear {
-          font-size: 0.8rem; font-weight: 600; color: #e05c2a;
-          background: #fff1ec; border: none; border-radius: 99px;
-          padding: 4px 12px; cursor: pointer;
+          font-size: 0.8rem;
+          font-weight: 600;
+          color: #e05c2a;
+          background: #fff1ec;
+          border: none;
+          border-radius: 99px;
+          padding: 4px 12px;
+          cursor: pointer;
         }
-        .productos-main__clear:hover { background: #fbd5c5; }
-        .productos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
-        .productos-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.75rem; padding: 4rem 1rem; color: #888; }
-        .productos-empty span { font-size: 3rem; }
-        .productos-empty p { margin: 0; }
-        .productos-empty__btn { padding: 0.5rem 1.25rem; background: #e05c2a; color: #fff; border: none; border-radius: 99px; font-weight: 600; cursor: pointer; }
+        .productos-main__clear:hover {
+          background: #fbd5c5;
+        }
+        .productos-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+          gap: 16px;
+        }
+        .productos-empty {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justifycontent: center;
+          gap: 0.75rem;
+          padding: 4rem 1rem;
+          color: #888;
+        }
+        .productos-empty span {
+          font-size: 3rem;
+        }
+        .productos-empty p {
+          margin: 0;
+        }
+        .productos-empty__btn {
+          padding: 0.5rem 1.25rem;
+          background: #e05c2a;
+          color: #fff;
+          border: none;
+          border-radius: 99px;
+          font-weight: 600;
+          cursor: pointer;
+        }
         @media (max-width: 768px) {
-          .filter-toggle { display: flex; }
-          .productos-layout { grid-template-columns: 1fr; }
+          .filter-toggle {
+            display: flex;
+          }
+          .productos-layout {
+            grid-template-columns: 1fr;
+          }
           .sidebar {
-            position: fixed; top: 0; left: 0;
-            width: min(320px, 85vw); height: 100dvh; overflow-y: auto;
-            z-index: 200; border-radius: 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: min(320px, 85vw);
+            height: 100dvh;
+            overflow-y: auto;
+            z-index: 200;
+            border-radius: 0;
             transform: translateX(-100%);
             transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 4px 0 24px rgba(0,0,0,0.12);
+            box-shadow: 4px 0 24px rgba(0, 0, 0, 0.12);
           }
-          .sidebar--open { transform: translateX(0); }
-          .sidebar__close { display: block; }
-          .sidebar-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 199; animation: fadeIn 0.2s ease; }
-          @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-          .productos-grid { grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); }
+          .sidebar--open {
+            transform: translateX(0);
+          }
+          .sidebar__close {
+            display: block;
+          }
+          .sidebar-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 199;
+            animation: fadeIn 0.2s ease;
+          }
+          @keyframes fadeIn {
+            from {
+              opacity: 0;
+            }
+            to {
+              opacity: 1;
+            }
+          }
+          .productos-grid {
+            grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+          }
         }
       `}</style>
     </main>
