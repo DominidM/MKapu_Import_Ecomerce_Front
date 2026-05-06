@@ -35,8 +35,7 @@ function Loading() {
 }
 
 export default async function Page() {
-  const [products, categories, { data: bannerData }] = await Promise.all([
-    getProductos(),
+  const [categories, { data: bannerData }] = await Promise.all([
     getCategoriasFromProductos(),
     supabase
       .from("banners_config")
@@ -48,7 +47,6 @@ export default async function Page() {
   return (
     <Suspense fallback={<Loading />}>
       <ProductosClient
-        initialProducts={products}
         allCats={categories}
         banner={bannerData ?? null}
       />
