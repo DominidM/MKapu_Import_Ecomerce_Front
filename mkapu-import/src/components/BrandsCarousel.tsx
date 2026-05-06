@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useRef, useState } from "react";
 import { getMarcas, Marca } from "@/lib/queries";
 
@@ -17,16 +18,20 @@ export default function BrandsCarousel() {
   useEffect(() => {
     const track = trackRef.current;
     if (!track || marcas.length === 0 || !shouldScroll) return;
+
     let pos = 0;
     const speed = 0.5;
     let raf: number;
+
     const step = () => {
       pos -= speed;
       if (Math.abs(pos) >= track.scrollWidth / 2) pos = 0;
       track.style.transform = `translateX(${pos}px)`;
       raf = requestAnimationFrame(step);
     };
+
     raf = requestAnimationFrame(step);
+
     return () => cancelAnimationFrame(raf);
   }, [marcas, shouldScroll]);
 
@@ -41,14 +46,16 @@ export default function BrandsCarousel() {
         <h2 className="brands-title">Marcas que distribuimos</h2>
       </div>
 
-      {/* El wrapper tiene position relative para los gradientes */}
-      <div className={`brands-wrapper ${shouldScroll ? "brands-wrapper--scroll" : ""}`}>
+      <div
+        className={`brands-wrapper ${shouldScroll ? "brands-wrapper--scroll" : ""}`}
+      >
         {shouldScroll && (
           <>
             <div className="brands-fade brands-fade--left" />
             <div className="brands-fade brands-fade--right" />
           </>
         )}
+
         <div
           className={`brands-track ${!shouldScroll ? "brands-track--static" : ""}`}
           ref={trackRef}
@@ -56,7 +63,12 @@ export default function BrandsCarousel() {
           {items.map((m, i) => (
             <div key={`${m.id}-${i}`} className="brands-item">
               {m.logo_url ? (
-                <img src={m.logo_url} alt={m.name} className="brands-logo" />
+                <img
+                  src={m.logo_url}
+                  alt={m.name}
+                  className="brands-logo"
+                  loading="lazy"
+                />
               ) : (
                 <span className="brands-name">{m.name}</span>
               )}
@@ -94,18 +106,15 @@ export default function BrandsCarousel() {
           margin: 0;
         }
 
-        /* --- WRAPPER --- */
         .brands-wrapper {
           width: 100%;
           overflow: hidden;
         }
 
-        /* Solo cuando hay scroll: position relative para los fades */
         .brands-wrapper--scroll {
           position: relative;
         }
 
-        /* --- GRADIENTES LATERALES (solo modo scroll) --- */
         .brands-fade {
           position: absolute;
           top: 0;
@@ -125,15 +134,14 @@ export default function BrandsCarousel() {
           background: linear-gradient(to left, #fff 30%, transparent);
         }
 
-        /* --- TRACK --- */
         .brands-track {
           display: flex;
           gap: 2rem;
           width: max-content;
           will-change: transform;
+          align-items: center;
         }
 
-        /* Modo estático: centrado y con wrap en mobile */
         .brands-track--static {
           width: 100% !important;
           justify-content: center;
@@ -141,69 +149,60 @@ export default function BrandsCarousel() {
           gap: 1.5rem;
         }
 
-        /* --- ITEMS --- */
         .brands-item {
           display: flex;
           align-items: center;
           justify-content: center;
-          min-width: 140px;
-          height: 80px;
+          min-width: 220px;
+          height: 120px;
           background: #f9f9f9;
           border: 1px solid #efefef;
           border-radius: 12px;
           padding: 1rem 1.5rem;
-          transition: box-shadow 0.2s, border-color 0.2s;
+          transition: box-shadow 0.2s, border-color 0.2s, transform 0.2s;
+          flex-shrink: 0;
         }
 
-        .brands-item:hover {
-          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-          border-color: #f5a623;
-        }
-
-        /* --- LOGO --- */
         .brands-logo {
-          max-height: 48px;
-          max-width: 110px;
+          width: 170px;
+          height: 78px;
           object-fit: contain;
-          filter: grayscale(1);
-          opacity: 0.7;
-          transition: filter 0.2s, opacity 0.2s;
-        }
-
-        .brands-item:hover .brands-logo {
-          filter: grayscale(0);
+          object-position: center;
+          display: block;
+          filter: none;
           opacity: 1;
         }
 
         .brands-name {
-          font-size: 0.9rem;
+          font-size: 1rem;
           font-weight: 700;
           color: #555;
           white-space: nowrap;
+          text-align: center;
         }
 
-        /* --- RESPONSIVE --- */
         @media (max-width: 640px) {
           .brands-section {
             padding: 2.5rem 1rem;
           }
 
           .brands-item {
-            min-width: 110px;
-            height: 64px;
+            min-width: 140px;
+            height: 78px;
             padding: 0.75rem 1rem;
           }
 
           .brands-logo {
-            max-height: 36px;
-            max-width: 85px;
+            width: 110px;
+            height: 46px;
+            object-fit: contain;
+            object-position: center;
           }
 
           .brands-fade {
             width: 60px;
           }
 
-          /* En mobile con pocas marcas, reduce el gap */
           .brands-track--static {
             gap: 1rem;
           }

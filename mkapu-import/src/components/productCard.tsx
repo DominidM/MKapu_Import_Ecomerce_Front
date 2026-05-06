@@ -20,47 +20,12 @@ interface Product {
   unidad_mayorista?: number;
   featured: boolean;
   is_new?: boolean;
-  low_stock?: boolean; // ← nuevo campo
+  low_stock?: boolean;
   image_url?: string;
 }
 
 interface Props {
   product: Product;
-}
-
-function calcTier(
-  qty: number,
-  p: Product,
-): { price: number; tier: "caja" | "mayorista" | "unidad" } {
-  const hasCaja = !!p.price_caja && !!p.unidad_caja;
-  const hasMayorista = !!p.price_mayorista && !!p.unidad_mayorista;
-
-  if (hasCaja && qty >= p.unidad_caja!)
-    return { price: p.price_caja! / p.unidad_caja!, tier: "caja" };
-  if (hasMayorista && qty >= p.unidad_mayorista!)
-    return { price: p.price_mayorista!, tier: "mayorista" };
-  return { price: p.price, tier: "unidad" };
-}
-
-function calcTotal(qty: number, p: Product): number {
-  if (qty <= 0) return 0;
-
-  const hasCaja = !!p.price_caja && !!p.unidad_caja;
-  const hasMayorista = !!p.price_mayorista && !!p.unidad_mayorista;
-
-  if (hasCaja && qty >= p.unidad_caja!) {
-    const cajas = Math.floor(qty / p.unidad_caja!);
-    const sueltas = qty % p.unidad_caja!;
-    const precioSueltas =
-      hasMayorista && qty >= p.unidad_mayorista! ? p.price_mayorista! : p.price;
-    return cajas * p.price_caja! + sueltas * precioSueltas;
-  }
-
-  if (hasMayorista && qty >= p.unidad_mayorista!) {
-    return qty * p.price_mayorista!;
-  }
-
-  return qty * p.price;
 }
 
 export default function ProductCard({ product }: Props) {
@@ -73,12 +38,7 @@ export default function ProductCard({ product }: Props) {
   const qty = cartItem?.qty ?? 0;
   const hasImage = !!product.image_url && !imgError;
 
-  const hasCaja = !!product.price_caja && !!product.unidad_caja;
-  const hasMayorista = !!product.price_mayorista && !!product.unidad_mayorista;
-  const isConsult = product.price === 0 && !hasCaja && !hasMayorista;
-
-  const { price: activePriceCart, tier: activeTier } = calcTier(qty, product);
-  const { price: activePriceNext } = calcTier(qty + 1, product);
+  const isConsult = product.price === 0;
 
   function handleUpdateQty(newQty: number) {
     if (newQty <= 0) {
@@ -89,13 +49,11 @@ export default function ProductCard({ product }: Props) {
   }
 
   function handleAdd() {
-    const { price } = calcTier(1, product);
-    const itemTotal = calcTotal(1, product);
     addItem({
       id: String(product.id),
       name: product.name,
-      price,
-      itemTotal,
+      price: product.price,
+      itemTotal: product.price,
       imageUrl: product.image_url,
       emoji: "📦",
       product: {
@@ -149,11 +107,7 @@ export default function ProductCard({ product }: Props) {
           </span>
         )}
 
-        {qty > 0 && (
-          <span className={`pcard__qty-badge pcard__qty-badge--${activeTier}`}>
-            {qty}
-          </span>
-        )}
+        {qty > 0 && <span className="pcard__qty-badge">{qty}</span>}
       </div>
 
       <div
@@ -192,7 +146,7 @@ export default function ProductCard({ product }: Props) {
             ) : (
               <>
                 <ShoppingCart size={15} /> Agregar — S/{" "}
-                {activePriceNext.toFixed(2)}
+                {product.price.toFixed(2)}
               </>
             )}
           </button>
@@ -207,7 +161,7 @@ export default function ProductCard({ product }: Props) {
             <div className="pcard__step-info">
               <span className="pcard__step-qty">{qty} und.</span>
               <span className="pcard__step-tier">
-                S/ {activePriceCart.toFixed(2)} c/u
+                S/ {product.price.toFixed(2)} c/u
               </span>
             </div>
             <button
