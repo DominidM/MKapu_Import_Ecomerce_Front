@@ -1,41 +1,167 @@
 "use client";
-import { useState, useMemo, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import Image from "next/image";
 import ProductCard from "@/components/productCard";
 import type { Producto } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase";
+
+type BannerConfig = {
+  titulo: string;
+  subtitulo: string | null;
+  image_url: string | null;
+  activo: boolean;
+};
 
 interface Props {
-  initialProducts: Producto[];
   allCats: string[];
+  banner: BannerConfig | null;
+  // Ya no recibe initialProducts — los carga paginado desde el cliente
 }
 
-export default function ProductosClient({
-  initialProducts,
-  allCats: ALL_CATS,
-}: Props) {
+const ITEMS_PER_PAGE = 24;
+
+export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
   const searchParams = useSearchParams();
+  const router = useRouter();
 
-  const allPrices = initialProducts
-    .map((p) => p.price)
-    .filter((p): p is number => typeof p === "number" && p > 0);
-
-  const PRICE_MAX =
-    allPrices.length > 0 ? Math.ceil(Math.max(...allPrices) / 100) * 100 : 5000;
+  const [productos, setProductos] = useState<Producto[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const [search, setSearch] = useState(searchParams.get("q") ?? "");
+  const [searchInput, setSearchInput] = useState(searchParams.get("q") ?? "");
   const [cats, setCats] = useState<string[]>(
     searchParams.get("cat") ? [searchParams.get("cat")!] : [],
   );
-  const [maxPrice, setMaxPrice] = useState(PRICE_MAX);
+  const [maxPrice, setMaxPrice] = useState<number>(99999);
+  const [priceMax, setPriceMax] = useState<number>(99999); // máximo real de los datos
   const [onlyFeatured, setOnlyFeatured] = useState(false);
+  const [onlyNew, setOnlyNew] = useState(false);
+  const [onlyLowStock, setOnlyLowStock] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // ── Carga paginada con filtros ────────────────────────────
+  const load = useCallback(async () => {
+    setLoading(true);
+
+    const from = (currentPage - 1) * ITEMS_PER_PAGE;
+    const to = from + ITEMS_PER_PAGE - 1;
+
+    let query = supabase
+      .from("productos")
+      .select("*, categorias!inner(name, activo)", { count: "exact" })
+      .eq("activo", true)
+      .eq("categorias.activo", true)
+      .order("id", { ascending: false })
+      .range(from, to);
+
+    if (cats.length > 0) {
+      const { data: catData } = await supabase
+        .from("categorias")
+        .select("id, name")
+        .in("name", cats)
+        .eq("activo", true);
+
+      const catIds = (catData ?? []).map((c: { id: number }) => c.id);
+
+      if (catIds.length > 0) {
+        query = query.in("category", catIds);
+      } else {
+        setProductos([]);
+        setTotalCount(0);
+        setLoading(false);
+        return;
+      }
+    }
+
+    if (search.trim()) {
+      query = query.or(
+        `name.ilike.%${search.trim()}%,description.ilike.%${search.trim()}%`,
+      );
+    }
+
+    if (maxPrice < priceMax) {
+      query = query.lte("price", maxPrice);
+    }
+
+    if (onlyFeatured) query = query.eq("featured", true);
+    if (onlyNew) query = query.eq("is_new", true);
+    if (onlyLowStock) query = query.eq("low_stock", true);
+
+    const { data, count, error } = await query;
+
+    if (!error) {
+      const mapped = (data ?? []).map((p: any) => ({
+        ...p,
+        category_name: p.categorias?.name ?? null,
+        categorias: undefined,
+      }));
+      setProductos(mapped);
+      setTotalCount(count ?? 0);
+
+      // Calcular precio máximo real solo la primera vez
+      if (priceMax === 99999 && mapped.length > 0) {
+        const { data: maxData } = await supabase
+          .from("productos")
+          .select("price")
+          .eq("activo", true)
+          .order("price", { ascending: false })
+          .limit(1)
+          .single();
+        if (maxData) {
+          const rounded = Math.ceil(maxData.price / 100) * 100;
+          setPriceMax(rounded);
+          setMaxPrice(rounded);
+        }
+      }
+    }
+
+    setLoading(false);
+  }, [
+    currentPage,
+    search,
+    cats,
+    maxPrice,
+    priceMax,
+    onlyFeatured,
+    onlyNew,
+    onlyLowStock,
+  ]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  // Reset a página 1 cuando cambian filtros
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, cats, maxPrice, onlyFeatured, onlyNew, onlyLowStock]);
+
+  // Sincronizar searchParams con estado
   useEffect(() => {
     const q = searchParams.get("q") ?? "";
     const cat = searchParams.get("cat");
     setSearch(q);
+    setSearchInput(q);
     setCats(cat ? [cat] : []);
   }, [searchParams]);
+
+  function handleSearchInput(value: string) {
+    setSearchInput(value);
+    if (searchTimer.current) clearTimeout(searchTimer.current);
+    searchTimer.current = setTimeout(() => {
+      setSearch(value);
+      // Actualizar URL sin navegar
+      const params = new URLSearchParams(searchParams.toString());
+      if (value) params.set("q", value);
+      else params.delete("q");
+      router.replace(`/productos?${params.toString()}`, { scroll: false });
+    }, 350);
+  }
 
   function toggleCat(cat: string) {
     setCats((prev) =>
@@ -45,552 +171,502 @@ export default function ProductosClient({
 
   function clearFilters() {
     setSearch("");
+    setSearchInput("");
     setCats([]);
-    setMaxPrice(PRICE_MAX);
+    setMaxPrice(priceMax);
     setOnlyFeatured(false);
+    setOnlyNew(false);
+    setOnlyLowStock(false);
+    router.replace("/productos", { scroll: false });
   }
 
-  const normalize = (s?: string | null) =>
-    (s ?? "")
-      .normalize("NFD")
-      .replace(/\p{Diacritic}/gu, "")
-      .trim()
-      .toLowerCase()
-      .replace(/\s+/g, "-");
-
-  const filtered = useMemo(() => {
-    let list = initialProducts;
-
-    if (cats.length > 0) {
-      const selected = new Set(cats.map(normalize));
-      list = list.filter((p) => selected.has(normalize(p.category)));
-    }
-
-    if (onlyFeatured) {
-      list = list.filter((p) => p.featured === true);
-    }
-
-    if (maxPrice < PRICE_MAX) {
-      list = list.filter((p) => {
-        const price = Number(p.price);
-        return Number.isFinite(price) && price <= maxPrice;
-      });
-    }
-
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      list = list.filter(
-        (p) =>
-          p.name?.toLowerCase().includes(q) ||
-          p.description?.toLowerCase().includes(q),
-      );
-    }
-
-    return list;
-  }, [cats, onlyFeatured, maxPrice, search, initialProducts, PRICE_MAX]);
-
   const activeFilters =
-    cats.length + (onlyFeatured ? 1 : 0) + (maxPrice < PRICE_MAX ? 1 : 0);
+    cats.length +
+    (onlyFeatured ? 1 : 0) +
+    (onlyNew ? 1 : 0) +
+    (onlyLowStock ? 1 : 0) +
+    (maxPrice < priceMax ? 1 : 0);
 
-  console.log("cats seleccionadas:", cats);
-  console.log("categorías productos:", [...new Set(initialProducts.map(p => p.category))]);
-  console.log("productos totales:", initialProducts.length);
+  const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
+  const heroTitulo = banner?.titulo || "Nuestros Productos";
+  const heroSub =
+    banner?.subtitulo || "Equipos de cocina industrial con garantía.";
+  const heroImg = banner?.activo && banner?.image_url ? banner.image_url : null;
 
   return (
-    <div className="productos-page">
-      <button
-        className="filter-toggle"
-        onClick={() => setSidebarOpen(true)}
-        aria-label="Abrir filtros"
+    <main style={{ background: "#f8f7f4", minHeight: "100vh" }}>
+      {/* ── HERO ── */}
+      <section
+        style={{
+          position: "relative",
+          width: "100%",
+          minHeight: "280px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "#1a1a1a",
+          overflow: "hidden",
+        }}
       >
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <line x1="4" y1="6" x2="20" y2="6" />
-          <line x1="8" y1="12" x2="20" y2="12" />
-          <line x1="12" y1="18" x2="20" y2="18" />
-        </svg>
-        Filtros
-        {activeFilters > 0 && (
-          <span className="filter-toggle__badge">{activeFilters}</span>
-        )}
-      </button>
-
-      <div className="productos-layout">
-        {/* ── SIDEBAR ── */}
-        <aside className={`sidebar${sidebarOpen ? " sidebar--open" : ""}`}>
-          <div className="sidebar__header">
-            <h2 className="sidebar__title">Filtros</h2>
-            <div className="sidebar__header-actions">
-              {activeFilters > 0 && (
-                <button className="sidebar__clear" onClick={clearFilters}>
-                  Limpiar
-                </button>
-              )}
-              <button
-                className="sidebar__close"
-                onClick={() => setSidebarOpen(false)}
-                aria-label="Cerrar"
-              >
-                ×
-              </button>
-            </div>
-          </div>
-
-          <div className="sidebar__section">
-            <label className="sidebar__label">Categoría</label>
-            <div className="sidebar__cats">
-              {ALL_CATS.map((cat) => (
-                <label key={cat} className="sidebar__check-row">
-                  <input
-                    type="checkbox"
-                    checked={cats.includes(cat)}
-                    onChange={() => toggleCat(cat)}
-                    className="sidebar__checkbox"
-                  />
-                  <span className="sidebar__check-label">
-                    {cat.replace(/-/g, " ")}
-                  </span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          <div className="sidebar__section">
-            <label className="sidebar__label">
-              Precio máximo
-              <span className="sidebar__price-val">
-                {maxPrice >= PRICE_MAX
-                  ? "Sin límite"
-                 : `S/ ${maxPrice.toLocaleString('es-PE')}`}
-              </span>
-            </label>
-            <input
-              type="range"
-              min={0}
-              max={PRICE_MAX}
-              step={100}
-              value={maxPrice}
-              onChange={(e) => setMaxPrice(Number(e.target.value))}
-              className="sidebar__range"
-            />
-            <div className="sidebar__range-labels">
-              <span>S/ 0</span>
-              <span>S/ {PRICE_MAX.toLocaleString("es-PE")}</span>
-            </div>
-          </div>
-
-          <div className="sidebar__section">
-            <label className="sidebar__check-row">
-              <input
-                type="checkbox"
-                checked={onlyFeatured}
-                onChange={(e) => setOnlyFeatured(e.target.checked)}
-                className="sidebar__checkbox"
-              />
-              <span className="sidebar__check-label">Solo destacados ⭐</span>
-            </label>
-          </div>
-        </aside>
-
-        {sidebarOpen && (
-          <div
-            className="sidebar-backdrop"
-            onClick={() => setSidebarOpen(false)}
-            aria-hidden="true"
+        {heroImg && (
+          <Image
+            src={heroImg}
+            alt={heroTitulo}
+            fill
+            priority
+            style={{ objectFit: "cover", objectPosition: "center" }}
           />
         )}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background:
+              "linear-gradient(to bottom, rgba(0,0,0,0.55), rgba(0,0,0,0.65))",
+            zIndex: 1,
+          }}
+        />
+        <div
+          style={{
+            position: "relative",
+            zIndex: 2,
+            textAlign: "center",
+            padding: "3.5rem 1.5rem 3rem",
+            maxWidth: "680px",
+          }}
+        >
+          <p
+            style={{
+              fontSize: "0.75rem",
+              fontWeight: 700,
+              letterSpacing: "0.15em",
+              textTransform: "uppercase",
+              color: "#f5a623",
+              marginBottom: "0.75rem",
+            }}
+          >
+            Catálogo
+          </p>
+          <h1
+            style={{
+              fontSize: "clamp(1.8rem, 4vw, 2.8rem)",
+              fontWeight: 900,
+              color: "#fff",
+              letterSpacing: "-0.02em",
+              marginBottom: "1rem",
+            }}
+          >
+            {heroTitulo}
+          </h1>
+          <p
+            style={{
+              fontSize: "1rem",
+              color: "rgba(255,255,255,0.75)",
+              margin: "0 auto",
+              lineHeight: 1.6,
+            }}
+          >
+            {heroSub}
+          </p>
+        </div>
+      </section>
 
-        {/* ── MAIN ── */}
-        <main className="productos-main">
-          <div className="productos-main__top">
-            <p className="productos-main__count">
-              <strong>{filtered.length}</strong> producto
-              {filtered.length !== 1 ? "s" : ""}
-              {cats.length > 0 &&
-                ` en ${cats.map((c) => c.replace(/-/g, " ")).join(", ")}`}
-            </p>
-            {activeFilters > 0 && (
-              <button className="productos-main__clear" onClick={clearFilters}>
-                × Limpiar filtros
-              </button>
-            )}
-          </div>
+      {/* ── PRODUCTOS ── */}
+      <div className="productos-page">
+        <button
+          className="filter-toggle"
+          onClick={() => setSidebarOpen(true)}
+          aria-label="Abrir filtros"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <line x1="4" y1="6" x2="20" y2="6" />
+            <line x1="8" y1="12" x2="20" y2="12" />
+            <line x1="12" y1="18" x2="20" y2="18" />
+          </svg>
+          Filtros
+          {activeFilters > 0 && (
+            <span className="filter-toggle__badge">{activeFilters}</span>
+          )}
+        </button>
 
-          {/* ── CHIP DE BÚSQUEDA ACTIVA ── */}
-          {search.trim() && (
-            <div className="productos-main__search-active">
-              <span className="productos-main__search-chip">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                </svg>
-                Buscando: <strong>&ldquo;{search.trim()}&rdquo;</strong>
+        <div className="productos-layout">
+          {/* ── SIDEBAR ── */}
+          <aside className={`sidebar${sidebarOpen ? " sidebar--open" : ""}`}>
+            <div className="sidebar__header">
+              <h2 className="sidebar__title">Filtros</h2>
+              <div className="sidebar__header-actions">
+                {activeFilters > 0 && (
+                  <button className="sidebar__clear" onClick={clearFilters}>
+                    Limpiar
+                  </button>
+                )}
                 <button
-                  className="productos-main__search-chip-close"
-                  onClick={() => setSearch("")}
-                  aria-label="Quitar búsqueda"
+                  className="sidebar__close"
+                  onClick={() => setSidebarOpen(false)}
+                  aria-label="Cerrar"
                 >
                   ×
                 </button>
-              </span>
-              {cats.length > 0 && (
-                <span className="productos-main__search-hint">
-                  dentro de {cats.map((c) => c.replace(/-/g, " ")).join(", ")}
+              </div>
+            </div>
+
+            <div className="sidebar__section">
+              <label className="sidebar__label">Categoría</label>
+              <div className="sidebar__cats">
+                {ALL_CATS.map((cat) => (
+                  <label key={cat} className="sidebar__check-row">
+                    <input
+                      type="checkbox"
+                      checked={cats.includes(cat)}
+                      onChange={() => toggleCat(cat)}
+                      className="sidebar__checkbox"
+                    />
+                    <span className="sidebar__check-label">{cat}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div className="sidebar__section">
+              <label className="sidebar__label">
+                Precio máximo
+                <span className="sidebar__price-val">
+                  {maxPrice >= priceMax
+                    ? "Sin límite"
+                    : `S/ ${maxPrice.toLocaleString("es-PE")}`}
                 </span>
-              )}
+              </label>
+              <input
+                type="range"
+                min={0}
+                max={priceMax}
+                step={100}
+                value={maxPrice}
+                onChange={(e) => setMaxPrice(Number(e.target.value))}
+                className="sidebar__range"
+              />
+              <div className="sidebar__range-labels">
+                <span>S/ 0</span>
+                <span>S/ {priceMax.toLocaleString("es-PE")}</span>
+              </div>
             </div>
+
+            <div className="sidebar__section">
+              <label className="sidebar__check-row">
+                <input
+                  type="checkbox"
+                  checked={onlyFeatured}
+                  onChange={(e) => setOnlyFeatured(e.target.checked)}
+                  className="sidebar__checkbox"
+                />
+                <span className="sidebar__check-label">Solo destacados ⭐</span>
+              </label>
+              <label className="sidebar__check-row" style={{ marginTop: 6 }}>
+                <input
+                  type="checkbox"
+                  checked={onlyNew}
+                  onChange={(e) => setOnlyNew(e.target.checked)}
+                  className="sidebar__checkbox"
+                />
+                <span className="sidebar__check-label">
+                  Solo productos nuevos 🆕
+                </span>
+              </label>
+              <label className="sidebar__check-row" style={{ marginTop: 6 }}>
+                <input
+                  type="checkbox"
+                  checked={onlyLowStock}
+                  onChange={(e) => setOnlyLowStock(e.target.checked)}
+                  className="sidebar__checkbox"
+                />
+                <span className="sidebar__check-label">
+                  Solo últimas unidades ⚠️
+                </span>
+              </label>
+            </div>
+          </aside>
+
+          {sidebarOpen && (
+            <div
+              className="sidebar-backdrop"
+              onClick={() => setSidebarOpen(false)}
+              aria-hidden="true"
+            />
           )}
-          
-          {filtered.length === 0 ? (
-            <div className="productos-empty">
-              <span>😕</span>
-              <p>No se encontraron productos con esos filtros</p>
-              <button onClick={clearFilters} className="productos-empty__btn">
-                Ver todos
-              </button>
-            </div>
-          ) : (
-            <div className="productos-grid">
-              {filtered.map((p) => (
-                <ProductCard
-                  key={p.id}
-                  product={{
-                    ...p,
-                    description: p.description ?? "",
-                    featured: p.featured ?? false,
-                    image_url: p.image_url ?? undefined,
-                    price_caja: p.price_caja ?? undefined,
-                    unidad_caja: p.unidad_caja ?? undefined,
-                    price_mayorista: p.price_mayorista ?? undefined,
-                    unidad_mayorista: p.unidad_mayorista ?? undefined,
+
+          {/* ── MAIN ── */}
+          <main className="productos-main">
+            {/* Buscador */}
+            <div style={{ marginBottom: "1rem" }}>
+              <div style={{ position: "relative", maxWidth: 480 }}>
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  style={{
+                    position: "absolute",
+                    left: 12,
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    color: "#ccc",
+                    pointerEvents: "none",
+                  }}
+                >
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="m21 21-4.35-4.35" />
+                </svg>
+                <input
+                  style={{
+                    width: "100%",
+                    padding: "10px 16px 10px 36px",
+                    border: "1.5px solid #e0d8d0",
+                    borderRadius: 10,
+                    fontSize: "0.88rem",
+                    outline: "none",
+                    background: "#fff",
+                    boxSizing: "border-box",
+                  }}
+                  placeholder="Buscar productos..."
+                  value={searchInput}
+                  onChange={(e) => handleSearchInput(e.target.value)}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = "#f5a623";
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = "#e0d8d0";
                   }}
                 />
-              ))}
+              </div>
             </div>
-          )}
-        </main>
+
+            <div className="productos-main__top">
+              <p className="productos-main__count">
+                <strong>{totalCount}</strong> producto
+                {totalCount !== 1 ? "s" : ""}
+                {cats.length > 0 && ` en ${cats.join(", ")}`}
+              </p>
+              {activeFilters > 0 && (
+                <button
+                  className="productos-main__clear"
+                  onClick={clearFilters}
+                >
+                  × Limpiar filtros
+                </button>
+              )}
+            </div>
+
+            {search.trim() && (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  marginBottom: "1rem",
+                  flexWrap: "wrap",
+                }}
+              >
+                <span
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 6,
+                    background: "#fff8f0",
+                    border: "1.5px solid #f5a623",
+                    color: "#c47a00",
+                    fontSize: "0.82rem",
+                    fontWeight: 500,
+                    borderRadius: 99,
+                    padding: "4px 10px",
+                  }}
+                >
+                  Buscando:{" "}
+                  <strong style={{ color: "#1a1a1a" }}>
+                    &ldquo;{search.trim()}&rdquo;
+                  </strong>
+                  <button
+                    onClick={() => {
+                      setSearch("");
+                      setSearchInput("");
+                    }}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      fontSize: "1rem",
+                      color: "#c47a00",
+                      padding: "0 0 0 2px",
+                    }}
+                  >
+                    ×
+                  </button>
+                </span>
+              </div>
+            )}
+
+            {/* Grid o loading */}
+            {loading ? (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 10,
+                  padding: "60px 0",
+                  color: "#888",
+                }}
+              >
+                <div
+                  style={{
+                    width: 28,
+                    height: 28,
+                    border: "3px solid #f0ebe4",
+                    borderTop: "3px solid #f5a623",
+                    borderRadius: "50%",
+                    animation: "spin 0.8s linear infinite",
+                  }}
+                />
+                <span style={{ fontSize: "0.9rem" }}>
+                  Buscando productos...
+                </span>
+                <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+              </div>
+            ) : totalCount === 0 ? (
+              <div className="productos-empty">
+                <span>😕</span>
+                <p>No se encontraron productos con esos filtros</p>
+                <button onClick={clearFilters} className="productos-empty__btn">
+                  Ver todos
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="productos-grid">
+                  {productos.map((p) => (
+                    <ProductCard
+                      key={p.id}
+                      product={{
+                        ...p,
+                        description: p.description ?? "",
+                        featured: p.featured ?? false,
+                        image_url: p.image_url ?? undefined,
+                        price_caja: p.price_caja ?? undefined,
+                        unidad_caja: p.unidad_caja ?? undefined,
+                        price_mayorista: p.price_mayorista ?? undefined,
+                        unidad_mayorista: p.unidad_mayorista ?? undefined,
+                      }}
+                    />
+                  ))}
+                </div>
+
+                {/* Paginador */}
+                {totalPages > 1 && (
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: 6,
+                      marginTop: "2rem",
+                      flexWrap: "wrap",
+                    }}
+                  >
+                    <button
+                      onClick={() => {
+                        setCurrentPage((p) => Math.max(1, p - 1));
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }}
+                      disabled={currentPage === 1}
+                      style={{
+                        padding: "8px 16px",
+                        border: "1.5px solid #e0d8d0",
+                        borderRadius: 8,
+                        background: "#fff",
+                        color: "#666",
+                        fontSize: "0.85rem",
+                        fontWeight: 600,
+                        cursor: currentPage === 1 ? "not-allowed" : "pointer",
+                        opacity: currentPage === 1 ? 0.4 : 1,
+                      }}
+                    >
+                      ← Anterior
+                    </button>
+                    {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
+                      let page: number;
+                      if (totalPages <= 7) page = i + 1;
+                      else if (currentPage <= 4) page = i + 1;
+                      else if (currentPage >= totalPages - 3)
+                        page = totalPages - 6 + i;
+                      else page = currentPage - 3 + i;
+                      return (
+                        <button
+                          key={page}
+                          onClick={() => {
+                            setCurrentPage(page);
+                            window.scrollTo({ top: 0, behavior: "smooth" });
+                          }}
+                          style={{
+                            padding: "8px 14px",
+                            borderRadius: 8,
+                            fontSize: "0.85rem",
+                            fontWeight: 600,
+                            cursor: "pointer",
+                            border:
+                              currentPage === page
+                                ? "2px solid #f5a623"
+                                : "1.5px solid #e0d8d0",
+                            background:
+                              currentPage === page ? "#fff8e6" : "#fff",
+                            color: currentPage === page ? "#f5a623" : "#666",
+                          }}
+                        >
+                          {page}
+                        </button>
+                      );
+                    })}
+                    <button
+                      onClick={() => {
+                        setCurrentPage((p) => Math.min(totalPages, p + 1));
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }}
+                      disabled={currentPage === totalPages}
+                      style={{
+                        padding: "8px 16px",
+                        border: "1.5px solid #e0d8d0",
+                        borderRadius: 8,
+                        background: "#fff",
+                        color: "#666",
+                        fontSize: "0.85rem",
+                        fontWeight: 600,
+                        cursor:
+                          currentPage === totalPages
+                            ? "not-allowed"
+                            : "pointer",
+                        opacity: currentPage === totalPages ? 0.4 : 1,
+                      }}
+                    >
+                      Siguiente →
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+          </main>
+        </div>
       </div>
-
-      <style jsx>{`
-        .productos-page {
-          max-width: 1300px;
-          margin: 0 auto;
-          padding: 1.5rem 1rem 4rem;
-        }
-        .productos-main__search-active {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          flex-wrap: wrap;
-          margin-bottom: 1rem;
-        }
-
-        .productos-main__search-chip {
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          background: #fff8f0;
-          border: 1.5px solid #f5a623;
-          color: #c47a00;
-          font-size: 0.82rem;
-          font-weight: 500;
-          border-radius: 99px;
-          padding: 4px 10px 4px 10px;
-        }
-
-        .productos-main__search-chip strong {
-          font-weight: 700;
-          color: #1a1a1a;
-        }
-
-        .productos-main__search-chip-close {
-          background: none;
-          border: none;
-          cursor: pointer;
-          font-size: 1rem;
-          line-height: 1;
-          color: #c47a00;
-          padding: 0 0 0 2px;
-          transition: color 0.15s;
-        }
-        .productos-main__search-chip-close:hover {
-          color: #e05c2a;
-        }
-
-        .productos-main__search-hint {
-          font-size: 0.78rem;
-          color: #aaa;
-          font-style: italic;
-        }
-        .filter-toggle {
-          display: none;
-          align-items: center;
-          gap: 8px;
-          background: #fff;
-          border: 1.5px solid #e0d8d0;
-          border-radius: 10px;
-          padding: 0.5rem 1rem;
-          font-size: 0.88rem;
-          font-weight: 600;
-          cursor: pointer;
-          margin-bottom: 1rem;
-          position: relative;
-          color: #1a1a1a;
-          transition: border-color 0.15s;
-        }
-        .filter-toggle:hover {
-          border-color: #f5a623;
-          color: #f5a623;
-        }
-        .filter-toggle__badge {
-          background: #f5a623;
-          color: #fff;
-          font-size: 0.65rem;
-          font-weight: 700;
-          border-radius: 99px;
-          padding: 1px 6px;
-          min-width: 18px;
-          text-align: center;
-        }
-
-        .productos-layout {
-          display: grid;
-          grid-template-columns: 240px 1fr;
-          gap: 2rem;
-          align-items: start;
-        }
-
-        .sidebar {
-          background: #fff;
-          border: 1px solid #ede8e1;
-          border-radius: 16px;
-          padding: 1.25rem;
-          position: sticky;
-          top: 108px;
-        }
-        .sidebar__header {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          margin-bottom: 1.25rem;
-        }
-        .sidebar__title {
-          font-size: 1rem;
-          font-weight: 800;
-          color: #1a1a1a;
-          margin: 0;
-        }
-        .sidebar__header-actions {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-        .sidebar__clear {
-          font-size: 0.75rem;
-          font-weight: 600;
-          color: #e05c2a;
-          background: none;
-          border: none;
-          cursor: pointer;
-          padding: 0;
-        }
-        .sidebar__close {
-          display: none;
-          background: none;
-          border: none;
-          font-size: 1.4rem;
-          cursor: pointer;
-          color: #888;
-          line-height: 1;
-          padding: 0;
-        }
-
-        .sidebar__section {
-          margin-bottom: 1.5rem;
-          padding-bottom: 1.5rem;
-          border-bottom: 1px solid #f0ebe4;
-        }
-        .sidebar__section:last-child {
-          border-bottom: none;
-          margin-bottom: 0;
-          padding-bottom: 0;
-        }
-
-        .sidebar__label {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          font-size: 0.75rem;
-          font-weight: 700;
-          text-transform: uppercase;
-          letter-spacing: 0.07em;
-          color: #888;
-          margin-bottom: 0.75rem;
-        }
-        .sidebar__price-val {
-          font-size: 0.8rem;
-          font-weight: 700;
-          color: #e05c2a;
-          text-transform: none;
-          letter-spacing: 0;
-        }
-
-        .sidebar__cats {
-          display: flex;
-          flex-direction: column;
-          gap: 6px;
-          max-height: 240px;
-          overflow-y: auto;
-          scrollbar-width: thin;
-        }
-        .sidebar__check-row {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          cursor: pointer;
-        }
-        .sidebar__checkbox {
-          width: 15px;
-          height: 15px;
-          accent-color: #e05c2a;
-          cursor: pointer;
-          flex-shrink: 0;
-        }
-        .sidebar__check-label {
-          font-size: 0.85rem;
-          color: #444;
-          text-transform: capitalize;
-          line-height: 1.3;
-        }
-
-        .sidebar__range {
-          width: 100%;
-          accent-color: #e05c2a;
-          cursor: pointer;
-        }
-        .sidebar__range-labels {
-          display: flex;
-          justify-content: space-between;
-          font-size: 0.72rem;
-          color: #aaa;
-          margin-top: 4px;
-        }
-
-        .productos-main__top {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          margin-bottom: 1.25rem;
-          flex-wrap: wrap;
-          gap: 8px;
-        }
-        .productos-main__count {
-          font-size: 0.85rem;
-          color: #777;
-          margin: 0;
-        }
-        .productos-main__count strong {
-          color: #1a1a1a;
-        }
-        .productos-main__clear {
-          font-size: 0.8rem;
-          font-weight: 600;
-          color: #e05c2a;
-          background: #fff1ec;
-          border: none;
-          border-radius: 99px;
-          padding: 4px 12px;
-          cursor: pointer;
-          transition: background 0.15s;
-        }
-        .productos-main__clear:hover {
-          background: #fbd5c5;
-        }
-
-        .productos-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-          gap: 16px;
-        }
-
-        .productos-empty {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          gap: 0.75rem;
-          padding: 4rem 1rem;
-          color: #888;
-        }
-        .productos-empty span {
-          font-size: 3rem;
-        }
-        .productos-empty p {
-          margin: 0;
-        }
-        .productos-empty__btn {
-          padding: 0.5rem 1.25rem;
-          background: #e05c2a;
-          color: #fff;
-          border: none;
-          border-radius: 99px;
-          font-weight: 600;
-          cursor: pointer;
-        }
-
-        @media (max-width: 768px) {
-          .filter-toggle {
-            display: flex;
-          }
-          .productos-layout {
-            grid-template-columns: 1fr;
-          }
-          .sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: min(320px, 85vw);
-            height: 100dvh;
-            overflow-y: auto;
-            z-index: 200;
-            border-radius: 0;
-            transform: translateX(-100%);
-            transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 4px 0 24px rgba(0, 0, 0, 0.12);
-          }
-          .sidebar--open {
-            transform: translateX(0);
-          }
-          .sidebar__close {
-            display: block;
-          }
-          .sidebar-backdrop {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.4);
-            z-index: 199;
-            animation: fadeIn 0.2s ease;
-          }
-          @keyframes fadeIn {
-            from {
-              opacity: 0;
-            }
-            to {
-              opacity: 1;
-            }
-          }
-          .productos-grid {
-            grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
-          }
-        }
-      `}</style>
-    </div>
+    </main>
   );
 }

@@ -14,6 +14,10 @@ import {
   Users,
   Video,
   Image,
+  FileText,
+  FolderTree,
+  Info,
+  LayoutDashboard,
 } from "lucide-react";
 
 export default function AdminLayout({
@@ -29,26 +33,33 @@ export default function AdminLayout({
   const isLogin = pathname.includes("login");
 
   useEffect(() => {
+    let isMounted = true;
+
     async function checkAuth() {
       if (isLogin) {
         setLoading(false);
         return;
       }
 
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData?.user) {
-        router.push("/admin/login");
+      const adminId = localStorage.getItem("admin_id");
+
+      if (!adminId) {
+        if (isMounted) router.push("/admin/login");
         return;
       }
 
       const { data: empleado } = await supabase
         .from("empleados")
         .select("id, activo")
-        .eq("email", userData.user.email) // ✅ Variable corregida
+        .eq("id", Number(adminId))
         .single();
 
+      if (!isMounted) return; // componente desmontado, no actualizar estado
+
       if (!empleado || !empleado.activo) {
-        router.push("/admin/login"); // ✅ Redirección correcta de cliente
+        localStorage.removeItem("admin_id");
+        localStorage.removeItem("admin_nombre");
+        router.push("/admin/login");
         return;
       }
 
@@ -57,8 +68,13 @@ export default function AdminLayout({
     }
 
     checkAuth();
+
+    return () => {
+      isMounted = false;
+    };
   }, [router, isLogin]);
 
+  
   if (isLogin) {
     return <>{children}</>;
   }
@@ -96,10 +112,15 @@ export default function AdminLayout({
     { name: "Reclamaciones", icon: AlertCircle, href: "/admin/reclamos" },
     { name: "Empleados", icon: Users, href: "/admin/empleados" },
     { name: "Banners", icon: Image, href: "/admin/banners" },
+    { name: "Blog", icon: FileText, href: "/admin/blog" },
+    { name: "Categorías", icon: FolderTree, href: "/admin/categorias" },
+    { name: "Sobre Nosotros", icon: Info, href: "/admin/sobre-nosotros" },
+    { name: "Secciones Home", icon: LayoutDashboard, href: "/admin/home" },
   ];
 
-  async function logout() {
-    await supabase.auth.signOut();
+  function logout() {
+    localStorage.removeItem("admin_id");
+    localStorage.removeItem("admin_nombre");
     router.push("/admin/login");
   }
 

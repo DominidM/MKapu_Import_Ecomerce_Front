@@ -74,7 +74,7 @@ export default function TerminosYCondiciones() {
             El presente sitio web es operado por <strong>Mkapu Import</strong>,
             empresa debidamente registrada en el Perú con RUC activo. Para
             cualquier consulta puedes contactarnos a través de{" "}
-            <a href="mailto:contacto@mkapu.com">contacto@mkapu.com</a> o por
+            <a href="mailto:marlomauriciop1@gmail.com">marlomauriciop1@gmail.com</a> o por
             WhatsApp.
           </p>
         </section>

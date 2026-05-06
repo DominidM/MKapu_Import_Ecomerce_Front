@@ -1,60 +1,41 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
-  Heart,
   ImageOff,
   MessageCircle,
-  Package,
   ShoppingCart,
   Tag,
+  ChevronLeft,
+  ChevronRight,
+  Play,
 } from "lucide-react";
 import { useCart } from "@/app/context/CartContext";
+import { supabase } from "@/lib/supabase";
 import type { Producto } from "@/lib/supabase";
 
 interface Props {
-  producto: Producto;
+  producto: Producto & {
+    category_name?: string | null;
+  };
 }
 
-function calcTier(
-  qty: number,
-  p: Producto,
-): { price: number; tier: "caja" | "mayorista" | "unidad" } {
-  const hasCaja = !!p.price_caja && !!p.unidad_caja;
-  const hasMayorista = !!p.price_mayorista && !!p.unidad_mayorista;
+type ProductoImagen = {
+  id: number;
+  producto_id: number;
+  url_imagenes: string;
+  orden: number;
+};
 
-  if (hasCaja && qty >= p.unidad_caja!) {
-    return { price: p.price_caja! / p.unidad_caja!, tier: "caja" };
-  }
-  if (hasMayorista && qty >= p.unidad_mayorista!) {
-    return { price: p.price_mayorista!, tier: "mayorista" };
-  }
-  return { price: p.price, tier: "unidad" };
-}
-
-function calcTotal(qty: number, p: Producto): number {
-  if (qty <= 0) return 0;
-
-  const hasCaja = !!p.price_caja && !!p.unidad_caja;
-  const hasMayorista = !!p.price_mayorista && !!p.unidad_mayorista;
-
-  if (hasCaja && qty >= p.unidad_caja!) {
-    const cajas = Math.floor(qty / p.unidad_caja!);
-    const sueltas = qty % p.unidad_caja!;
-    const precioSueltas =
-      hasMayorista && qty >= p.unidad_mayorista! ? p.price_mayorista! : p.price;
-
-    return cajas * p.price_caja! + sueltas * precioSueltas;
-  }
-
-  if (hasMayorista && qty >= p.unidad_mayorista!) {
-    return qty * p.price_mayorista!;
-  }
-
-  return qty * p.price;
-}
+type ProductoVideo = {
+  id: number;
+  producto_id: number;
+  video_url: string | null;
+  titulo: string | null;
+  orden: number;
+};
 
 function formatPrice(value: number) {
   return `S/ ${value.toFixed(2)}`;
@@ -62,25 +43,57 @@ function formatPrice(value: number) {
 
 export default function ProductoDetailClient({ producto }: Props) {
   const { addItem, items, updateQty, removeItem } = useCart();
-  const [wishlisted, setWishlisted] = useState(false);
   const [imgError, setImgError] = useState(false);
+  const [imagenes, setImagenes] = useState<ProductoImagen[]>([]);
+  const [videos, setVideos] = useState<ProductoVideo[]>([]);
+  const [activeMediaIdx, setActiveMediaIdx] = useState(0);
 
   const cartItem = items.find((item) => item.id === String(producto.id));
   const qty = cartItem?.qty ?? 0;
-  const hasImage = !!producto.image_url && !imgError;
-  const hasCaja = !!producto.price_caja && !!producto.unidad_caja;
-  const hasMayorista = !!producto.price_mayorista && !!producto.unidad_mayorista;
-  const isConsult = producto.price === 0 && !hasCaja && !hasMayorista;
+  const isConsult = producto.price === 0;
+  const categoryLabel = producto.category_name || `Categoría ${producto.category}`;
 
-  const { tier: activeTier } = calcTier(qty, producto);
-  const { price: activePriceNext } = calcTier(qty + 1, producto);
+  useEffect(() => {
+    async function loadMedia() {
+      const [imgRes, vidRes] = await Promise.all([
+        supabase
+          .from("producto_imagenes")
+          .select("*")
+          .eq("producto_id", producto.id)
+          .order("orden"),
+        supabase
+          .from("producto_videos")
+          .select("*")
+          .eq("producto_id", producto.id)
+          .order("orden"),
+      ]);
 
-  const tierLabel =
-    activeTier === "caja"
-      ? `Precio caja (x${producto.unidad_caja} und.)`
-      : activeTier === "mayorista"
-        ? `Precio mayorista (desde ${producto.unidad_mayorista} und.)`
-        : "Precio por unidad";
+      setImagenes(imgRes.data ?? []);
+      setVideos(vidRes.data ?? []);
+    }
+
+    loadMedia();
+  }, [producto.id]);
+
+  const allMedia = [
+    ...(producto.image_url
+      ? [{ type: "main" as const, url: producto.image_url, titulo: null }]
+      : []),
+    ...imagenes.map((img) => ({
+      type: "image" as const,
+      url: img.url_imagenes,
+      titulo: null,
+    })),
+    ...videos.map((vid) => ({
+      type: "video" as const,
+      url: vid.video_url,
+      titulo: vid.titulo,
+    })),
+  ];
+
+  const currentMedia = allMedia[activeMediaIdx];
+  const hasMultipleMedia = allMedia.length > 1;
+  const totalPrice = qty * producto.price;
 
   function handleUpdateQty(newQty: number) {
     if (newQty <= 0) {
@@ -91,16 +104,13 @@ export default function ProductoDetailClient({ producto }: Props) {
   }
 
   function handleAdd() {
-    const { price } = calcTier(1, producto);
-    const itemTotal = calcTotal(1, producto);
-
     addItem({
       id: String(producto.id),
       name: producto.name,
-      price,
-      itemTotal,
+      price: producto.price,
+      itemTotal: producto.price,
       imageUrl: producto.image_url,
-      emoji: "\ud83d\udce6",
+      emoji: "📦",
       product: {
         price: producto.price,
         price_caja: producto.price_caja,
@@ -111,33 +121,13 @@ export default function ProductoDetailClient({ producto }: Props) {
     });
   }
 
-  const nextTierInfo =
-    qty > 0 && activeTier !== "caja" && (hasMayorista || hasCaja)
-      ? (() => {
-          const nextThreshold =
-            activeTier === "unidad" && hasMayorista
-              ? producto.unidad_mayorista! - qty
-              : hasCaja
-                ? producto.unidad_caja! - qty
-                : null;
-          const nextPrice =
-            activeTier === "unidad" && hasMayorista
-              ? producto.price_mayorista!
-              : hasCaja
-                ? producto.price_caja!
-                : null;
-          const nextName =
-            activeTier === "unidad" && hasMayorista ? "mayorista" : "caja";
+  function prevMedia() {
+    setActiveMediaIdx((i) => (i === 0 ? allMedia.length - 1 : i - 1));
+  }
 
-          if (!nextThreshold || nextThreshold <= 0 || !nextPrice) return null;
-
-          return {
-            nextThreshold,
-            nextPrice,
-            nextName,
-          };
-        })()
-      : null;
+  function nextMedia() {
+    setActiveMediaIdx((i) => (i === allMedia.length - 1 ? 0 : i + 1));
+  }
 
   return (
     <div className="detail-shell">
@@ -155,33 +145,100 @@ export default function ProductoDetailClient({ producto }: Props) {
           <div className="detail-visual-card">
             <div className="detail-visual-toolbar">
               <span className="detail-chip detail-chip--soft">
-                {producto.category?.replace(/-/g, " ") || "Sin categoria"}
+                {categoryLabel}
               </span>
-              <button
-                className={`detail-fav${wishlisted ? " detail-fav--on" : ""}`}
-                onClick={() => setWishlisted((value) => !value)}
-                aria-label="Agregar a favoritos"
-                type="button"
-              >
-                <Heart size={18} fill={wishlisted ? "currentColor" : "none"} />
-              </button>
+              {producto.is_new && (
+                <span className="detail-badge detail-badge--new">Nuevo</span>
+              )}
+              {producto.featured && (
+                <span className="detail-badge detail-badge--featured">
+                  Destacado
+                </span>
+              )}
             </div>
 
             <div className="detail-image-stage">
-              {hasImage ? (
-                <img
-                  src={producto.image_url}
-                  alt={producto.name}
-                  className="detail-image"
-                  onError={() => setImgError(true)}
-                />
+              {currentMedia && currentMedia.url && !imgError ? (
+                currentMedia.type === "video" ? (
+                  <video
+                    src={currentMedia.url}
+                    controls
+                    className="detail-video"
+                    key={currentMedia.url}
+                  />
+                ) : (
+                  <img
+                    src={currentMedia.url}
+                    alt={producto.name}
+                    className="detail-image"
+                    onError={() => setImgError(true)}
+                  />
+                )
               ) : (
                 <div className="detail-image-empty">
                   <ImageOff size={48} strokeWidth={1.6} />
                   <span>Imagen no disponible</span>
                 </div>
               )}
+
+              {hasMultipleMedia && (
+                <>
+                  <button
+                    className="detail-media-arrow detail-media-arrow--left"
+                    onClick={prevMedia}
+                    aria-label="Anterior"
+                    type="button"
+                  >
+                    <ChevronLeft size={20} />
+                  </button>
+                  <button
+                    className="detail-media-arrow detail-media-arrow--right"
+                    onClick={nextMedia}
+                    aria-label="Siguiente"
+                    type="button"
+                  >
+                    <ChevronRight size={20} />
+                  </button>
+                </>
+              )}
             </div>
+
+            {hasMultipleMedia && (
+              <div className="detail-thumbs">
+                {allMedia.map((media, i) => (
+                  <button
+                    key={i}
+                    className={`detail-thumb${i === activeMediaIdx ? " detail-thumb--active" : ""}`}
+                    onClick={() => setActiveMediaIdx(i)}
+                    type="button"
+                  >
+                    {media.type === "video" ? (
+                      <div className="detail-thumb-video">
+                        <video
+                          src={media.url || ""}
+                          muted
+                          preload="metadata"
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                          }}
+                        />
+                        <div className="detail-thumb-video-overlay">
+                          <Play size={24} color="#fff" />
+                        </div>
+                      </div>
+                    ) : media.url ? (
+                      <img src={media.url} alt="" />
+                    ) : (
+                      <div className="detail-thumb-empty">
+                        <ImageOff size={14} />
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -190,99 +247,42 @@ export default function ProductoDetailClient({ producto }: Props) {
             <div className="detail-kicker">Detalle del producto</div>
             <h1 className="detail-title">{producto.name}</h1>
             <p className="detail-summary">
-              {producto.description || "Este producto no tiene descripcion por ahora."}
+              {producto.description ||
+                "Este producto no tiene descripción por ahora."}
             </p>
           </div>
 
           <div className="detail-meta">
             {producto.code && (
               <div className="detail-meta-card">
-                <span className="detail-meta-label">Codigo</span>
+                <span className="detail-meta-label">Código</span>
                 <strong>{producto.code}</strong>
               </div>
             )}
             <div className="detail-meta-card">
-              <span className="detail-meta-label">Categoria</span>
-              <strong>{producto.category?.replace(/-/g, " ") || "General"}</strong>
+              <span className="detail-meta-label">Categoría</span>
+              <strong>{categoryLabel}</strong>
             </div>
             <div className="detail-meta-card">
               <span className="detail-meta-label">Estado de compra</span>
-              <strong>{qty > 0 ? `${qty} en tu carrito` : "Listo para agregar"}</strong>
+              <strong>
+                {qty > 0 ? `${qty} en tu carrito` : "Listo para agregar"}
+              </strong>
             </div>
           </div>
 
           <div className="detail-pricing-panel">
             <div className="detail-section-head">
-              <h2>Opciones de precio</h2>
-              <span className={`detail-tier-pill detail-tier-pill--${activeTier}`}>
-                {tierLabel}
-              </span>
+              <h2>Precio</h2>
             </div>
 
-            <div className="detail-tier-grid">
-              <div
-                className={`detail-tier-card${
-                  activeTier === "unidad" && qty > 0 ? " detail-tier-card--active" : ""
-                }`}
-              >
-                <div className="detail-tier-card__head">
-                  <span className="detail-tier-card__icon detail-tier-card__icon--orange">
-                    <Tag size={16} />
-                  </span>
-                  <div>
-                    <div className="detail-tier-card__name">Por unidad</div>
-                    <div className="detail-tier-card__hint">Compra flexible</div>
-                  </div>
-                </div>
-                <div className="detail-tier-card__price">
-                  {isConsult ? "Consultar" : formatPrice(producto.price)}
-                </div>
+            <div className="detail-price-single">
+              <div className="detail-price-label">
+                <Tag size={16} />
+                Precio por unidad
               </div>
-
-              <div
-                className={`detail-tier-card detail-tier-card--blue${
-                  activeTier === "mayorista" && qty > 0
-                    ? " detail-tier-card--active"
-                    : ""
-                }${!hasMayorista ? " detail-tier-card--disabled" : ""}`}
-              >
-                <div className="detail-tier-card__head">
-                  <span className="detail-tier-card__icon detail-tier-card__icon--blue">
-                    <Package size={16} />
-                  </span>
-                  <div>
-                    <div className="detail-tier-card__name">Por mayor</div>
-                    <div className="detail-tier-card__hint">
-                      {hasMayorista
-                        ? `Desde ${producto.unidad_mayorista} und.`
-                        : "No disponible"}
-                    </div>
-                  </div>
-                </div>
-                <div className="detail-tier-card__price">
-                  {hasMayorista ? formatPrice(producto.price_mayorista!) : "--"}
-                </div>
-              </div>
-
-              <div
-                className={`detail-tier-card detail-tier-card--green${
-                  activeTier === "caja" && qty > 0 ? " detail-tier-card--active" : ""
-                }${!hasCaja ? " detail-tier-card--disabled" : ""}`}
-              >
-                <div className="detail-tier-card__head">
-                  <span className="detail-tier-card__icon detail-tier-card__icon--green">
-                    <Package size={16} />
-                  </span>
-                  <div>
-                    <div className="detail-tier-card__name">Caja</div>
-                    <div className="detail-tier-card__hint">
-                      {hasCaja ? `${producto.unidad_caja} und. por caja` : "No disponible"}
-                    </div>
-                  </div>
-                </div>
-                <div className="detail-tier-card__price">
-                  {hasCaja ? formatPrice(producto.price_caja!) : "--"}
-                </div>
+              <div className="detail-price-value">
+                {isConsult ? "Consultar" : formatPrice(producto.price)}
               </div>
             </div>
           </div>
@@ -290,7 +290,11 @@ export default function ProductoDetailClient({ producto }: Props) {
           <div className="detail-purchase-card">
             <div className="detail-section-head">
               <h2>Compra</h2>
-              {qty > 0 && <span className="detail-total">Total: {formatPrice(calcTotal(qty, producto))}</span>}
+              {qty > 0 && (
+                <span className="detail-total">
+                  Total: {formatPrice(totalPrice)}
+                </span>
+              )}
             </div>
 
             {qty === 0 ? (
@@ -307,7 +311,7 @@ export default function ProductoDetailClient({ producto }: Props) {
                 ) : (
                   <>
                     <ShoppingCart size={18} />
-                    Agregar al carrito - {formatPrice(activePriceNext)}
+                    Agregar al carrito - {formatPrice(producto.price)}
                   </>
                 )}
               </button>
@@ -324,8 +328,8 @@ export default function ProductoDetailClient({ producto }: Props) {
 
                 <div className="detail-stepper__body">
                   <strong className="detail-stepper__qty">{qty} unidades</strong>
-                  <span className={`detail-stepper__tier detail-stepper__tier--${activeTier}`}>
-                    {tierLabel}
+                  <span className="detail-stepper__tier">
+                    {formatPrice(producto.price)} c/u
                   </span>
                 </div>
 
@@ -339,14 +343,6 @@ export default function ProductoDetailClient({ producto }: Props) {
                 </button>
               </div>
             )}
-
-            {nextTierInfo && (
-              <div className={`detail-next detail-next--${nextTierInfo.nextName}`}>
-                Compra {nextTierInfo.nextThreshold} mas y desbloquea el precio{" "}
-                <strong>{nextTierInfo.nextName}</strong>:{" "}
-                <strong>{formatPrice(nextTierInfo.nextPrice)}</strong>
-              </div>
-            )}
           </div>
         </div>
       </section>
@@ -355,16 +351,10 @@ export default function ProductoDetailClient({ producto }: Props) {
         .detail-shell {
           --bg-soft: linear-gradient(180deg, #fffaf3 0%, #ffffff 100%);
           --card: rgba(255, 255, 255, 0.9);
-          --line: #eadfce;
           --text: #1f1a17;
           --muted: #72675f;
           --orange: #e05c2a;
-          --orange-deep: #c84d1f;
-          --orange-soft: #fff2ea;
-          --blue: #0c8db0;
-          --blue-soft: #e8f8fc;
-          --green: #179653;
-          --green-soft: #eaf8ef;
+          --card-line: rgba(234, 223, 206, 0.9);
           max-width: 1240px;
           margin: 0 auto;
           padding: 24px 16px 56px;
@@ -429,7 +419,7 @@ export default function ProductoDetailClient({ producto }: Props) {
         .detail-pricing-panel,
         .detail-purchase-card {
           background: var(--card);
-          border: 1px solid rgba(234, 223, 206, 0.9);
+          border: 1px solid var(--card-line);
           box-shadow: 0 16px 40px rgba(78, 52, 24, 0.08);
           backdrop-filter: blur(10px);
         }
@@ -445,9 +435,10 @@ export default function ProductoDetailClient({ producto }: Props) {
         .detail-visual-toolbar {
           display: flex;
           align-items: center;
-          justify-content: space-between;
-          gap: 12px;
+          justify-content: flex-start;
+          gap: 8px;
           margin-bottom: 16px;
+          flex-wrap: wrap;
         }
 
         .detail-chip {
@@ -467,44 +458,41 @@ export default function ProductoDetailClient({ producto }: Props) {
           color: #6b625b;
         }
 
-        .detail-fav {
-          width: 42px;
-          height: 42px;
-          border-radius: 50%;
-          border: 1px solid #ebdfcf;
-          background: #fff;
-          color: #b9a59a;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          transition:
-            transform 0.18s ease,
-            color 0.18s ease,
-            border-color 0.18s ease;
+        .detail-badge {
+          font-size: 0.7rem;
+          font-weight: 800;
+          padding: 6px 12px;
+          border-radius: 8px;
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
         }
 
-        .detail-fav:hover {
-          transform: scale(1.05);
-          color: #ef4444;
-          border-color: #f2b4b4;
+        .detail-badge--new {
+          background: #f59e0b;
+          color: #fff;
         }
 
-        .detail-fav--on {
-          color: #ef4444;
-          border-color: #f2b4b4;
+        .detail-badge--featured {
+          background: #10b981;
+          color: #fff;
         }
 
         .detail-image-stage {
           aspect-ratio: 1 / 1;
           border-radius: 22px;
           overflow: hidden;
-          background:
-            radial-gradient(circle at top left, #fff7ef 0%, #f2ece5 55%, #ebe4db 100%);
+          position: relative;
+          background: radial-gradient(
+            circle at top left,
+            #fff7ef 0%,
+            #f2ece5 55%,
+            #ebe4db 100%
+          );
           border: 1px solid #ece3d7;
         }
 
-        .detail-image {
+        .detail-image,
+        .detail-video {
           width: 100%;
           height: 100%;
           object-fit: cover;
@@ -521,6 +509,109 @@ export default function ProductoDetailClient({ producto }: Props) {
           gap: 12px;
           color: #b4aaa3;
           font-size: 0.95rem;
+        }
+
+        .detail-media-arrow {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          border: none;
+          background: rgba(255, 255, 255, 0.92);
+          color: #1a1a1a;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          z-index: 2;
+          backdrop-filter: blur(4px);
+          transition:
+            background 0.15s,
+            transform 0.15s;
+        }
+
+        .detail-media-arrow:hover {
+          background: #fff;
+          transform: translateY(-50%) scale(1.08);
+        }
+
+        .detail-media-arrow--left {
+          left: 12px;
+        }
+
+        .detail-media-arrow--right {
+          right: 12px;
+        }
+
+        .detail-thumbs {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+          gap: 8px;
+          margin-top: 12px;
+        }
+
+        .detail-thumb {
+          aspect-ratio: 1 / 1;
+          border-radius: 12px;
+          overflow: hidden;
+          border: 2px solid #e8dfd3;
+          background: #f9f6f2;
+          cursor: pointer;
+          padding: 0;
+          transition:
+            border-color 0.15s,
+            transform 0.15s;
+        }
+
+        .detail-thumb:hover {
+          transform: scale(1.04);
+          border-color: #d7c6b0;
+        }
+
+        .detail-thumb--active {
+          border-color: var(--orange);
+        }
+
+        .detail-thumb img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+        }
+
+        .detail-thumb-video {
+          width: 100%;
+          height: 100%;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .detail-thumb-video video {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+        }
+
+        .detail-thumb-video-overlay {
+          position: absolute;
+          inset: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: rgba(0, 0, 0, 0.3);
+          pointer-events: none;
+        }
+
+        .detail-thumb-empty {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #b4aaa3;
         }
 
         .detail-main {
@@ -610,121 +701,29 @@ export default function ProductoDetailClient({ producto }: Props) {
           font-size: 1.08rem;
         }
 
-        .detail-tier-pill {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          padding: 8px 12px;
-          border-radius: 999px;
-          font-size: 0.78rem;
-          font-weight: 700;
-          white-space: nowrap;
-        }
-
-        .detail-tier-pill--unidad {
-          color: var(--orange);
-          background: var(--orange-soft);
-        }
-
-        .detail-tier-pill--mayorista {
-          color: var(--blue);
-          background: var(--blue-soft);
-        }
-
-        .detail-tier-pill--caja {
-          color: var(--green);
-          background: var(--green-soft);
-        }
-
-        .detail-tier-grid {
-          display: grid;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-          gap: 12px;
-        }
-
-        .detail-tier-card {
-          border-radius: 18px;
-          border: 1px solid #ece2d6;
-          background: linear-gradient(180deg, #ffffff 0%, #fcfaf7 100%);
-          padding: 16px;
+        .detail-price-single {
           display: flex;
-          flex-direction: column;
+          align-items: center;
           justify-content: space-between;
-          gap: 18px;
-          min-height: 164px;
-          transition:
-            transform 0.18s ease,
-            border-color 0.18s ease,
-            box-shadow 0.18s ease;
+          padding: 18px;
+          border-radius: 16px;
+          background: linear-gradient(180deg, #ffffff 0%, #fcfaf7 100%);
+          border: 1px solid #ece2d6;
         }
 
-        .detail-tier-card--active {
-          border-color: #f0b39a;
-          box-shadow: 0 14px 26px rgba(224, 92, 42, 0.12);
-          transform: translateY(-2px);
-        }
-
-        .detail-tier-card--blue.detail-tier-card--active {
-          border-color: #9fd9e7;
-          box-shadow: 0 14px 26px rgba(12, 141, 176, 0.12);
-        }
-
-        .detail-tier-card--green.detail-tier-card--active {
-          border-color: #a7dfbd;
-          box-shadow: 0 14px 26px rgba(23, 150, 83, 0.12);
-        }
-
-        .detail-tier-card--disabled {
-          opacity: 0.56;
-        }
-
-        .detail-tier-card__head {
+        .detail-price-label {
           display: flex;
-          align-items: flex-start;
-          gap: 12px;
-        }
-
-        .detail-tier-card__icon {
-          width: 34px;
-          height: 34px;
-          border-radius: 12px;
-          display: inline-flex;
           align-items: center;
-          justify-content: center;
-          flex-shrink: 0;
+          gap: 10px;
+          font-size: 0.92rem;
+          font-weight: 600;
+          color: var(--text);
         }
 
-        .detail-tier-card__icon--orange {
-          background: var(--orange-soft);
+        .detail-price-value {
+          font-size: 1.5rem;
+          font-weight: 900;
           color: var(--orange);
-        }
-
-        .detail-tier-card__icon--blue {
-          background: var(--blue-soft);
-          color: var(--blue);
-        }
-
-        .detail-tier-card__icon--green {
-          background: var(--green-soft);
-          color: var(--green);
-        }
-
-        .detail-tier-card__name {
-          font-size: 0.95rem;
-          font-weight: 700;
-          margin-bottom: 4px;
-        }
-
-        .detail-tier-card__hint {
-          font-size: 0.82rem;
-          color: #8d8178;
-          line-height: 1.35;
-        }
-
-        .detail-tier-card__price {
-          font-size: 1.38rem;
-          font-weight: 800;
-          line-height: 1.1;
         }
 
         .detail-total {
@@ -815,41 +814,7 @@ export default function ProductoDetailClient({ producto }: Props) {
         .detail-stepper__tier {
           font-size: 0.8rem;
           font-weight: 700;
-        }
-
-        .detail-stepper__tier--unidad {
           color: var(--orange);
-        }
-
-        .detail-stepper__tier--mayorista {
-          color: var(--blue);
-        }
-
-        .detail-stepper__tier--caja {
-          color: var(--green);
-        }
-
-        .detail-next {
-          margin-top: 14px;
-          padding: 14px 16px;
-          border-radius: 16px;
-          font-size: 0.92rem;
-          line-height: 1.5;
-          border: 1px solid #f2d7c8;
-          background: #fff5ef;
-          color: #6f432d;
-        }
-
-        .detail-next--mayorista {
-          border-color: #cfeef6;
-          background: #f1fbfe;
-          color: #0f6177;
-        }
-
-        .detail-next--caja {
-          border-color: #cfead7;
-          background: #f1fbf4;
-          color: #1d6942;
         }
 
         @media (max-width: 1080px) {
@@ -866,7 +831,6 @@ export default function ProductoDetailClient({ producto }: Props) {
             top: auto;
           }
 
-          .detail-tier-grid,
           .detail-meta {
             grid-template-columns: 1fr 1fr;
           }
@@ -881,8 +845,7 @@ export default function ProductoDetailClient({ producto }: Props) {
             font-size: 1.9rem;
           }
 
-          .detail-meta,
-          .detail-tier-grid {
+          .detail-meta {
             grid-template-columns: 1fr;
           }
 
@@ -895,10 +858,6 @@ export default function ProductoDetailClient({ producto }: Props) {
           .detail-section-head {
             flex-direction: column;
             align-items: stretch;
-          }
-
-          .detail-tier-pill {
-            width: fit-content;
           }
         }
 

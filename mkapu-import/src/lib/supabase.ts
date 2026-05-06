@@ -4,7 +4,8 @@ export interface Producto {
   id: number;
   code: string;
   name: string;
-  category: string;
+  category: number;
+  category_name?: string;
   description?: string;
   price: number;
   price_caja?: number;
@@ -15,13 +16,15 @@ export interface Producto {
   image_url?: string;
   activo?: boolean;
   created_at?: string;
+  is_new?: boolean;
+  low_stock?: boolean;
 }
 
 export type Categoria = {
-  id: string;
-  nombre: string;
+  id: number;
+  name: string;
   slug: string;
-  imagen?: string;
+  activo?: boolean;
 };
 
 export type Reclamacion = {
@@ -42,7 +45,14 @@ export type Reclamacion = {
   created_at?: string;
 };
 
-export const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseKey) {
+  throw new Error(
+    "Faltan variables de entorno: NEXT_PUBLIC_SUPABASE_URL y/o NEXT_PUBLIC_SUPABASE_ANON_KEY. "
+    //"Agrégalas en el dashboard de Cloudflare Workers > Settings > Variables."
+  );
+}
+
+export const supabase = createClient(supabaseUrl, supabaseKey);
