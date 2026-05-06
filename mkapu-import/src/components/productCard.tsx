@@ -20,8 +20,10 @@ interface Product {
   unidad_mayorista?: number;
   featured: boolean;
   is_new?: boolean;
+  low_stock?: boolean; // ← nuevo campo
   image_url?: string;
 }
+
 interface Props {
   product: Product;
 }
@@ -134,11 +136,17 @@ export default function ProductCard({ product }: Props) {
           </div>
         )}
 
+        {/* Badges */}
         {product.is_new && (
           <span className="pcard__badge pcard__badge--new">Nuevo</span>
         )}
         {product.featured && (
           <span className="pcard__badge pcard__badge--featured">Destacado</span>
+        )}
+        {product.low_stock && (
+          <span className="pcard__badge pcard__badge--low">
+            Últimas unidades
+          </span>
         )}
 
         {qty > 0 && (
@@ -154,7 +162,7 @@ export default function ProductCard({ product }: Props) {
         style={{ cursor: "pointer" }}
       >
         <p className="pcard__cat">
-          {product.name ?? product.category}
+          {product.category_name ?? product.category}
         </p>
         <h3 className="pcard__name">{product.name}</h3>
         <p className="pcard__desc">{product.description || "\u00a0"}</p>
@@ -287,7 +295,6 @@ export default function ProductCard({ product }: Props) {
 
         .pcard__badge {
           position: absolute;
-          top: 9px;
           left: 9px;
           font-size: 0.6rem;
           font-weight: 800;
@@ -299,13 +306,19 @@ export default function ProductCard({ product }: Props) {
           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
         }
         .pcard__badge--new {
+          top: 9px;
           background: #f59e0b;
           color: #fff;
         }
         .pcard__badge--featured {
+          top: 34px;
           background: #10b981;
           color: #fff;
-          top: 38px;
+        }
+        .pcard__badge--low {
+          top: 59px;
+          background: #b91c1c;
+          color: #fff;
         }
 
         .pcard__qty-badge {

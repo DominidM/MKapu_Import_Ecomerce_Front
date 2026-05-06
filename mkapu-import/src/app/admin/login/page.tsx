@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import bcrypt from "bcryptjs";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 
@@ -17,53 +18,37 @@ export default function AdminLoginPage() {
     setLoading(true);
     setError("");
 
-    // 1. Login con Supabase Auth
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    // Paso 1: buscar empleado por email
+    const { data: empleado, error: dbError } = await supabase
+      .from("empleados")
+      .select("id, nombre, activo, password")
+      .eq("email", email.trim())
+      .single();
 
-    if (signInError) {
+    if (dbError || !empleado) {
       setError("Credenciales incorrectas.");
       setLoading(false);
       return;
     }
 
-    // 2. Verificar que existe en empleados y obtener password hash
-    const { data: empleado, error: empleadoError } = await supabase
-      .from("empleados")
-      .select("id, nombre, activo, password")
-      .eq("email", email)
-      .single();
+    // Paso 2: verificar password con bcrypt
+    const passwordValido = await bcrypt.compare(password, empleado.password);
 
-    if (empleadoError || !empleado) {
-      await supabase.auth.signOut();
-      setError("No tienes permisos de administrador.");
+    if (!passwordValido) {
+      setError("Credenciales incorrectas.");
       setLoading(false);
       return;
     }
 
     if (!empleado.activo) {
-      await supabase.auth.signOut();
       setError("Tu cuenta está desactivada. Contacta soporte.");
       setLoading(false);
       return;
     }
 
-    // 3. Verificar password encriptado con pgcrypto via RPC
-    const { data: passwordValido, error: rpcError } = await supabase
-      .rpc("verificar_password", {
-        input_password: password,
-        hashed_password: empleado.password,
-      });
-
-    if (rpcError || !passwordValido) {
-      await supabase.auth.signOut();
-      setError("Credenciales incorrectas.");
-      setLoading(false);
-      return;
-    }
-
+    // Paso 3: guardar sesión
+    localStorage.setItem("admin_id", String(empleado.id));
+    localStorage.setItem("admin_nombre", empleado.nombre);
     router.push("/admin/productos");
   }
 
@@ -78,16 +63,15 @@ export default function AdminLoginPage() {
         backgroundImage: `url('https://res.cloudinary.com/dxuk9bogw/image/upload/v1775939505/ebb81f5c-ffd5-40c8-9b4f-6b0de4dd9bd4.png')`,
         backgroundSize: "cover",
         backgroundPosition: "center",
-        backgroundAttachment: "fixed",
         position: "relative",
       }}
     >
-      {/* Overlay oscuro */}
+      {/* Overlay */}
       <div
         style={{
           position: "absolute",
           inset: 0,
-          background: "rgba(0, 0, 0, 0.4)",
+          background: "rgba(0,0,0,0.45)",
           zIndex: 1,
         }}
       />
@@ -97,7 +81,7 @@ export default function AdminLoginPage() {
         style={{
           background: "#fff",
           borderRadius: "16px",
-          boxShadow: "0 20px 60px rgba(0, 0, 0, 0.2)",
+          boxShadow: "0 20px 60px rgba(0,0,0,0.25)",
           padding: "3rem 2.5rem",
           maxWidth: "420px",
           width: "100%",
@@ -109,16 +93,16 @@ export default function AdminLoginPage() {
         <div style={{ textAlign: "center", marginBottom: "2rem" }}>
           <h1
             style={{
-              fontSize: "1.75rem",
+              fontSize: "1.5rem",
               fontWeight: 700,
               color: "#1a1a1a",
-              margin: "0 0 0.5rem",
+              margin: "0 0 0.4rem",
             }}
           >
-            Admin Login
+            Login
           </h1>
-          <p style={{ fontSize: "0.9rem", color: "#666", margin: 0 }}>
-            Accede a tu panel de control
+          <p style={{ fontSize: "0.875rem", color: "#888", margin: 0 }}>
+            Ingresa tus credenciales para continuar
           </p>
         </div>
 
@@ -126,26 +110,24 @@ export default function AdminLoginPage() {
         {error && (
           <div
             style={{
-              background: "#fee",
-              border: "1px solid #f5a623",
+              background: "#fff5f5",
+              border: "1px solid #fca5a5",
               borderRadius: "8px",
               padding: "0.75rem 1rem",
               marginBottom: "1.5rem",
-              fontSize: "0.9rem",
-              color: "#c33",
+              fontSize: "0.875rem",
+              color: "#dc2626",
               display: "flex",
               alignItems: "center",
               gap: "0.5rem",
             }}
           >
-            <span>⚠️</span>
-            {error}
+            <span>⚠️</span> {error}
           </div>
         )}
 
         {/* Form */}
         <form onSubmit={onSubmit} style={{ display: "grid", gap: "1.25rem" }}>
-          {/* Email */}
           <div>
             <label
               style={{
@@ -171,13 +153,13 @@ export default function AdminLoginPage() {
                 borderRadius: "8px",
                 fontSize: "0.95rem",
                 outline: "none",
-                transition: "all 0.15s",
                 boxSizing: "border-box",
+                transition: "border-color 0.15s, box-shadow 0.15s",
               }}
               onFocus={(e) => {
                 e.currentTarget.style.borderColor = "#f5a623";
                 e.currentTarget.style.boxShadow =
-                  "0 0 0 3px rgba(245, 166, 35, 0.1)";
+                  "0 0 0 3px rgba(245,166,35,0.12)";
               }}
               onBlur={(e) => {
                 e.currentTarget.style.borderColor = "#ddd";
@@ -186,7 +168,6 @@ export default function AdminLoginPage() {
             />
           </div>
 
-          {/* Password */}
           <div>
             <label
               style={{
@@ -212,13 +193,13 @@ export default function AdminLoginPage() {
                 borderRadius: "8px",
                 fontSize: "0.95rem",
                 outline: "none",
-                transition: "all 0.15s",
                 boxSizing: "border-box",
+                transition: "border-color 0.15s, box-shadow 0.15s",
               }}
               onFocus={(e) => {
                 e.currentTarget.style.borderColor = "#f5a623";
                 e.currentTarget.style.boxShadow =
-                  "0 0 0 3px rgba(245, 166, 35, 0.1)";
+                  "0 0 0 3px rgba(245,166,35,0.12)";
               }}
               onBlur={(e) => {
                 e.currentTarget.style.borderColor = "#ddd";
@@ -227,12 +208,11 @@ export default function AdminLoginPage() {
             />
           </div>
 
-          {/* Submit */}
           <button
             type="submit"
             disabled={loading}
             style={{
-              background: loading ? "#ccc" : "#f5a623",
+              background: loading ? "#e0b97a" : "#f5a623",
               color: "#fff",
               border: "none",
               borderRadius: "8px",
@@ -240,26 +220,24 @@ export default function AdminLoginPage() {
               fontSize: "0.95rem",
               fontWeight: 700,
               cursor: loading ? "not-allowed" : "pointer",
-              transition: "all 0.2s",
-              marginTop: "0.5rem",
-              opacity: loading ? 0.7 : 1,
+              marginTop: "0.25rem",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               gap: "0.5rem",
+              transition: "background 0.2s, transform 0.15s",
             }}
             onMouseEnter={(e) => {
               if (!loading) {
-                e.currentTarget.style.background = "#b77c1b";
-                e.currentTarget.style.transform = "translateY(-2px)";
-                e.currentTarget.style.boxShadow =
-                  "0 4px 12px rgba(245, 166, 35, 0.3)";
+                e.currentTarget.style.background = "#d4891a";
+                e.currentTarget.style.transform = "translateY(-1px)";
               }
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.background = loading ? "#ccc" : "#f5a623";
+              e.currentTarget.style.background = loading
+                ? "#e0b97a"
+                : "#f5a623";
               e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow = "none";
             }}
           >
             {loading ? (
@@ -268,14 +246,14 @@ export default function AdminLoginPage() {
                   style={{
                     width: "16px",
                     height: "16px",
-                    border: "2px solid #fff",
-                    borderTopColor: "transparent",
+                    border: "2px solid rgba(255,255,255,0.4)",
+                    borderTopColor: "#fff",
                     borderRadius: "50%",
                     display: "inline-block",
                     animation: "spin 0.6s linear infinite",
                   }}
                 />
-                Ingresando...
+                Verificando...
               </>
             ) : (
               "Ingresar"
@@ -283,18 +261,17 @@ export default function AdminLoginPage() {
           </button>
         </form>
 
-        {/* Footer */}
         <div
           style={{
             marginTop: "1.5rem",
-            paddingTop: "1.5rem",
-            borderTop: "1px solid #eee",
+            paddingTop: "1.25rem",
+            borderTop: "1px solid #f0f0f0",
             textAlign: "center",
-            fontSize: "0.85rem",
-            color: "#666",
+            fontSize: "0.82rem",
+            color: "#aaa",
           }}
         >
-          ¿Olvidaste tu contraseña?{" "}
+          ¿Problemas para ingresar?{" "}
           <Link
             href="/"
             style={{
@@ -303,16 +280,13 @@ export default function AdminLoginPage() {
               fontWeight: 600,
             }}
           >
-            Contacta soporte
+            Volver a la tienda
           </Link>
         </div>
       </div>
 
-      {/* Spinner keyframe */}
       <style>{`
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
       `}</style>
     </div>
   );
