@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
       },
       body: JSON.stringify({
         from: "Contacto Web <onboarding@resend.dev>",
-        to: ["solvegrades@gmail.com"],
+        to: ["mkapuperu@gmail.com"],
         subject: `Nuevo mensaje web de: ${nombre}`,
         html: htmlInterno,
       }),
