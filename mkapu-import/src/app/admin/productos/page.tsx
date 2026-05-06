@@ -24,7 +24,7 @@ type Producto = {
   code: string;
   name: string;
   price: number;
-  category: string | number | null;
+  category: number | null;
   image_url: string | null;
   description: string | null;
   price_caja: number | null;
