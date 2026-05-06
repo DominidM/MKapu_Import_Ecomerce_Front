@@ -1,5 +1,5 @@
 import { supabase } from "@/lib/supabase";
-import ProductCard from "@/components/productCard";
+import HomeSeccionesCarousel from "@/components/HomeSeccionesCarousel";
 
 type Producto = {
   id: number;
@@ -14,6 +14,18 @@ type Producto = {
   is_new: boolean;
 };
 
+type Categoria = {
+  id: number;
+  name: string;
+  slug?: string;
+};
+
+type Seccion = {
+  orden: number;
+  categoria_id: number;
+  categorias: Categoria | Categoria[] | null;
+};
+
 export default async function HomeSecciones() {
   const { data: secciones } = await supabase
     .from("home_secciones")
@@ -23,7 +35,8 @@ export default async function HomeSecciones() {
 
   if (!secciones?.length) return null;
 
-  const catIds = secciones.map((s) => s.categoria_id);
+  const seccionesTyped = secciones as Seccion[];
+  const catIds = seccionesTyped.map((s) => s.categoria_id);
 
   const { data: productos } = await supabase
     .from("productos")
@@ -33,24 +46,45 @@ export default async function HomeSecciones() {
     .order("name");
 
   const prodPorCat: Record<number, Producto[]> = {};
-  for (const p of productos ?? []) {
+
+  for (const p of (productos ?? []) as Producto[]) {
     if (!prodPorCat[p.category]) prodPorCat[p.category] = [];
     prodPorCat[p.category].push(p);
   }
 
   return (
     <>
-      {secciones.map((sec) => {
-        const cat = sec.categorias as any;
+      {seccionesTyped.map((sec) => {
+        const cat = Array.isArray(sec.categorias)
+          ? sec.categorias[0]
+          : sec.categorias;
+
+        if (!cat) return null;
+
         const prods = prodPorCat[sec.categoria_id] ?? [];
         if (!prods.length) return null;
+
         return (
-          <section key={sec.categoria_id} style={{ padding: "60px 0" }}>
+          <section
+            key={sec.categoria_id}
+            style={{
+              padding: "60px 0",
+              background: "#fafafa",
+            }}
+          >
             <div
-              style={{ maxWidth: 1280, margin: "0 auto", padding: "0 24px" }}
+              style={{
+                maxWidth: 1280,
+                margin: "0 auto",
+                padding: "0 24px",
+              }}
             >
-              {/* Header sección */}
-              <div style={{ marginBottom: 32, textAlign: "center" }}>
+              <div
+                style={{
+                  marginBottom: 32,
+                  textAlign: "center",
+                }}
+              >
                 <p
                   style={{
                     margin: "0 0 8px",
@@ -61,50 +95,28 @@ export default async function HomeSecciones() {
                     letterSpacing: "0.12em",
                   }}
                 >
-                  {cat.name}
+                  Categoría
                 </p>
+
                 <h2
                   style={{
                     margin: 0,
                     fontSize: "2rem",
                     fontWeight: 800,
-                    color: "#fff",
+                    color: "#1a1a1a",
                   }}
                 >
                   {cat.name}
                 </h2>
               </div>
 
-              {/* Grid productos */}
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
-                  gap: 20,
-                }}
-              >
-                {prods.map((p) => (
-                  <ProductCard
-                    key={p.id}
-                    product={{ ...p, category_name: cat.name }}
-                  />
-                ))}
-              </div>
-
-              {/* Ver todos */}
-              <div style={{ textAlign: "center", marginTop: 32 }}>
-                <a
-                  href={`/productos?cat=${encodeURIComponent(cat.name)}`}
-                  style={{
-                    color: "#f5a623",
-                    fontWeight: 700,
-                    fontSize: "0.9rem",
-                    textDecoration: "none",
-                  }}
-                >
-                  Ver todos los {cat.name.toLowerCase()} →
-                </a>
-              </div>
+              <HomeSeccionesCarousel
+                products={prods.map((p) => ({
+                  ...p,
+                  category_name: cat.name,
+                }))}
+                categoryName={cat.name}
+              />
             </div>
           </section>
         );
