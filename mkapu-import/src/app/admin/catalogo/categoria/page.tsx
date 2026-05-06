@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+/*import { notFound } from "next/navigation";
 import Link from "next/link";
 import PageHero from "@/components/PageHero";
 import { getCategorias, getProductosByCategoria } from "@/lib/queries";
@@ -20,7 +20,9 @@ export default async function CatalogoPage({
   const { categoria: categoriaParam } = await params;
 
   const categorias = await getCategorias();
-  const categoria = categorias.find((c: Categoria) => String(c.id) === categoriaParam);
+  const categoria = categorias.find(
+    (c: Categoria) => String(c.id) === categoriaParam,
+  );
 
   if (!categoria) notFound();
 
@@ -31,9 +33,11 @@ export default async function CatalogoPage({
   return (
     <>
       <PageHero
-        title={categoria.name} // 🚨 Estaba como "name", ahora es "nombre"
-        subtitle={`${activos.length} producto${activos.length !== 1 ? "s" : ""} disponible${activos.length !== 1 ? "s" : ""} en esta categoría.`}
-        dark
+        ruta="/catalogo"
+        fallbackTitulo={categoria.name}
+        fallbackSubtitulo={`${activos.length} producto${
+          activos.length !== 1 ? "s" : ""
+        } disponible${activos.length !== 1 ? "s" : ""} en esta categoría.`}
       />
 
       <section className="cat-section">
@@ -43,7 +47,7 @@ export default async function CatalogoPage({
             <span>›</span>
             <Link href="/productos">Productos</Link>
             <span>›</span>
-            <span>{categoria.name}</span> {/* 🚨 También corregido aquí */}
+            <span>{categoria.name}</span>
           </div>
 
           {activos.length === 0 ? (
@@ -131,3 +135,4 @@ export default async function CatalogoPage({
     </>
   );
 }
+*/
