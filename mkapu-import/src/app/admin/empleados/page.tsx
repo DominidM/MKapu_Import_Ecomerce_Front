@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import bcrypt from "bcryptjs";
-import { UserPlus, Pencil, Trash2, X, Check, Eye, EyeOff } from "lucide-react";
+import { Pencil, Trash2, Eye, EyeOff } from "lucide-react";
 
 interface Empleado {
   id: number;
@@ -30,16 +30,36 @@ const FORM_INICIAL: FormData = {
   activo: true,
 };
 
+const inp: React.CSSProperties = {
+  width: "100%",
+  padding: "0.7rem 0.9rem",
+  border: "1px solid #ddd",
+  borderRadius: "8px",
+  fontSize: "0.875rem",
+  background: "#fff",
+  color: "#1a1a1a",
+  outline: "none",
+  boxSizing: "border-box",
+  transition: "border-color 0.15s, box-shadow 0.15s",
+};
+
+const lbl: React.CSSProperties = {
+  display: "block",
+  fontSize: "0.82rem",
+  fontWeight: 600,
+  color: "#444",
+  marginBottom: "0.4rem",
+};
+
 export default function EmpleadosPage() {
   const [empleados, setEmpleados] = useState<Empleado[]>([]);
   const [loading, setLoading] = useState(true);
-  const [modalOpen, setModalOpen] = useState(false);
   const [editando, setEditando] = useState<Empleado | null>(null);
   const [form, setForm] = useState<FormData>(FORM_INICIAL);
+  const [showForm, setShowForm] = useState(false);
   const [guardando, setGuardando] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
-  const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
 
   useEffect(() => {
     fetchEmpleados();
@@ -60,7 +80,8 @@ export default function EmpleadosPage() {
     setForm(FORM_INICIAL);
     setError("");
     setShowPassword(false);
-    setModalOpen(true);
+    setShowForm(true);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function abrirEditar(emp: Empleado) {
@@ -69,20 +90,24 @@ export default function EmpleadosPage() {
       nombre: emp.nombre,
       apellido: emp.apellido,
       email: emp.email,
-      password: "", // vacío — solo se cambia si escribe algo
+      password: "",
       activo: emp.activo,
     });
     setError("");
     setShowPassword(false);
-    setModalOpen(true);
+    setShowForm(true);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  async function guardar() {
+  async function guardar(e: React.FormEvent) {
+    e.preventDefault();
     setError("");
+
     if (!form.nombre || !form.email) {
       setError("Nombre y email son obligatorios.");
       return;
     }
+
     if (!editando && !form.password) {
       setError("La contraseña es obligatoria al crear un empleado.");
       return;
@@ -92,7 +117,6 @@ export default function EmpleadosPage() {
 
     try {
       if (editando) {
-        // Actualizar
         const updates: Partial<Empleado & { password: string }> = {
           nombre: form.nombre,
           apellido: form.apellido,
@@ -100,7 +124,6 @@ export default function EmpleadosPage() {
           activo: form.activo,
         };
 
-        // Solo hashear y actualizar password si escribió uno nuevo
         if (form.password.trim()) {
           updates.password = await bcrypt.hash(form.password, 10);
         }
@@ -112,7 +135,6 @@ export default function EmpleadosPage() {
 
         if (err) throw err;
       } else {
-        // Crear nuevo
         const hash = await bcrypt.hash(form.password, 10);
         const { error: err } = await supabase.from("empleados").insert({
           nombre: form.nombre,
@@ -125,8 +147,8 @@ export default function EmpleadosPage() {
         if (err) throw err;
       }
 
-      setModalOpen(false);
-      fetchEmpleados();
+      cancelForm();
+      await fetchEmpleados();
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "Error al guardar.";
       setError(msg);
@@ -136,9 +158,10 @@ export default function EmpleadosPage() {
   }
 
   async function eliminar(id: number) {
+    if (!confirm("¿Eliminar este empleado? Esta acción no se puede deshacer."))
+      return;
     await supabase.from("empleados").delete().eq("id", id);
-    setConfirmDelete(null);
-    fetchEmpleados();
+    await fetchEmpleados();
   }
 
   async function toggleActivo(emp: Empleado) {
@@ -146,27 +169,56 @@ export default function EmpleadosPage() {
       .from("empleados")
       .update({ activo: !emp.activo })
       .eq("id", emp.id);
-    fetchEmpleados();
+    await fetchEmpleados();
+  }
+
+  function cancelForm() {
+    setEditando(null);
+    setForm(FORM_INICIAL);
+    setShowForm(false);
+    setError("");
+    setShowPassword(false);
+  }
+
+  function onFocusInput(
+    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) {
+    e.currentTarget.style.borderColor = "#f5a623";
+    e.currentTarget.style.boxShadow = "0 0 0 3px rgba(245,166,35,0.1)";
+  }
+
+  function onBlurInput(
+    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) {
+    e.currentTarget.style.borderColor = "#ddd";
+    e.currentTarget.style.boxShadow = "none";
   }
 
   return (
-    <div>
-      {/* Header */}
+    <div
+      style={{
+        padding: "1.5rem 1.25rem 2.5rem",
+        background: "#f8f7f4",
+        minHeight: "100vh",
+      }}
+    >
       <div
         style={{
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
           marginBottom: "1.5rem",
+          gap: "1rem",
+          flexWrap: "wrap",
         }}
       >
         <div>
           <h1
             style={{
+              margin: 0,
               fontSize: "1.4rem",
               fontWeight: 700,
               color: "#1a1a1a",
-              margin: 0,
             }}
           >
             Empleados
@@ -181,8 +233,12 @@ export default function EmpleadosPage() {
             Gestiona los accesos al panel de administración
           </p>
         </div>
+
         <button
-          onClick={abrirCrear}
+          onClick={() => {
+            setShowForm(!showForm);
+            if (showForm) cancelForm();
+          }}
           style={{
             display: "flex",
             alignItems: "center",
@@ -200,184 +256,372 @@ export default function EmpleadosPage() {
           onMouseEnter={(e) => (e.currentTarget.style.background = "#d4891a")}
           onMouseLeave={(e) => (e.currentTarget.style.background = "#f5a623")}
         >
-          <UserPlus size={16} />
-          Nuevo empleado
+          {showForm ? "✕ Cancelar" : "+ Nuevo empleado"}
         </button>
       </div>
 
-      {/* Tabla */}
-      <div
-        style={{
-          background: "#fff",
-          borderRadius: "12px",
-          border: "1px solid #e8e8e8",
-          overflow: "hidden",
-        }}
-      >
-        {loading ? (
-          <div style={{ padding: "3rem", textAlign: "center", color: "#aaa" }}>
-            Cargando empleados...
-          </div>
-        ) : empleados.length === 0 ? (
-          <div style={{ padding: "3rem", textAlign: "center", color: "#aaa" }}>
-            No hay empleados registrados.
-          </div>
-        ) : (
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
-            <thead>
-              <tr
-                style={{
-                  background: "#fafafa",
-                  borderBottom: "1px solid #e8e8e8",
-                }}
-              >
-                {["Nombre", "Email", "Estado", "Creado", "Acciones"].map(
-                  (h) => (
-                    <th
-                      key={h}
-                      style={{
-                        padding: "0.85rem 1rem",
-                        textAlign: "left",
-                        fontSize: "0.8rem",
-                        fontWeight: 600,
-                        color: "#888",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.05em",
-                      }}
-                    >
-                      {h}
-                    </th>
-                  ),
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              {empleados.map((emp, i) => (
-                <tr
-                  key={emp.id}
+      {showForm && (
+        <div
+          style={{
+            background: "#fff",
+            border: "1px solid #e8e8e8",
+            borderRadius: "12px",
+            padding: "1.5rem",
+            marginBottom: "1.5rem",
+            borderTop: "3px solid #f5a623",
+          }}
+        >
+          <h2
+            style={{
+              margin: "0 0 1.25rem",
+              fontSize: "1.05rem",
+              fontWeight: 700,
+              color: "#1a1a1a",
+            }}
+          >
+            {editando ? "Editar empleado" : "Nuevo empleado"}
+          </h2>
+
+          {error && (
+            <div
+              style={{
+                background: "#fff5f5",
+                border: "1px solid #fca5a5",
+                borderRadius: "8px",
+                padding: "0.8rem 1rem",
+                marginBottom: "1rem",
+                fontSize: "0.85rem",
+                color: "#dc2626",
+              }}
+            >
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={guardar}>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: "1rem",
+                marginBottom: "1rem",
+              }}
+            >
+              <div>
+                <label style={lbl}>Nombre *</label>
+                <input
+                  style={inp}
+                  placeholder="Juan"
+                  value={form.nombre}
+                  onChange={(e) => setForm({ ...form, nombre: e.target.value })}
+                  onFocus={onFocusInput}
+                  onBlur={onBlurInput}
+                  required
+                />
+              </div>
+
+              <div>
+                <label style={lbl}>Apellido</label>
+                <input
+                  style={inp}
+                  placeholder="Pérez"
+                  value={form.apellido}
+                  onChange={(e) =>
+                    setForm({ ...form, apellido: e.target.value })
+                  }
+                  onFocus={onFocusInput}
+                  onBlur={onBlurInput}
+                />
+              </div>
+            </div>
+
+            <div style={{ marginBottom: "1rem" }}>
+              <label style={lbl}>Email *</label>
+              <input
+                type="email"
+                style={inp}
+                placeholder="empleado@correo.com"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                onFocus={onFocusInput}
+                onBlur={onBlurInput}
+                required
+              />
+            </div>
+
+            <div style={{ marginBottom: "1rem" }}>
+              <label style={lbl}>
+                Contraseña {editando ? "(dejar vacío para no cambiar)" : "*"}
+              </label>
+              <div style={{ position: "relative" }}>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  style={{ ...inp, paddingRight: "2.5rem" }}
+                  placeholder="••••••••"
+                  value={form.password}
+                  onChange={(e) =>
+                    setForm({ ...form, password: e.target.value })
+                  }
+                  onFocus={onFocusInput}
+                  onBlur={onBlurInput}
+                  required={!editando}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
                   style={{
-                    borderBottom:
-                      i < empleados.length - 1 ? "1px solid #f0f0f0" : "none",
+                    position: "absolute",
+                    right: "10px",
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    color: "#aaa",
+                    display: "flex",
+                    padding: 0,
                   }}
                 >
-                  <td style={{ padding: "0.9rem 1rem" }}>
-                    <div
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+            </div>
+
+            <div style={{ marginBottom: "1.25rem" }}>
+              <label
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  cursor: "pointer",
+                  fontSize: "0.875rem",
+                  color: "#444",
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={form.activo}
+                  onChange={(e) =>
+                    setForm({ ...form, activo: e.target.checked })
+                  }
+                  style={{
+                    width: 16,
+                    height: 16,
+                    accentColor: "#f5a623",
+                    cursor: "pointer",
+                  }}
+                />
+                ✅ Empleado activo
+              </label>
+            </div>
+
+            <div style={{ display: "flex", gap: "10px" }}>
+              <button
+                type="submit"
+                disabled={guardando}
+                style={{
+                  background: guardando ? "#e0b97a" : "#f5a623",
+                  color: "#fff",
+                  border: "none",
+                  padding: "0.65rem 1.4rem",
+                  borderRadius: "8px",
+                  fontWeight: 600,
+                  fontSize: "0.875rem",
+                  cursor: guardando ? "not-allowed" : "pointer",
+                  transition: "background 0.2s",
+                  opacity: guardando ? 0.7 : 1,
+                }}
+                onMouseEnter={(e) => {
+                  if (!guardando) e.currentTarget.style.background = "#d4891a";
+                }}
+                onMouseLeave={(e) => {
+                  if (!guardando) e.currentTarget.style.background = "#f5a623";
+                }}
+              >
+                {guardando
+                  ? "Guardando..."
+                  : editando
+                    ? "Guardar cambios"
+                    : "Crear empleado"}
+              </button>
+
+              <button
+                type="button"
+                onClick={cancelForm}
+                style={{
+                  padding: "0.65rem 1.2rem",
+                  borderRadius: "8px",
+                  border: "1px solid #e0e0e0",
+                  background: "#fff",
+                  color: "#555",
+                  fontWeight: 600,
+                  fontSize: "0.875rem",
+                  cursor: "pointer",
+                }}
+              >
+                Cancelar
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {!showForm && (
+        <div
+          style={{
+            background: "#fff",
+            border: "1px solid #e8e8e8",
+            borderRadius: "12px",
+            overflow: "hidden",
+          }}
+        >
+          {loading ? (
+            <div
+              style={{
+                padding: "3rem",
+                textAlign: "center",
+                color: "#aaa",
+              }}
+            >
+              Cargando empleados...
+            </div>
+          ) : empleados.length === 0 ? (
+            <div
+              style={{
+                padding: "3rem",
+                textAlign: "center",
+                color: "#aaa",
+              }}
+            >
+              No hay empleados registrados.
+            </div>
+          ) : (
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <thead>
+                <tr
+                  style={{
+                    background: "#fafafa",
+                    borderBottom: "1px solid #e8e8e8",
+                  }}
+                >
+                  {["Nombre", "Email", "Estado", "Creado", "Acciones"].map(
+                    (h) => (
+                      <th
+                        key={h}
+                        style={{
+                          padding: "0.85rem 1rem",
+                          textAlign: "left",
+                          fontSize: "0.8rem",
+                          fontWeight: 600,
+                          color: "#888",
+                          textTransform: "uppercase",
+                          letterSpacing: "0.05em",
+                        }}
+                      >
+                        {h}
+                      </th>
+                    ),
+                  )}
+                </tr>
+              </thead>
+
+              <tbody>
+                {empleados.map((emp, i) => (
+                  <tr
+                    key={emp.id}
+                    style={{
+                      borderBottom:
+                        i < empleados.length - 1 ? "1px solid #f0f0f0" : "none",
+                    }}
+                  >
+                    <td
                       style={{
+                        padding: "0.9rem 1rem",
                         fontWeight: 600,
                         color: "#1a1a1a",
                         fontSize: "0.9rem",
                       }}
                     >
                       {emp.nombre} {emp.apellido}
-                    </div>
-                  </td>
-                  <td
-                    style={{
-                      padding: "0.9rem 1rem",
-                      color: "#555",
-                      fontSize: "0.875rem",
-                    }}
-                  >
-                    {emp.email}
-                  </td>
-                  <td style={{ padding: "0.9rem 1rem" }}>
-                    <button
-                      onClick={() => toggleActivo(emp)}
+                    </td>
+
+                    <td
                       style={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: "5px",
-                        padding: "3px 10px",
-                        borderRadius: "999px",
-                        border: "none",
-                        cursor: "pointer",
-                        fontSize: "0.78rem",
-                        fontWeight: 600,
-                        background: emp.activo
-                          ? "rgba(34,197,94,0.1)"
-                          : "rgba(239,68,68,0.1)",
-                        color: emp.activo ? "#16a34a" : "#dc2626",
-                        transition: "all 0.2s",
+                        padding: "0.9rem 1rem",
+                        color: "#555",
+                        fontSize: "0.875rem",
                       }}
                     >
-                      {emp.activo ? <Check size={12} /> : <X size={12} />}
-                      {emp.activo ? "Activo" : "Inactivo"}
-                    </button>
-                  </td>
-                  <td
-                    style={{
-                      padding: "0.9rem 1rem",
-                      color: "#aaa",
-                      fontSize: "0.8rem",
-                    }}
-                  >
-                    {new Date(emp.created_at).toLocaleDateString("es-PE", {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                    })}
-                  </td>
-                  <td style={{ padding: "0.9rem 1rem" }}>
-                    <div style={{ display: "flex", gap: "6px" }}>
+                      {emp.email}
+                    </td>
+
+                    <td style={{ padding: "0.9rem 1rem" }}>
                       <button
-                        onClick={() => abrirEditar(emp)}
-                        title="Editar"
+                        onClick={() => toggleActivo(emp)}
                         style={{
-                          background: "rgba(245,166,35,0.1)",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "5px",
+                          padding: "3px 10px",
+                          borderRadius: "999px",
                           border: "none",
-                          borderRadius: "6px",
-                          padding: "6px",
                           cursor: "pointer",
-                          color: "#f5a623",
-                          display: "flex",
-                          transition: "background 0.2s",
+                          fontSize: "0.78rem",
+                          fontWeight: 600,
+                          background: emp.activo
+                            ? "rgba(34,197,94,0.1)"
+                            : "rgba(239,68,68,0.1)",
+                          color: emp.activo ? "#16a34a" : "#dc2626",
+                          transition: "all 0.2s",
                         }}
-                        onMouseEnter={(e) =>
-                          (e.currentTarget.style.background =
-                            "rgba(245,166,35,0.2)")
-                        }
-                        onMouseLeave={(e) =>
-                          (e.currentTarget.style.background =
-                            "rgba(245,166,35,0.1)")
-                        }
                       >
-                        <Pencil size={15} />
+                        {emp.activo ? "Activo" : "Inactivo"}
                       </button>
-                      {confirmDelete === emp.id ? (
-                        <div style={{ display: "flex", gap: "4px" }}>
-                          <button
-                            onClick={() => eliminar(emp.id)}
-                            style={{
-                              background: "rgba(220,38,38,0.1)",
-                              border: "none",
-                              borderRadius: "6px",
-                              padding: "6px 10px",
-                              cursor: "pointer",
-                              color: "#dc2626",
-                              fontSize: "0.75rem",
-                              fontWeight: 600,
-                            }}
-                          >
-                            Confirmar
-                          </button>
-                          <button
-                            onClick={() => setConfirmDelete(null)}
-                            style={{
-                              background: "#f0f0f0",
-                              border: "none",
-                              borderRadius: "6px",
-                              padding: "6px",
-                              cursor: "pointer",
-                              color: "#555",
-                              display: "flex",
-                            }}
-                          >
-                            <X size={15} />
-                          </button>
-                        </div>
-                      ) : (
+                    </td>
+
+                    <td
+                      style={{
+                        padding: "0.9rem 1rem",
+                        color: "#aaa",
+                        fontSize: "0.8rem",
+                      }}
+                    >
+                      {new Date(emp.created_at).toLocaleDateString("es-PE", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </td>
+
+                    <td style={{ padding: "0.9rem 1rem" }}>
+                      <div style={{ display: "flex", gap: "6px" }}>
                         <button
-                          onClick={() => setConfirmDelete(emp.id)}
+                          onClick={() => abrirEditar(emp)}
+                          title="Editar"
+                          style={{
+                            background: "rgba(245,166,35,0.1)",
+                            border: "none",
+                            borderRadius: "6px",
+                            padding: "6px",
+                            cursor: "pointer",
+                            color: "#f5a623",
+                            display: "flex",
+                            transition: "background 0.2s",
+                          }}
+                          onMouseEnter={(e) =>
+                            (e.currentTarget.style.background =
+                              "rgba(245,166,35,0.2)")
+                          }
+                          onMouseLeave={(e) =>
+                            (e.currentTarget.style.background =
+                              "rgba(245,166,35,0.1)")
+                          }
+                        >
+                          <Pencil size={15} />
+                        </button>
+
+                        <button
+                          onClick={() => eliminar(emp.id)}
                           title="Eliminar"
                           style={{
                             background: "rgba(220,38,38,0.08)",
@@ -400,277 +644,15 @@ export default function EmpleadosPage() {
                         >
                           <Trash2 size={15} />
                         </button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-
-      {/* Modal */}
-      {modalOpen && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0,0,0,0.4)",
-            zIndex: 50,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "1rem",
-          }}
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setModalOpen(false);
-          }}
-        >
-          <div
-            style={{
-              background: "#fff",
-              borderRadius: "14px",
-              width: "100%",
-              maxWidth: "480px",
-              boxShadow: "0 20px 60px rgba(0,0,0,0.2)",
-              overflow: "hidden",
-            }}
-          >
-            {/* Modal header */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                padding: "1.25rem 1.5rem",
-                borderBottom: "1px solid #f0f0f0",
-              }}
-            >
-              <h2 style={{ margin: 0, fontSize: "1.05rem", fontWeight: 700 }}>
-                {editando ? "Editar empleado" : "Nuevo empleado"}
-              </h2>
-              <button
-                onClick={() => setModalOpen(false)}
-                style={{
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  color: "#aaa",
-                  display: "flex",
-                  padding: "4px",
-                }}
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            {/* Modal body */}
-            <div style={{ padding: "1.5rem", display: "grid", gap: "1rem" }}>
-              {error && (
-                <div
-                  style={{
-                    background: "#fff5f5",
-                    border: "1px solid #fca5a5",
-                    borderRadius: "8px",
-                    padding: "0.7rem 1rem",
-                    fontSize: "0.85rem",
-                    color: "#dc2626",
-                  }}
-                >
-                  {error}
-                </div>
-              )}
-
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: "1rem",
-                }}
-              >
-                {[
-                  { label: "Nombre *", key: "nombre", placeholder: "Juan" },
-                  { label: "Apellido", key: "apellido", placeholder: "Pérez" },
-                ].map(({ label, key, placeholder }) => (
-                  <div key={key}>
-                    <label style={labelStyle}>{label}</label>
-                    <input
-                      value={form[key as keyof FormData] as string}
-                      onChange={(e) =>
-                        setForm({ ...form, [key]: e.target.value })
-                      }
-                      placeholder={placeholder}
-                      style={inputStyle}
-                      onFocus={onFocusInput}
-                      onBlur={onBlurInput}
-                    />
-                  </div>
+                      </div>
+                    </td>
+                  </tr>
                 ))}
-              </div>
-
-              <div>
-                <label style={labelStyle}>Email *</label>
-                <input
-                  type="email"
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  placeholder="empleado@correo.com"
-                  style={inputStyle}
-                  onFocus={onFocusInput}
-                  onBlur={onBlurInput}
-                />
-              </div>
-
-              <div>
-                <label style={labelStyle}>
-                  Contraseña {editando ? "(dejar vacío para no cambiar)" : "*"}
-                </label>
-                <div style={{ position: "relative" }}>
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    value={form.password}
-                    onChange={(e) =>
-                      setForm({ ...form, password: e.target.value })
-                    }
-                    placeholder="••••••••"
-                    style={{ ...inputStyle, paddingRight: "2.5rem" }}
-                    onFocus={onFocusInput}
-                    onBlur={onBlurInput}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    style={{
-                      position: "absolute",
-                      right: "10px",
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      background: "none",
-                      border: "none",
-                      cursor: "pointer",
-                      color: "#aaa",
-                      display: "flex",
-                      padding: 0,
-                    }}
-                  >
-                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
-                </div>
-              </div>
-
-              <div
-                style={{ display: "flex", alignItems: "center", gap: "10px" }}
-              >
-                <input
-                  type="checkbox"
-                  id="activo"
-                  checked={form.activo}
-                  onChange={(e) =>
-                    setForm({ ...form, activo: e.target.checked })
-                  }
-                  style={{
-                    width: "16px",
-                    height: "16px",
-                    cursor: "pointer",
-                    accentColor: "#f5a623",
-                  }}
-                />
-                <label
-                  htmlFor="activo"
-                  style={{
-                    fontSize: "0.875rem",
-                    color: "#333",
-                    cursor: "pointer",
-                  }}
-                >
-                  Empleado activo
-                </label>
-              </div>
-            </div>
-
-            {/* Modal footer */}
-            <div
-              style={{
-                display: "flex",
-                gap: "10px",
-                justifyContent: "flex-end",
-                padding: "1rem 1.5rem",
-                borderTop: "1px solid #f0f0f0",
-              }}
-            >
-              <button
-                onClick={() => setModalOpen(false)}
-                style={{
-                  padding: "0.65rem 1.2rem",
-                  borderRadius: "8px",
-                  border: "1px solid #e0e0e0",
-                  background: "#fff",
-                  color: "#555",
-                  fontWeight: 600,
-                  fontSize: "0.875rem",
-                  cursor: "pointer",
-                }}
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={guardar}
-                disabled={guardando}
-                style={{
-                  padding: "0.65rem 1.4rem",
-                  borderRadius: "8px",
-                  border: "none",
-                  background: guardando ? "#e0b97a" : "#f5a623",
-                  color: "#fff",
-                  fontWeight: 600,
-                  fontSize: "0.875rem",
-                  cursor: guardando ? "not-allowed" : "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "6px",
-                }}
-              >
-                {guardando
-                  ? "Guardando..."
-                  : editando
-                    ? "Guardar cambios"
-                    : "Crear empleado"}
-              </button>
-            </div>
-          </div>
+              </tbody>
+            </table>
+          )}
         </div>
       )}
     </div>
   );
-}
-
-// Estilos reutilizables
-const labelStyle: React.CSSProperties = {
-  display: "block",
-  fontSize: "0.82rem",
-  fontWeight: 600,
-  color: "#444",
-  marginBottom: "0.4rem",
-};
-
-const inputStyle: React.CSSProperties = {
-  width: "100%",
-  padding: "0.7rem 0.9rem",
-  border: "1px solid #ddd",
-  borderRadius: "8px",
-  fontSize: "0.9rem",
-  outline: "none",
-  boxSizing: "border-box",
-  transition: "border-color 0.15s, box-shadow 0.15s",
-};
-
-function onFocusInput(e: React.FocusEvent<HTMLInputElement>) {
-  e.currentTarget.style.borderColor = "#f5a623";
-  e.currentTarget.style.boxShadow = "0 0 0 3px rgba(245,166,35,0.1)";
-}
-
-function onBlurInput(e: React.FocusEvent<HTMLInputElement>) {
-  e.currentTarget.style.borderColor = "#ddd";
-  e.currentTarget.style.boxShadow = "none";
 }
