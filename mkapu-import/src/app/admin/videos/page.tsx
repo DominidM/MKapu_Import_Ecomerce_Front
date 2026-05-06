@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import type { Video } from "@/lib/queries";
@@ -36,30 +37,41 @@ export default function AdminVideosPage() {
 
   function scrollToTop() {
     const container = document.querySelector(".main-content");
-    if (container) container.scrollTop = 0;
+    if (container) {
+      container.scrollTop = 0;
+    } else {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
   }
 
   async function uploadVideo(file: File): Promise<string | null> {
     const MAX_MB = 50;
+
     if (file.size > MAX_MB * 1024 * 1024) {
       alert(
         `El archivo supera los ${MAX_MB}MB. Comprime el video e intenta de nuevo.`,
       );
       return null;
     }
+
     setUploadingVideo(true);
     setUploadProgress("Subiendo...");
+
     const ext = file.name.split(".").pop();
     const path = `videos/${Date.now()}.${ext}`;
+
     const { error } = await supabase.storage
       .from("imagenes")
       .upload(path, file, { upsert: true });
+
     setUploadingVideo(false);
+
     if (error) {
       setUploadProgress("");
       alert("Error al subir: " + error.message);
       return null;
     }
+
     const url = supabase.storage.from("imagenes").getPublicUrl(path)
       .data.publicUrl;
     setUploadProgress("✓ Video subido correctamente");
@@ -68,10 +80,12 @@ export default function AdminVideosPage() {
 
   async function load() {
     setLoading(true);
+
     const { data } = await supabase
       .from("videos")
       .select("*")
       .order("created_at", { ascending: false });
+
     setRows(data ?? []);
     setLoading(false);
   }
@@ -86,12 +100,15 @@ export default function AdminVideosPage() {
     setShowForm(false);
     setUploadProgress("");
     setSelectedFileName("");
+    if (videoFileRef.current) videoFileRef.current.value = "";
   }
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
+
     if (!form.title.trim()) return alert("Título requerido");
     if (!form.video_url.trim()) return alert("Sube un archivo de video");
+
     const payload = {
       title: form.title,
       descripcion: form.descripcion || null,
@@ -99,10 +116,13 @@ export default function AdminVideosPage() {
       tipo: form.tipo,
       activo: form.activo,
     };
+
     const { error } = editId
       ? await supabase.from("videos").update(payload).eq("id", editId)
       : await supabase.from("videos").insert(payload);
+
     if (error) return alert(error.message);
+
     resetForm();
     load();
   }
@@ -132,7 +152,6 @@ export default function AdminVideosPage() {
     ? rows.filter((v) => v.tipo === filterTipo)
     : rows;
 
-  // Helpers para saber si la URL es imagen o video
   function isImage(url: string | null | undefined) {
     if (!url) return false;
     return /\.(jpe?g|png|gif|webp|avif)$/i.test(url);
@@ -278,7 +297,6 @@ export default function AdminVideosPage() {
       `}</style>
 
       <div style={{ maxWidth: 1000, margin: "0 auto" }}>
-        {/* Header */}
         <div
           style={{
             display: "flex",
@@ -305,9 +323,17 @@ export default function AdminVideosPage() {
               {rows.length !== 1 ? "s" : ""}
             </p>
           </div>
+
           <button
             className="av-btn-primary"
-            onClick={() => (showForm ? resetForm() : setShowForm(true))}
+            onClick={() => {
+              if (showForm) {
+                resetForm();
+              } else {
+                setShowForm(true);
+                setTimeout(() => scrollToTop(), 50);
+              }
+            }}
           >
             {showForm ? (
               <>
@@ -321,14 +347,193 @@ export default function AdminVideosPage() {
           </button>
         </div>
 
-        {/* Formulario */}
         {showForm && (
-          /* ... tu formulario exactamente igual que ya lo tienes ... */
-          // (omito aquí para no repetir: pega el mismo bloque de formulario que ya tenías)
-          <></>
+          <form
+            onSubmit={save}
+            style={{
+              background: "#fff",
+              border: "1px solid #e8e8e8",
+              borderRadius: 12,
+              padding: 20,
+              marginBottom: 20,
+              display: "grid",
+              gap: 16,
+            }}
+          >
+            <div>
+              <label className="av-label">Título</label>
+              <input
+                className="av-input"
+                value={form.title}
+                onChange={(e) => setForm({ ...form, title: e.target.value })}
+                placeholder="Ingresa el título"
+              />
+            </div>
+
+            <div>
+              <label className="av-label">Descripción</label>
+              <textarea
+                className="av-input"
+                value={form.descripcion}
+                onChange={(e) =>
+                  setForm({ ...form, descripcion: e.target.value })
+                }
+                placeholder="Ingresa una descripción"
+                rows={4}
+                style={{ resize: "vertical" }}
+              />
+            </div>
+
+            <div>
+              <label className="av-label">Tipo</label>
+              <select
+                className="av-input"
+                value={form.tipo}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    tipo: e.target.value as "video" | "vlog",
+                  })
+                }
+              >
+                <option value="video">Video</option>
+                <option value="vlog">Vlog</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="av-label">Subir video</label>
+
+              <input
+                ref={videoFileRef}
+                type="file"
+                accept="video/*"
+                style={{ display: "none" }}
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+
+                  setSelectedFileName(file.name);
+                  const url = await uploadVideo(file);
+
+                  if (url) {
+                    setForm((prev) => ({ ...prev, video_url: url }));
+                  }
+                }}
+              />
+
+              <div
+                className={`av-dropzone ${
+                  uploadProgress.startsWith("✓") ? "av-dropzone--success" : ""
+                } ${uploadingVideo ? "av-dropzone--uploading" : ""}`}
+                onClick={() => {
+                  if (!uploadingVideo) videoFileRef.current?.click();
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: 10,
+                  }}
+                >
+                  {uploadingVideo ? (
+                    <Loader2 size={28} className="av-spin" color="#f5a623" />
+                  ) : uploadProgress.startsWith("✓") ? (
+                    <CheckCircle size={28} color="#22c55e" />
+                  ) : (
+                    <Upload size={28} color="#f5a623" />
+                  )}
+
+                  <div style={{ fontWeight: 600, color: "#444" }}>
+                    {uploadingVideo
+                      ? "Subiendo video..."
+                      : selectedFileName ||
+                        "Haz clic para seleccionar un video"}
+                  </div>
+
+                  <div style={{ fontSize: "0.82rem", color: "#999" }}>
+                    MP4, WebM, MOV, AVI, MKV - máximo 50MB
+                  </div>
+
+                  {uploadProgress && (
+                    <div
+                      style={{
+                        fontSize: "0.82rem",
+                        color: uploadProgress.startsWith("✓")
+                          ? "#22c55e"
+                          : "#999",
+                        fontWeight: 600,
+                      }}
+                    >
+                      {uploadProgress}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {form.video_url && (
+                <div style={{ marginTop: 12 }}>
+                  <video
+                    src={form.video_url}
+                    controls
+                    style={{
+                      width: "100%",
+                      maxWidth: 360,
+                      borderRadius: 10,
+                      border: "1px solid #e8e8e8",
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <input
+                id="activo"
+                type="checkbox"
+                checked={form.activo}
+                onChange={(e) => setForm({ ...form, activo: e.target.checked })}
+              />
+              <label
+                htmlFor="activo"
+                style={{ fontSize: "0.9rem", color: "#555" }}
+              >
+                Activo
+              </label>
+            </div>
+
+            <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
+              <button
+                type="submit"
+                className="av-btn-primary"
+                disabled={uploadingVideo}
+              >
+                {editId ? (
+                  <>
+                    <CheckCircle size={15} />
+                    Actualizar
+                  </>
+                ) : (
+                  <>
+                    <PlusCircle size={15} />
+                    Guardar
+                  </>
+                )}
+              </button>
+
+              <button
+                type="button"
+                className="av-btn-secondary"
+                onClick={resetForm}
+              >
+                Cancelar
+              </button>
+            </div>
+          </form>
         )}
 
-        {/* Filtros */}
         {!showForm && (
           <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
             {(["", "video", "vlog"] as const).map((t) => (
@@ -345,7 +550,6 @@ export default function AdminVideosPage() {
           </div>
         )}
 
-        {/* Tabla */}
         {!showForm &&
           (loading ? (
             <div
@@ -404,6 +608,7 @@ export default function AdminVideosPage() {
                     )}
                   </tr>
                 </thead>
+
                 <tbody>
                   {filtered.length === 0 ? (
                     <tr>
@@ -439,7 +644,6 @@ export default function AdminVideosPage() {
                               : "none",
                         }}
                       >
-                        {/* Media preview */}
                         <td
                           style={{
                             padding: "8px 12px",
@@ -509,7 +713,6 @@ export default function AdminVideosPage() {
                           )}
                         </td>
 
-                        {/* Título */}
                         <td style={{ padding: "12px 16px", maxWidth: 320 }}>
                           <span
                             style={{
@@ -539,7 +742,6 @@ export default function AdminVideosPage() {
                           )}
                         </td>
 
-                        {/* Tipo */}
                         <td style={{ padding: "12px 16px" }}>
                           <span
                             className="av-badge"
@@ -553,7 +755,6 @@ export default function AdminVideosPage() {
                           </span>
                         </td>
 
-                        {/* Estado */}
                         <td style={{ padding: "12px 16px" }}>
                           <span
                             className="av-badge"
@@ -566,7 +767,6 @@ export default function AdminVideosPage() {
                           </span>
                         </td>
 
-                        {/* Acciones */}
                         <td style={{ padding: "12px 16px" }}>
                           <div style={{ display: "flex", gap: 6 }}>
                             <button
