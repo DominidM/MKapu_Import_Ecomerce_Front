@@ -1,5 +1,4 @@
 import { Suspense } from "react";
-import { getProductos, getCategoriasFromProductos } from "@/lib/queries";
 import ProductosClient from "./ProductosClient";
 import { supabase } from "@/lib/supabase";
 
@@ -35,8 +34,8 @@ function Loading() {
 }
 
 export default async function Page() {
-  const [categories, { data: bannerData }] = await Promise.all([
-    getCategoriasFromProductos(),
+  const [{ data: categoriasData }, { data: bannerData }] = await Promise.all([
+    supabase.from("categorias").select("name").eq("activo", true).order("name"),
     supabase
       .from("banners_config")
       .select("titulo, subtitulo, image_url, activo")
@@ -44,12 +43,11 @@ export default async function Page() {
       .single(),
   ]);
 
+  const categories = (categoriasData ?? []).map((c) => c.name);
+
   return (
     <Suspense fallback={<Loading />}>
-      <ProductosClient
-        allCats={categories}
-        banner={bannerData ?? null}
-      />
+      <ProductosClient allCats={categories} banner={bannerData ?? null} />
     </Suspense>
   );
 }

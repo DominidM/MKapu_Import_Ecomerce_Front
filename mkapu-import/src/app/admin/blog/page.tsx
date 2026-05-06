@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { Pencil, Trash2, Image as ImageIcon, Video } from "lucide-react";
 
 type BlogPost = {
   id: number;
@@ -18,6 +19,7 @@ type BlogImagen = {
   url_imagen: string;
   orden: number;
 };
+
 type BlogVideo = {
   id: number;
   vlog_post_id: number;
@@ -29,30 +31,28 @@ const initialForm = {
   titulo: "",
   descripcion: "",
   contenido: "",
-  fecha_publicacion: new Date().toISOString().split("T")[0],
-  orden: 0,
   activo: true,
 };
 
 const inp: React.CSSProperties = {
   width: "100%",
-  padding: "9px 12px",
-  border: "1px solid #e0e0e0",
+  padding: "0.7rem 0.9rem",
+  border: "1px solid #ddd",
   borderRadius: "8px",
   fontSize: "0.875rem",
   background: "#fff",
   color: "#1a1a1a",
   outline: "none",
   boxSizing: "border-box",
+  transition: "border-color 0.15s, box-shadow 0.15s",
 };
+
 const lbl: React.CSSProperties = {
   display: "block",
-  fontSize: "0.75rem",
+  fontSize: "0.82rem",
   fontWeight: 600,
-  color: "#888",
-  marginBottom: "4px",
-  textTransform: "uppercase",
-  letterSpacing: "0.05em",
+  color: "#444",
+  marginBottom: "0.4rem",
 };
 
 export default function AdminBlogPage() {
@@ -69,6 +69,7 @@ export default function AdminBlogPage() {
   >({});
   const [uploadingImg, setUploadingImg] = useState(false);
   const [uploadingVid, setUploadingVid] = useState(false);
+  const [savingOrder, setSavingOrder] = useState(false);
   const imgRef = useRef<HTMLInputElement>(null);
   const vidRef = useRef<HTMLInputElement>(null);
 
@@ -83,7 +84,6 @@ export default function AdminBlogPage() {
     );
     setRows(posts ?? []);
 
-    // Construir mapa de conteos
     const mapa: Record<number, { imgs: number; vids: number }> = {};
     for (const img of imgs ?? []) {
       if (!mapa[img.vlog_post_id])
@@ -120,6 +120,47 @@ export default function AdminBlogPage() {
     load();
   }, []);
 
+  async function persistOrder(list: BlogPost[]) {
+    setSavingOrder(true);
+
+    const reordered = list.map((p, i) => ({
+      ...p,
+      orden: i + 1,
+    }));
+
+    setRows(reordered);
+
+    await Promise.all(
+      reordered.map((p) =>
+        supabase.from("vlog_posts").update({ orden: p.orden }).eq("id", p.id),
+      ),
+    );
+
+    setSavingOrder(false);
+  }
+
+  function moveUp(idx: number) {
+    if (idx === 0) return;
+
+    const copy = [...rows];
+    const temp = copy[idx - 1];
+    copy[idx - 1] = copy[idx];
+    copy[idx] = temp;
+
+    void persistOrder(copy);
+  }
+
+  function moveDown(idx: number) {
+    if (idx === rows.length - 1) return;
+
+    const copy = [...rows];
+    const temp = copy[idx + 1];
+    copy[idx + 1] = copy[idx];
+    copy[idx] = temp;
+
+    void persistOrder(copy);
+  }
+
   async function uploadImagen(file: File): Promise<string | null> {
     const ext = file.name.split(".").pop();
     const path = `blog/imagenes/${Date.now()}.${ext}`;
@@ -155,15 +196,14 @@ export default function AdminBlogPage() {
     for (let i = 0; i < files.length; i++) {
       const url = await uploadImagen(files[i]);
       if (url)
-        await supabase
-          .from("vlog_imagenes")
-          .insert({
-            vlog_post_id: editId,
-            url_imagen: url,
-            orden: baseOrden + i,
-          });
+        await supabase.from("vlog_imagenes").insert({
+          vlog_post_id: editId,
+          url_imagen: url,
+          orden: baseOrden + i,
+        });
     }
     await loadMedia(editId);
+    await load();
     setUploadingImg(false);
     if (imgRef.current) imgRef.current.value = "";
   }
@@ -177,15 +217,14 @@ export default function AdminBlogPage() {
     for (let i = 0; i < files.length; i++) {
       const url = await uploadVideo(files[i]);
       if (url)
-        await supabase
-          .from("vlog_videos")
-          .insert({
-            vlog_post_id: editId,
-            video_url: url,
-            orden: baseOrden + i,
-          });
+        await supabase.from("vlog_videos").insert({
+          vlog_post_id: editId,
+          video_url: url,
+          orden: baseOrden + i,
+        });
     }
     await loadMedia(editId);
+    await load();
     setUploadingVid(false);
     if (vidRef.current) vidRef.current.value = "";
   }
@@ -193,53 +232,59 @@ export default function AdminBlogPage() {
   async function deleteImagen(id: number) {
     if (!confirm("¿Eliminar imagen?")) return;
     await supabase.from("vlog_imagenes").delete().eq("id", id);
-    if (editId) loadMedia(editId);
+    if (editId) await loadMedia(editId);
+    await load();
   }
 
   async function deleteVideo(id: number) {
     if (!confirm("¿Eliminar video?")) return;
     await supabase.from("vlog_videos").delete().eq("id", id);
-    if (editId) loadMedia(editId);
+    if (editId) await loadMedia(editId);
+    await load();
   }
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
     if (!form.titulo.trim()) return alert("Título requerido");
+
     const payload = {
       titulo: form.titulo.trim(),
       descripcion: form.descripcion || null,
       contenido: form.contenido || null,
-      fecha_publicacion: form.fecha_publicacion,
-      orden: form.orden,
+      fecha_publicacion: new Date().toISOString().split("T")[0],
+      orden: rows.length + 1,
       activo: form.activo,
     };
 
     if (editId) {
       const { error } = await supabase
         .from("vlog_posts")
-        .update(payload)
+        .update({
+          titulo: payload.titulo,
+          descripcion: payload.descripcion,
+          contenido: payload.contenido,
+          activo: payload.activo,
+        })
         .eq("id", editId);
+
       if (error) return alert(error.message);
       cancelForm();
-      load();
+      await load();
     } else {
-      // Crear y quedarse en modo edición para subir media de inmediato
       const { data, error } = await supabase
         .from("vlog_posts")
         .insert(payload)
         .select()
         .single();
+
       if (error) return alert(error.message);
       await load();
+
       setEditId(data.id);
       setForm({
         titulo: data.titulo ?? "",
         descripcion: data.descripcion ?? "",
         contenido: data.contenido ?? "",
-        fecha_publicacion:
-          data.fecha_publicacion?.split("T")[0] ??
-          new Date().toISOString().split("T")[0],
-        orden: data.orden ?? 0,
         activo: data.activo ?? true,
       });
       setImagenes([]);
@@ -254,10 +299,6 @@ export default function AdminBlogPage() {
       titulo: p.titulo ?? "",
       descripcion: p.descripcion ?? "",
       contenido: p.contenido ?? "",
-      fecha_publicacion:
-        p.fecha_publicacion?.split("T")[0] ??
-        new Date().toISOString().split("T")[0],
-      orden: p.orden ?? 0,
       activo: p.activo ?? true,
     });
     loadMedia(p.id);
@@ -275,7 +316,7 @@ export default function AdminBlogPage() {
     await supabase.from("vlog_imagenes").delete().eq("vlog_post_id", id);
     await supabase.from("vlog_videos").delete().eq("vlog_post_id", id);
     await supabase.from("vlog_posts").delete().eq("id", id);
-    load();
+    await load();
   }
 
   function cancelForm() {
@@ -286,151 +327,159 @@ export default function AdminBlogPage() {
     setVideos([]);
   }
 
+  function onFocusInput(
+    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) {
+    e.currentTarget.style.borderColor = "#f5a623";
+    e.currentTarget.style.boxShadow = "0 0 0 3px rgba(245,166,35,0.1)";
+  }
+
+  function onBlurInput(
+    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) {
+    e.currentTarget.style.borderColor = "#ddd";
+    e.currentTarget.style.boxShadow = "none";
+  }
+
   const filtered = rows.filter((p) =>
     p.titulo.toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
-    <div style={{ maxWidth: 1100, margin: "0 auto", padding: "20px" }}>
-      <style>{`
-        .fi:focus{border-color:#f5a623!important;box-shadow:0 0 0 3px rgba(245,166,35,0.12)}
-        .rh:hover{background:#fafafa!important}
-        .be:hover{background:rgba(0,123,255,0.1)!important;color:#0056b3!important}
-        .bd:hover{background:rgba(220,53,69,0.1)!important;color:#a71d2a!important}
-        .bp:hover{background:#e69510!important}
-      `}</style>
-
-      {/* Header */}
+    <div
+      style={{
+        padding: "1.5rem 1.25rem 2.5rem",
+        background: "#f8f7f4",
+        minHeight: "100vh",
+      }}
+    >
       <div
         style={{
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          marginBottom: "24px",
+          marginBottom: "1.5rem",
+          gap: "1rem",
+          flexWrap: "wrap",
         }}
       >
         <div>
           <h1
             style={{
               margin: 0,
-              fontSize: "1.5rem",
+              fontSize: "1.4rem",
               fontWeight: 700,
               color: "#1a1a1a",
             }}
           >
             Blog
           </h1>
-          <p style={{ margin: "4px 0 0", fontSize: "0.875rem", color: "#888" }}>
+          <p
+            style={{
+              fontSize: "0.875rem",
+              color: "#888",
+              margin: "0.25rem 0 0",
+            }}
+          >
             {rows.length} publicación{rows.length !== 1 ? "es" : ""} registrada
             {rows.length !== 1 ? "s" : ""}
           </p>
         </div>
-        <button
-          className="bp"
-          onClick={() => {
-            setShowForm(!showForm);
-            if (showForm) cancelForm();
-          }}
-          style={{
-            background: "#f5a623",
-            color: "#fff",
-            border: "none",
-            padding: "10px 20px",
-            borderRadius: "8px",
-            fontWeight: 700,
-            cursor: "pointer",
-            fontSize: "0.875rem",
-          }}
-        >
-          {showForm ? "✕ Cancelar" : "+ Nuevo post"}
-        </button>
+
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          {savingOrder && (
+            <span
+              style={{
+                fontSize: "0.8rem",
+                color: "#c47d00",
+                background: "#fff8e6",
+                padding: "6px 10px",
+                borderRadius: "999px",
+                fontWeight: 600,
+              }}
+            >
+              Guardando orden...
+            </span>
+          )}
+
+          <button
+            onClick={() => {
+              setShowForm(!showForm);
+              if (showForm) cancelForm();
+            }}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              background: "#f5a623",
+              color: "#fff",
+              border: "none",
+              borderRadius: "8px",
+              padding: "0.65rem 1.1rem",
+              fontWeight: 600,
+              fontSize: "0.875rem",
+              cursor: "pointer",
+              transition: "background 0.2s",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = "#d4891a")}
+            onMouseLeave={(e) => (e.currentTarget.style.background = "#f5a623")}
+          >
+            {showForm ? "✕ Cancelar" : "+ Nuevo post"}
+          </button>
+        </div>
       </div>
 
-      {/* Formulario */}
       {showForm && (
         <div
           style={{
             background: "#fff",
             border: "1px solid #e8e8e8",
             borderRadius: "12px",
-            padding: "24px",
-            marginBottom: "28px",
+            padding: "1.5rem",
+            marginBottom: "1.5rem",
             borderTop: "3px solid #f5a623",
           }}
         >
           <h2
             style={{
-              margin: "0 0 20px",
-              fontSize: "1rem",
+              margin: "0 0 1.25rem",
+              fontSize: "1.05rem",
               fontWeight: 700,
               color: "#1a1a1a",
             }}
           >
             {editId ? "Editar post" : "Nuevo post"}
           </h2>
+
           <form onSubmit={save}>
-            {/* Fila 1 */}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "2fr 1fr 1fr",
-                gap: "16px",
-                marginBottom: "16px",
-              }}
-            >
-              <div>
-                <label style={lbl}>Título *</label>
-                <input
-                  className="fi"
-                  style={inp}
-                  placeholder="Título del post"
-                  value={form.titulo}
-                  onChange={(e) => setForm({ ...form, titulo: e.target.value })}
-                  required
-                />
-              </div>
-              <div>
-                <label style={lbl}>Fecha publicación</label>
-                <input
-                  className="fi"
-                  style={inp}
-                  type="date"
-                  value={form.fecha_publicacion}
-                  onChange={(e) =>
-                    setForm({ ...form, fecha_publicacion: e.target.value })
-                  }
-                />
-              </div>
-              <div>
-                <label style={lbl}>Orden</label>
-                <input
-                  className="fi"
-                  style={inp}
-                  type="number"
-                  value={form.orden}
-                  onChange={(e) =>
-                    setForm({ ...form, orden: parseInt(e.target.value) || 0 })
-                  }
-                />
-              </div>
+            <div style={{ marginBottom: "1rem" }}>
+              <label style={lbl}>Título *</label>
+              <input
+                style={inp}
+                placeholder="Título del post"
+                value={form.titulo}
+                onChange={(e) => setForm({ ...form, titulo: e.target.value })}
+                onFocus={onFocusInput}
+                onBlur={onBlurInput}
+                required
+              />
             </div>
 
-            {/* Descripción */}
-            <div style={{ marginBottom: "16px" }}>
+            <div style={{ marginBottom: "1rem" }}>
               <label style={lbl}>Descripción corta</label>
               <input
-                className="fi"
                 style={inp}
                 placeholder="Breve descripción visible en la lista"
                 value={form.descripcion}
                 onChange={(e) =>
                   setForm({ ...form, descripcion: e.target.value })
                 }
+                onFocus={onFocusInput}
+                onBlur={onBlurInput}
               />
             </div>
 
-            {/* Contenido */}
-            <div style={{ marginBottom: "16px" }}>
+            <div style={{ marginBottom: "1rem" }}>
               <label style={lbl}>
                 Contenido{" "}
                 <span
@@ -444,18 +493,18 @@ export default function AdminBlogPage() {
                 </span>
               </label>
               <textarea
-                className="fi"
                 style={{ ...inp, minHeight: "140px", resize: "vertical" }}
                 placeholder="<p>Escribe el contenido completo aquí...</p>"
                 value={form.contenido}
                 onChange={(e) =>
                   setForm({ ...form, contenido: e.target.value })
                 }
+                onFocus={onFocusInput}
+                onBlur={onBlurInput}
               />
             </div>
 
-            {/* Activo */}
-            <div style={{ marginBottom: "20px" }}>
+            <div style={{ marginBottom: "1.25rem" }}>
               <label
                 style={{
                   display: "flex",
@@ -483,24 +532,24 @@ export default function AdminBlogPage() {
               </label>
             </div>
 
-            {/* Media */}
             <div
               style={{
                 background: "#fafafa",
                 border: "1px solid #e8e8e8",
                 borderRadius: "10px",
-                padding: "16px",
-                marginBottom: "20px",
+                padding: "1rem",
+                marginBottom: "1.25rem",
               }}
             >
-              {/* Imágenes */}
-              <div style={{ marginBottom: "16px" }}>
+              <div style={{ marginBottom: "1rem" }}>
                 <div
                   style={{
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",
-                    marginBottom: "10px",
+                    marginBottom: "0.75rem",
+                    gap: "1rem",
+                    flexWrap: "wrap",
                   }}
                 >
                   <div>
@@ -527,14 +576,18 @@ export default function AdminBlogPage() {
                           background: "#f0f0f0",
                           border: "1px solid #e0e0e0",
                           borderRadius: "6px",
-                          padding: "5px 12px",
+                          padding: "8px 14px",
                           cursor: "pointer",
-                          fontSize: "0.78rem",
+                          fontSize: "0.8rem",
                           fontWeight: 600,
                           opacity: uploadingImg ? 0.6 : 1,
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "6px",
                         }}
                       >
-                        {uploadingImg ? "⏳ Subiendo..." : "📁 Subir imágenes"}
+                        <ImageIcon size={14} />
+                        {uploadingImg ? "Subiendo..." : "Subir imágenes"}
                       </button>
                       <input
                         ref={imgRef}
@@ -547,6 +600,7 @@ export default function AdminBlogPage() {
                     </>
                   )}
                 </div>
+
                 {editId ? (
                   <div
                     style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}
@@ -557,8 +611,8 @@ export default function AdminBlogPage() {
                           src={img.url_imagen}
                           alt=""
                           style={{
-                            width: 72,
-                            height: 72,
+                            width: 80,
+                            height: 80,
                             objectFit: "cover",
                             borderRadius: "8px",
                             border: "1px solid #e0e0e0",
@@ -589,7 +643,13 @@ export default function AdminBlogPage() {
                       </div>
                     ))}
                     {imagenes.length === 0 && (
-                      <span style={{ fontSize: "0.8rem", color: "#bbb" }}>
+                      <span
+                        style={{
+                          fontSize: "0.8rem",
+                          color: "#bbb",
+                          padding: "8px 0",
+                        }}
+                      >
                         Sin imágenes aún
                       </span>
                     )}
@@ -600,12 +660,13 @@ export default function AdminBlogPage() {
                       display: "flex",
                       alignItems: "center",
                       gap: "10px",
+                      padding: "8px 0",
                     }}
                   >
                     <div
                       style={{
-                        width: 72,
-                        height: 72,
+                        width: 80,
+                        height: 80,
                         background: "#ececec",
                         borderRadius: "8px",
                         display: "flex",
@@ -613,12 +674,14 @@ export default function AdminBlogPage() {
                         justifyContent: "center",
                       }}
                     >
-                      <span style={{ fontSize: "1.4rem", opacity: 0.35 }}>
-                        🖼️
-                      </span>
+                      <ImageIcon size={32} color="#ccc" />
                     </div>
                     <p
-                      style={{ margin: 0, fontSize: "0.82rem", color: "#bbb" }}
+                      style={{
+                        margin: 0,
+                        fontSize: "0.82rem",
+                        color: "#bbb",
+                      }}
                     >
                       Crea el post primero y podrás
                       <br />
@@ -628,14 +691,15 @@ export default function AdminBlogPage() {
                 )}
               </div>
 
-              {/* Videos */}
               <div>
                 <div
                   style={{
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",
-                    marginBottom: "10px",
+                    marginBottom: "0.75rem",
+                    gap: "1rem",
+                    flexWrap: "wrap",
                   }}
                 >
                   <div>
@@ -662,14 +726,18 @@ export default function AdminBlogPage() {
                           background: "#f0f0f0",
                           border: "1px solid #e0e0e0",
                           borderRadius: "6px",
-                          padding: "5px 12px",
+                          padding: "8px 14px",
                           cursor: "pointer",
-                          fontSize: "0.78rem",
+                          fontSize: "0.8rem",
                           fontWeight: 600,
                           opacity: uploadingVid ? 0.6 : 1,
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "6px",
                         }}
                       >
-                        {uploadingVid ? "⏳ Subiendo..." : "🎬 Subir videos"}
+                        <Video size={14} />
+                        {uploadingVid ? "Subiendo..." : "Subir videos"}
                       </button>
                       <input
                         ref={vidRef}
@@ -682,6 +750,7 @@ export default function AdminBlogPage() {
                     </>
                   )}
                 </div>
+
                 {editId ? (
                   <div
                     style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}
@@ -693,8 +762,8 @@ export default function AdminBlogPage() {
                           muted
                           preload="metadata"
                           style={{
-                            width: 72,
-                            height: 72,
+                            width: 80,
+                            height: 80,
                             objectFit: "cover",
                             borderRadius: "8px",
                             border: "1px solid #e0e0e0",
@@ -725,7 +794,13 @@ export default function AdminBlogPage() {
                       </div>
                     ))}
                     {videos.length === 0 && (
-                      <span style={{ fontSize: "0.8rem", color: "#bbb" }}>
+                      <span
+                        style={{
+                          fontSize: "0.8rem",
+                          color: "#bbb",
+                          padding: "8px 0",
+                        }}
+                      >
                         Sin videos aún
                       </span>
                     )}
@@ -736,12 +811,13 @@ export default function AdminBlogPage() {
                       display: "flex",
                       alignItems: "center",
                       gap: "10px",
+                      padding: "8px 0",
                     }}
                   >
                     <div
                       style={{
-                        width: 72,
-                        height: 72,
+                        width: 80,
+                        height: 80,
                         background: "#ececec",
                         borderRadius: "8px",
                         display: "flex",
@@ -749,12 +825,14 @@ export default function AdminBlogPage() {
                         justifyContent: "center",
                       }}
                     >
-                      <span style={{ fontSize: "1.4rem", opacity: 0.35 }}>
-                        🎬
-                      </span>
+                      <Video size={32} color="#ccc" />
                     </div>
                     <p
-                      style={{ margin: 0, fontSize: "0.82rem", color: "#bbb" }}
+                      style={{
+                        margin: 0,
+                        fontSize: "0.82rem",
+                        color: "#bbb",
+                      }}
                     >
                       Crea el post primero y podrás
                       <br />
@@ -763,49 +841,44 @@ export default function AdminBlogPage() {
                   </div>
                 )}
               </div>
-
-              {editId && (
-                <p
-                  style={{
-                    margin: "12px 0 0",
-                    fontSize: "0.75rem",
-                    color: "#aaa",
-                  }}
-                >
-                  Las imágenes y videos se guardan inmediatamente al subirlos.
-                </p>
-              )}
             </div>
 
             <div style={{ display: "flex", gap: "10px" }}>
               <button
                 type="submit"
-                className="bp"
                 style={{
                   background: "#f5a623",
                   color: "#fff",
                   border: "none",
-                  padding: "10px 24px",
+                  padding: "0.65rem 1.4rem",
                   borderRadius: "8px",
-                  fontWeight: 700,
-                  cursor: "pointer",
+                  fontWeight: 600,
                   fontSize: "0.875rem",
+                  cursor: "pointer",
+                  transition: "background 0.2s",
                 }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.background = "#d4891a")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.background = "#f5a623")
+                }
               >
                 {editId ? "Guardar cambios" : "Crear post"}
               </button>
+
               <button
                 type="button"
                 onClick={cancelForm}
                 style={{
-                  background: "#f0f0f0",
-                  color: "#555",
-                  border: "none",
-                  padding: "10px 18px",
+                  padding: "0.65rem 1.2rem",
                   borderRadius: "8px",
+                  border: "1px solid #e0e0e0",
+                  background: "#fff",
+                  color: "#555",
                   fontWeight: 600,
-                  cursor: "pointer",
                   fontSize: "0.875rem",
+                  cursor: "pointer",
                 }}
               >
                 Cancelar
@@ -815,22 +888,26 @@ export default function AdminBlogPage() {
         </div>
       )}
 
-      {/* Buscador + Tabla — ocultos cuando formulario abierto */}
       {!showForm && (
         <>
-          <div style={{ marginBottom: "16px" }}>
+          <div style={{ marginBottom: "1rem" }}>
             <input
-              className="fi"
               style={{ ...inp, maxWidth: 380 }}
               placeholder="Buscar por título..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              onFocus={onFocusInput}
+              onBlur={onBlurInput}
             />
           </div>
 
           {loading ? (
             <div
-              style={{ textAlign: "center", padding: "40px", color: "#888" }}
+              style={{
+                textAlign: "center",
+                padding: "3rem",
+                color: "#aaa",
+              }}
             >
               Cargando posts...
             </div>
@@ -838,18 +915,12 @@ export default function AdminBlogPage() {
             <div
               style={{
                 background: "#fff",
-                border: "1px solid #e8e8e8",
                 borderRadius: "12px",
+                border: "1px solid #e8e8e8",
                 overflow: "hidden",
               }}
             >
-              <table
-                style={{
-                  width: "100%",
-                  borderCollapse: "collapse",
-                  fontSize: "0.875rem",
-                }}
-              >
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead>
                   <tr
                     style={{
@@ -862,6 +933,7 @@ export default function AdminBlogPage() {
                       "Descripción",
                       "Fecha",
                       "Orden",
+                      "Mover",
                       "Imágenes",
                       "Videos",
                       "Estado",
@@ -870,14 +942,13 @@ export default function AdminBlogPage() {
                       <th
                         key={h}
                         style={{
-                          padding: "12px 16px",
+                          padding: "0.85rem 1rem",
                           textAlign: "left",
-                          fontWeight: 700,
-                          color: "#555",
-                          fontSize: "0.75rem",
+                          fontSize: "0.8rem",
+                          fontWeight: 600,
+                          color: "#888",
                           textTransform: "uppercase",
                           letterSpacing: "0.05em",
-                          whiteSpace: "nowrap",
                         }}
                       >
                         {h}
@@ -885,13 +956,14 @@ export default function AdminBlogPage() {
                     ))}
                   </tr>
                 </thead>
+
                 <tbody>
                   {filtered.length === 0 ? (
                     <tr>
                       <td
-                        colSpan={8}
+                        colSpan={9}
                         style={{
-                          padding: "40px",
+                          padding: "3rem",
                           textAlign: "center",
                           color: "#aaa",
                         }}
@@ -902,23 +974,23 @@ export default function AdminBlogPage() {
                   ) : (
                     filtered.map((p, i) => {
                       const media = mediaMap[p.id] ?? { imgs: 0, vids: 0 };
+
                       return (
                         <tr
                           key={p.id}
-                          className="rh"
                           style={{
                             borderBottom:
                               i < filtered.length - 1
                                 ? "1px solid #f0f0f0"
                                 : "none",
-                            background: "#fff",
                           }}
                         >
                           <td
                             style={{
-                              padding: "12px 16px",
+                              padding: "0.9rem 1rem",
                               fontWeight: 600,
                               color: "#1a1a1a",
+                              fontSize: "0.9rem",
                               maxWidth: 200,
                             }}
                           >
@@ -933,10 +1005,12 @@ export default function AdminBlogPage() {
                               {p.titulo}
                             </span>
                           </td>
+
                           <td
                             style={{
-                              padding: "12px 16px",
-                              color: "#666",
+                              padding: "0.9rem 1rem",
+                              color: "#555",
+                              fontSize: "0.875rem",
                               maxWidth: 220,
                             }}
                           >
@@ -953,10 +1027,12 @@ export default function AdminBlogPage() {
                               )}
                             </span>
                           </td>
+
                           <td
                             style={{
-                              padding: "12px 16px",
+                              padding: "0.9rem 1rem",
                               color: "#666",
+                              fontSize: "0.85rem",
                               whiteSpace: "nowrap",
                             }}
                           >
@@ -969,19 +1045,94 @@ export default function AdminBlogPage() {
                               },
                             )}
                           </td>
+
                           <td
                             style={{
-                              padding: "12px 16px",
-                              color: "#888",
+                              padding: "0.9rem 1rem",
+                              color: "#aaa",
+                              fontSize: "0.8rem",
                               textAlign: "center",
+                              fontWeight: 700,
                             }}
                           >
                             {p.orden}
                           </td>
-                          {/* Columna imágenes */}
+
                           <td
                             style={{
-                              padding: "12px 16px",
+                              padding: "0.9rem 1rem",
+                              textAlign: "center",
+                            }}
+                          >
+                            <div
+                              style={{
+                                display: "flex",
+                                flexDirection: "column",
+                                gap: "4px",
+                                alignItems: "center",
+                              }}
+                            >
+                              <button
+                                type="button"
+                                onClick={() => moveUp(i)}
+                                disabled={i === 0 || savingOrder}
+                                title="Subir"
+                                style={{
+                                  width: 26,
+                                  height: 18,
+                                  borderRadius: 4,
+                                  border: "1px solid #e5e7eb",
+                                  background: i === 0 ? "#f3f4f6" : "#fff",
+                                  cursor:
+                                    i === 0 || savingOrder
+                                      ? "not-allowed"
+                                      : "pointer",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  fontSize: "0.65rem",
+                                  color: "#666",
+                                  opacity: i === 0 || savingOrder ? 0.5 : 1,
+                                }}
+                              >
+                                ↑
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => moveDown(i)}
+                                disabled={i === rows.length - 1 || savingOrder}
+                                title="Bajar"
+                                style={{
+                                  width: 26,
+                                  height: 18,
+                                  borderRadius: 4,
+                                  border: "1px solid #e5e7eb",
+                                  background:
+                                    i === rows.length - 1 ? "#f3f4f6" : "#fff",
+                                  cursor:
+                                    i === rows.length - 1 || savingOrder
+                                      ? "not-allowed"
+                                      : "pointer",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  fontSize: "0.65rem",
+                                  color: "#666",
+                                  opacity:
+                                    i === rows.length - 1 || savingOrder
+                                      ? 0.5
+                                      : 1,
+                                }}
+                              >
+                                ↓
+                              </button>
+                            </div>
+                          </td>
+
+                          <td
+                            style={{
+                              padding: "0.9rem 1rem",
                               textAlign: "center",
                             }}
                           >
@@ -992,7 +1143,7 @@ export default function AdminBlogPage() {
                                   alignItems: "center",
                                   gap: "4px",
                                   padding: "3px 10px",
-                                  borderRadius: "20px",
+                                  borderRadius: "999px",
                                   fontSize: "0.78rem",
                                   fontWeight: 700,
                                   background: "#eef4ff",
@@ -1005,21 +1156,21 @@ export default function AdminBlogPage() {
                               <span
                                 style={{
                                   padding: "3px 10px",
-                                  borderRadius: "20px",
+                                  borderRadius: "999px",
                                   fontSize: "0.78rem",
                                   fontWeight: 600,
                                   background: "#f5f5f5",
                                   color: "#bbb",
                                 }}
                               >
-                                —
+                                Sin imágenes
                               </span>
                             )}
                           </td>
-                          {/* Columna videos */}
+
                           <td
                             style={{
-                              padding: "12px 16px",
+                              padding: "0.9rem 1rem",
                               textAlign: "center",
                             }}
                           >
@@ -1030,7 +1181,7 @@ export default function AdminBlogPage() {
                                   alignItems: "center",
                                   gap: "4px",
                                   padding: "3px 10px",
-                                  borderRadius: "20px",
+                                  borderRadius: "999px",
                                   fontSize: "0.78rem",
                                   fontWeight: 700,
                                   background: "#f0fdf4",
@@ -1043,64 +1194,88 @@ export default function AdminBlogPage() {
                               <span
                                 style={{
                                   padding: "3px 10px",
-                                  borderRadius: "20px",
+                                  borderRadius: "999px",
                                   fontSize: "0.78rem",
                                   fontWeight: 600,
                                   background: "#f5f5f5",
                                   color: "#bbb",
                                 }}
                               >
-                                —
+                                Sin videos
                               </span>
                             )}
                           </td>
-                          <td style={{ padding: "12px 16px" }}>
+
+                          <td style={{ padding: "0.9rem 1rem" }}>
                             <span
                               style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "5px",
                                 padding: "3px 10px",
-                                borderRadius: "20px",
+                                borderRadius: "999px",
                                 fontSize: "0.78rem",
-                                fontWeight: 700,
-                                background: p.activo ? "#e8f7ee" : "#fde8e8",
-                                color: p.activo ? "#1a7a3c" : "#a71d2a",
+                                fontWeight: 600,
+                                background: p.activo
+                                  ? "rgba(34,197,94,0.1)"
+                                  : "rgba(239,68,68,0.1)",
+                                color: p.activo ? "#16a34a" : "#dc2626",
                               }}
                             >
                               {p.activo ? "Activo" : "Inactivo"}
                             </span>
                           </td>
-                          <td style={{ padding: "12px 16px" }}>
+
+                          <td style={{ padding: "0.9rem 1rem" }}>
                             <div style={{ display: "flex", gap: "6px" }}>
                               <button
-                                className="be"
                                 onClick={() => onEdit(p)}
+                                title="Editar"
                                 style={{
-                                  background: "rgba(0,123,255,0.08)",
-                                  color: "#007bff",
-                                  border: "1px solid rgba(0,123,255,0.2)",
-                                  padding: "5px 12px",
+                                  background: "rgba(245,166,35,0.1)",
+                                  border: "none",
                                   borderRadius: "6px",
+                                  padding: "6px",
                                   cursor: "pointer",
-                                  fontSize: "0.8rem",
-                                  fontWeight: 600,
+                                  color: "#f5a623",
+                                  display: "flex",
+                                  transition: "background 0.2s",
                                 }}
+                                onMouseEnter={(e) =>
+                                  (e.currentTarget.style.background =
+                                    "rgba(245,166,35,0.2)")
+                                }
+                                onMouseLeave={(e) =>
+                                  (e.currentTarget.style.background =
+                                    "rgba(245,166,35,0.1)")
+                                }
                               >
-                                Editar
+                                <Pencil size={15} />
                               </button>
+
                               <button
-                                className="bd"
                                 onClick={() => onDelete(p.id)}
+                                title="Eliminar"
                                 style={{
-                                  background: "rgba(220,53,69,0.08)",
-                                  color: "#dc3545",
-                                  border: "1px solid rgba(220,53,69,0.2)",
-                                  padding: "5px 12px",
+                                  background: "rgba(220,38,38,0.08)",
+                                  border: "none",
                                   borderRadius: "6px",
+                                  padding: "6px",
                                   cursor: "pointer",
-                                  fontSize: "0.8rem",
-                                  fontWeight: 600,
+                                  color: "#dc2626",
+                                  display: "flex",
+                                  transition: "background 0.2s",
                                 }}
+                                onMouseEnter={(e) =>
+                                  (e.currentTarget.style.background =
+                                    "rgba(220,38,38,0.18)")
+                                }
+                                onMouseLeave={(e) =>
+                                  (e.currentTarget.style.background =
+                                    "rgba(220,38,38,0.08)")
+                                }
                               >
-                                Eliminar
+                                <Trash2 size={15} />
                               </button>
                             </div>
                           </td>
@@ -1110,6 +1285,7 @@ export default function AdminBlogPage() {
                   )}
                 </tbody>
               </table>
+
               <div
                 style={{
                   padding: "12px 16px",

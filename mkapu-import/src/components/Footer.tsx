@@ -43,8 +43,8 @@ export default function Footer() {
               </svg>
               WhatsApp
             </a>
-            <a href="mailto:contacto@mkapu.com" className="footer__link">
-              contacto@mkapu.com
+            <a href="mailto:marlomauriciop1@gmail.com" className="footer__link">
+              marlomauriciop1@gmail.com
             </a>
           </div>
 

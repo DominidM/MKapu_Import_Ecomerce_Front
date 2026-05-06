@@ -13,23 +13,23 @@ const initialForm = { name: "", slug: "", activo: true };
 
 const inp: React.CSSProperties = {
   width: "100%",
-  padding: "9px 12px",
-  border: "1px solid #e0e0e0",
+  padding: "0.7rem 0.9rem",
+  border: "1px solid #ddd",
   borderRadius: "8px",
   fontSize: "0.875rem",
   background: "#fff",
   color: "#1a1a1a",
   outline: "none",
   boxSizing: "border-box",
+  transition: "border-color 0.15s, box-shadow 0.15s",
 };
+
 const lbl: React.CSSProperties = {
   display: "block",
-  fontSize: "0.75rem",
+  fontSize: "0.82rem",
   fontWeight: 600,
-  color: "#888",
-  marginBottom: "4px",
-  textTransform: "uppercase",
-  letterSpacing: "0.05em",
+  color: "#444",
+  marginBottom: "0.4rem",
 };
 
 function toSlug(text: string) {
@@ -118,6 +118,20 @@ export default function AdminCategoriasPage() {
     setShowForm(false);
   }
 
+  function onFocusInput(
+    e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>,
+  ) {
+    e.currentTarget.style.borderColor = "#f5a623";
+    e.currentTarget.style.boxShadow = "0 0 0 3px rgba(245,166,35,0.1)";
+  }
+
+  function onBlurInput(
+    e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>,
+  ) {
+    e.currentTarget.style.borderColor = "#ddd";
+    e.currentTarget.style.boxShadow = "none";
+  }
+
   const filtered = rows.filter(
     (c) =>
       c.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -125,98 +139,106 @@ export default function AdminCategoriasPage() {
   );
 
   return (
-    <div style={{ maxWidth: 900, margin: "0 auto", padding: "20px" }}>
-      <style>{`
-        .fi:focus{border-color:#f5a623!important;box-shadow:0 0 0 3px rgba(245,166,35,0.12)}
-        .rh:hover{background:#fafafa!important}
-        .be:hover{background:rgba(0,123,255,0.1)!important;color:#0056b3!important}
-        .bd:hover{background:rgba(220,53,69,0.1)!important;color:#a71d2a!important}
-        .bp:hover{background:#e69510!important}
-        .tog:hover{opacity:0.8}
-      `}</style>
-
-      {/* Header */}
+    <div
+      style={{
+        padding: "1.5rem 1.25rem 2.5rem",
+        background: "#f8f7f4",
+        minHeight: "100vh",
+      }}
+    >
       <div
         style={{
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          marginBottom: "24px",
+          marginBottom: "1.5rem",
+          gap: "1rem",
+          flexWrap: "wrap",
         }}
       >
         <div>
           <h1
             style={{
               margin: 0,
-              fontSize: "1.5rem",
+              fontSize: "1.4rem",
               fontWeight: 700,
               color: "#1a1a1a",
             }}
           >
             Categorías
           </h1>
-          <p style={{ margin: "4px 0 0", fontSize: "0.875rem", color: "#888" }}>
+          <p
+            style={{
+              fontSize: "0.875rem",
+              color: "#888",
+              margin: "0.25rem 0 0",
+            }}
+          >
             {rows.length} categoría{rows.length !== 1 ? "s" : ""} registrada
             {rows.length !== 1 ? "s" : ""}
           </p>
         </div>
+
         <button
-          className="bp"
           onClick={() => {
             setShowForm(!showForm);
             if (showForm) cancelForm();
           }}
           style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
             background: "#f5a623",
             color: "#fff",
             border: "none",
-            padding: "10px 20px",
             borderRadius: "8px",
-            fontWeight: 700,
-            cursor: "pointer",
+            padding: "0.65rem 1.1rem",
+            fontWeight: 600,
             fontSize: "0.875rem",
+            cursor: "pointer",
+            transition: "background 0.2s",
           }}
+          onMouseEnter={(e) => (e.currentTarget.style.background = "#d4891a")}
+          onMouseLeave={(e) => (e.currentTarget.style.background = "#f5a623")}
         >
           {showForm ? "✕ Cancelar" : "+ Nueva categoría"}
         </button>
       </div>
 
-      {/* Formulario */}
       {showForm && (
         <div
           style={{
             background: "#fff",
             border: "1px solid #e8e8e8",
             borderRadius: "12px",
-            padding: "24px",
-            marginBottom: "28px",
+            padding: "1.5rem",
+            marginBottom: "1.5rem",
             borderTop: "3px solid #f5a623",
           }}
         >
           <h2
             style={{
-              margin: "0 0 20px",
-              fontSize: "1rem",
+              margin: "0 0 1.25rem",
+              fontSize: "1.05rem",
               fontWeight: 700,
               color: "#1a1a1a",
             }}
           >
             {editId ? "Editar categoría" : "Nueva categoría"}
           </h2>
+
           <form onSubmit={save}>
             <div
               style={{
                 display: "grid",
                 gridTemplateColumns: "1fr 1fr 120px",
-                gap: "16px",
-                marginBottom: "20px",
+                gap: "1rem",
+                marginBottom: "1rem",
               }}
             >
-              {/* Nombre */}
               <div>
                 <label style={lbl}>Nombre *</label>
                 <input
-                  className="fi"
                   style={inp}
                   placeholder="Ej: Electrónica"
                   value={form.name}
@@ -224,11 +246,12 @@ export default function AdminCategoriasPage() {
                     const name = e.target.value;
                     setForm({ ...form, name, slug: toSlug(name) });
                   }}
+                  onFocus={onFocusInput}
+                  onBlur={onBlurInput}
                   required
                 />
               </div>
 
-              {/* Slug */}
               <div>
                 <label style={lbl}>
                   Slug{" "}
@@ -243,26 +266,27 @@ export default function AdminCategoriasPage() {
                   </span>
                 </label>
                 <input
-                  className="fi"
                   style={{ ...inp, background: "#fafafa" }}
                   placeholder="electronica"
                   value={form.slug}
                   onChange={(e) =>
                     setForm({ ...form, slug: toSlug(e.target.value) })
                   }
+                  onFocus={onFocusInput}
+                  onBlur={onBlurInput}
                 />
               </div>
 
-              {/* Estado */}
               <div>
                 <label style={lbl}>Estado</label>
                 <select
-                  className="fi"
                   style={inp}
                   value={form.activo ? "true" : "false"}
                   onChange={(e) =>
                     setForm({ ...form, activo: e.target.value === "true" })
                   }
+                  onFocus={onFocusInput}
+                  onBlur={onBlurInput}
                 >
                   <option value="true">Activo</option>
                   <option value="false">Inactivo</option>
@@ -270,9 +294,8 @@ export default function AdminCategoriasPage() {
               </div>
             </div>
 
-            {/* Preview slug */}
             {form.slug && (
-              <div style={{ marginBottom: "20px" }}>
+              <div style={{ marginBottom: "1.25rem" }}>
                 <span style={{ fontSize: "0.78rem", color: "#aaa" }}>
                   Vista previa URL:{" "}
                 </span>
@@ -291,32 +314,39 @@ export default function AdminCategoriasPage() {
             <div style={{ display: "flex", gap: "10px" }}>
               <button
                 type="submit"
-                className="bp"
                 style={{
                   background: "#f5a623",
                   color: "#fff",
                   border: "none",
-                  padding: "10px 24px",
+                  padding: "0.65rem 1.4rem",
                   borderRadius: "8px",
-                  fontWeight: 700,
-                  cursor: "pointer",
+                  fontWeight: 600,
                   fontSize: "0.875rem",
+                  cursor: "pointer",
+                  transition: "background 0.2s",
                 }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.background = "#d4891a")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.background = "#f5a623")
+                }
               >
                 {editId ? "Guardar cambios" : "Crear categoría"}
               </button>
+
               <button
                 type="button"
                 onClick={cancelForm}
                 style={{
-                  background: "#f0f0f0",
-                  color: "#555",
-                  border: "none",
-                  padding: "10px 18px",
+                  padding: "0.65rem 1.2rem",
                   borderRadius: "8px",
+                  border: "1px solid #e0e0e0",
+                  background: "#fff",
+                  color: "#555",
                   fontWeight: 600,
-                  cursor: "pointer",
                   fontSize: "0.875rem",
+                  cursor: "pointer",
                 }}
               >
                 Cancelar
@@ -326,22 +356,26 @@ export default function AdminCategoriasPage() {
         </div>
       )}
 
-      {/* Buscador + Tabla — ocultos cuando formulario abierto */}
       {!showForm && (
         <>
-          <div style={{ marginBottom: "16px" }}>
+          <div style={{ marginBottom: "1rem" }}>
             <input
-              className="fi"
               style={{ ...inp, maxWidth: 380 }}
               placeholder="Buscar por nombre o slug..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              onFocus={onFocusInput}
+              onBlur={onBlurInput}
             />
           </div>
 
           {loading ? (
             <div
-              style={{ textAlign: "center", padding: "40px", color: "#888" }}
+              style={{
+                textAlign: "center",
+                padding: "3rem",
+                color: "#aaa",
+              }}
             >
               Cargando categorías...
             </div>
@@ -349,18 +383,12 @@ export default function AdminCategoriasPage() {
             <div
               style={{
                 background: "#fff",
-                border: "1px solid #e8e8e8",
                 borderRadius: "12px",
+                border: "1px solid #e8e8e8",
                 overflow: "hidden",
               }}
             >
-              <table
-                style={{
-                  width: "100%",
-                  borderCollapse: "collapse",
-                  fontSize: "0.875rem",
-                }}
-              >
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead>
                   <tr
                     style={{
@@ -372,14 +400,13 @@ export default function AdminCategoriasPage() {
                       <th
                         key={h}
                         style={{
-                          padding: "12px 16px",
+                          padding: "0.85rem 1rem",
                           textAlign: "left",
-                          fontWeight: 700,
-                          color: "#555",
-                          fontSize: "0.75rem",
+                          fontSize: "0.8rem",
+                          fontWeight: 600,
+                          color: "#888",
                           textTransform: "uppercase",
                           letterSpacing: "0.05em",
-                          whiteSpace: "nowrap",
                         }}
                       >
                         {h}
@@ -387,13 +414,14 @@ export default function AdminCategoriasPage() {
                     ))}
                   </tr>
                 </thead>
+
                 <tbody>
                   {filtered.length === 0 ? (
                     <tr>
                       <td
                         colSpan={4}
                         style={{
-                          padding: "40px",
+                          padding: "3rem",
                           textAlign: "center",
                           color: "#aaa",
                         }}
@@ -405,27 +433,25 @@ export default function AdminCategoriasPage() {
                     filtered.map((c, i) => (
                       <tr
                         key={c.id}
-                        className="rh"
                         style={{
                           borderBottom:
                             i < filtered.length - 1
                               ? "1px solid #f0f0f0"
                               : "none",
-                          background: "#fff",
                         }}
                       >
-                        {/* Nombre */}
                         <td
                           style={{
-                            padding: "12px 16px",
+                            padding: "0.9rem 1rem",
                             fontWeight: 600,
                             color: "#1a1a1a",
+                            fontSize: "0.9rem",
                           }}
                         >
                           {c.name}
                         </td>
-                        {/* Slug */}
-                        <td style={{ padding: "12px 16px" }}>
+
+                        <td style={{ padding: "0.9rem 1rem" }}>
                           <span
                             style={{
                               background: "#f5f5f5",
@@ -439,31 +465,41 @@ export default function AdminCategoriasPage() {
                             {c.slug}
                           </span>
                         </td>
-                        {/* Estado — toggle rápido */}
-                        <td style={{ padding: "12px 16px" }}>
+
+                        <td style={{ padding: "0.9rem 1rem" }}>
                           <button
-                            className="tog"
                             onClick={() => toggleActivo(c)}
                             title="Click para cambiar estado"
                             style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: "5px",
                               padding: "3px 12px",
-                              borderRadius: "20px",
+                              borderRadius: "999px",
                               fontSize: "0.78rem",
-                              fontWeight: 700,
+                              fontWeight: 600,
                               border: "none",
                               cursor: "pointer",
-                              background: c.activo ? "#e8f7ee" : "#fde8e8",
-                              color: c.activo ? "#1a7a3c" : "#a71d2a",
+                              background: c.activo
+                                ? "rgba(34,197,94,0.1)"
+                                : "rgba(239,68,68,0.1)",
+                              color: c.activo ? "#16a34a" : "#dc2626",
+                              transition: "opacity 0.2s",
                             }}
+                            onMouseEnter={(e) =>
+                              (e.currentTarget.style.opacity = "0.8")
+                            }
+                            onMouseLeave={(e) =>
+                              (e.currentTarget.style.opacity = "1")
+                            }
                           >
                             {c.activo ? "Activo" : "Inactivo"}
                           </button>
                         </td>
-                        {/* Acciones */}
-                        <td style={{ padding: "12px 16px" }}>
+
+                        <td style={{ padding: "0.9rem 1rem" }}>
                           <div style={{ display: "flex", gap: "6px" }}>
                             <button
-                              className="be"
                               onClick={() => onEdit(c)}
                               style={{
                                 background: "rgba(0,123,255,0.08)",
@@ -474,12 +510,23 @@ export default function AdminCategoriasPage() {
                                 cursor: "pointer",
                                 fontSize: "0.8rem",
                                 fontWeight: 600,
+                                transition: "all 0.2s",
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.background =
+                                  "rgba(0,123,255,0.1)";
+                                e.currentTarget.style.color = "#0056b3";
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.background =
+                                  "rgba(0,123,255,0.08)";
+                                e.currentTarget.style.color = "#007bff";
                               }}
                             >
                               Editar
                             </button>
+
                             <button
-                              className="bd"
                               onClick={() => onDelete(c.id)}
                               style={{
                                 background: "rgba(220,53,69,0.08)",
@@ -490,6 +537,17 @@ export default function AdminCategoriasPage() {
                                 cursor: "pointer",
                                 fontSize: "0.8rem",
                                 fontWeight: 600,
+                                transition: "all 0.2s",
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.background =
+                                  "rgba(220,53,69,0.1)";
+                                e.currentTarget.style.color = "#a71d2a";
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.background =
+                                  "rgba(220,53,69,0.08)";
+                                e.currentTarget.style.color = "#dc3545";
                               }}
                             >
                               Eliminar
@@ -501,6 +559,7 @@ export default function AdminCategoriasPage() {
                   )}
                 </tbody>
               </table>
+
               <div
                 style={{
                   padding: "12px 16px",

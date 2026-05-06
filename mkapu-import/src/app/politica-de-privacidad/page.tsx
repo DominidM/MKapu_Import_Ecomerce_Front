@@ -16,7 +16,7 @@ export default function PoliticaDePrivacidad() {
           </p>
           <p>
             Contacto:{" "}
-            <a href="mailto:contacto@mkapu.com">contacto@mkapu.com</a>
+            <a href="mailto:marlomauriciop1@gmail.com">marlomauriciop1@gmail.com</a>
           </p>
         </section>
 
@@ -129,7 +129,7 @@ export default function PoliticaDePrivacidad() {
           </ul>
           <p>
             Para ejercer cualquiera de estos derechos, escríbenos a{" "}
-            <a href="mailto:contacto@mkapu.com">contacto@mkapu.com</a>{" "}
+            <a href="mailto:marlomauriciop1@gmail.com">marlomauriciop1@gmail.com</a>{" "}
             indicando tu nombre completo, el derecho que deseas ejercer y
             adjuntando una copia de tu DNI. Responderemos en un plazo máximo de
             20 días hábiles.
