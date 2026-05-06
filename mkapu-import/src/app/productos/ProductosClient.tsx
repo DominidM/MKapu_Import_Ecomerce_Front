@@ -53,20 +53,28 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
 
     let query = supabase
       .from("productos")
-      .select("*, categorias(name)", { count: "exact" })
+      .select("*, categorias!inner(name, activo)", { count: "exact" })
       .eq("activo", true)
+      .eq("categorias.activo", true)
       .order("id", { ascending: false })
       .range(from, to);
 
     if (cats.length > 0) {
-      // Buscar los ids de las categorías seleccionadas por nombre
       const { data: catData } = await supabase
         .from("categorias")
-        .select("id")
-        .in("name", cats);
+        .select("id, name")
+        .in("name", cats)
+        .eq("activo", true);
+
       const catIds = (catData ?? []).map((c: { id: number }) => c.id);
+
       if (catIds.length > 0) {
         query = query.in("category", catIds);
+      } else {
+        setProductos([]);
+        setTotalCount(0);
+        setLoading(false);
+        return;
       }
     }
 

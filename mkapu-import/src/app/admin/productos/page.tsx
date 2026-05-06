@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useRef, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
@@ -38,6 +39,7 @@ type Producto = {
   _imgCount?: number;
   _vidCount?: number;
 };
+
 type Categoria = { id: string; name: string };
 type ViewMode = "todos" | "completos" | "incompletos";
 type FormMode = "list" | "create" | "edit";
@@ -78,7 +80,6 @@ export default function AdminProductosPage() {
   const [savedId, setSavedId] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Contadores globales para los tabs (independientes de la página)
   const [totalCompletos, setTotalCompletos] = useState(0);
   const [totalIncompletos, setTotalIncompletos] = useState(0);
 
@@ -86,7 +87,6 @@ export default function AdminProductosPage() {
   const topRef = useRef<HTMLDivElement>(null);
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // ── Carga de categorías (una sola vez) ──────────────────
   useEffect(() => {
     supabase
       .from("categorias")
@@ -96,14 +96,12 @@ export default function AdminProductosPage() {
       });
   }, []);
 
-  // ── Carga paginada server-side ───────────────────────────
   const load = useCallback(async () => {
     setLoading(true);
 
     const from = (currentPage - 1) * ITEMS_PER_PAGE;
     const to = from + ITEMS_PER_PAGE - 1;
 
-    // Query base con filtros
     let query = supabase
       .from("productos")
       .select("*", { count: "exact" })
@@ -112,15 +110,12 @@ export default function AdminProductosPage() {
 
     if (search.trim()) {
       query = query.or(
-        `name.ilike.%${search.trim()}%,code.ilike.%${search.trim()}%`,
+        `name.ilike.%${search.trim()}%,code.ilike.%${search.trim()}%`
       );
     }
+
     if (selectedCategory) {
       query = query.eq("category", selectedCategory);
-    }
-    if (viewMode === "completos") {
-      // productos que tienen al menos 1 imagen Y 1 video
-      // se filtra después de traer los datos (ver más abajo)
     }
 
     const [prodRes, imgRes, vidRes] = await Promise.all([
@@ -129,12 +124,13 @@ export default function AdminProductosPage() {
       supabase.from("producto_videos").select("producto_id"),
     ]);
 
-    // Mapas de conteo de media
     const imgCount: Record<number, number> = {};
     const vidCount: Record<number, number> = {};
+
     (imgRes.data ?? []).forEach((r: { producto_id: number }) => {
       imgCount[r.producto_id] = (imgCount[r.producto_id] ?? 0) + 1;
     });
+
     (vidRes.data ?? []).forEach((r: { producto_id: number }) => {
       vidCount[r.producto_id] = (vidCount[r.producto_id] ?? 0) + 1;
     });
@@ -145,24 +141,27 @@ export default function AdminProductosPage() {
       _vidCount: vidCount[p.id] ?? 0,
     }));
 
-    // Contadores de tabs usando los datos de media completos
-    const allIds = Object.keys(imgCount).map(Number);
-    const completosSet = new Set(
-      allIds.filter((id) => (imgCount[id] ?? 0) > 0 && (vidCount[id] ?? 0) > 0),
+    const allIds = Array.from(
+      new Set([
+        ...Object.keys(imgCount).map(Number),
+        ...Object.keys(vidCount).map(Number),
+      ])
     );
 
-    // Para viewMode completos/incompletos filtramos en cliente
-    // (son pocos datos en los conteos de media)
+    const completosSet = new Set(
+      allIds.filter((id) => (imgCount[id] ?? 0) > 0 && (vidCount[id] ?? 0) > 0)
+    );
+
     let finalProducts = products;
-    let finalCount = prodRes.count ?? 0;
+    const finalCount = prodRes.count ?? 0;
 
     if (viewMode === "completos") {
       finalProducts = products.filter(
-        (p) => (p._imgCount ?? 0) > 0 && (p._vidCount ?? 0) > 0,
+        (p) => (p._imgCount ?? 0) > 0 && (p._vidCount ?? 0) > 0
       );
     } else if (viewMode === "incompletos") {
       finalProducts = products.filter(
-        (p) => (p._imgCount ?? 0) === 0 || (p._vidCount ?? 0) === 0,
+        (p) => (p._imgCount ?? 0) === 0 || (p._vidCount ?? 0) === 0
       );
     }
 
@@ -177,12 +176,10 @@ export default function AdminProductosPage() {
     load();
   }, [load]);
 
-  // Reset página al cambiar filtros
   useEffect(() => {
     setCurrentPage(1);
   }, [search, selectedCategory, viewMode]);
 
-  // Debounce del buscador para no disparar una query por cada letra
   function handleSearchInput(value: string) {
     setSearchInput(value);
     if (searchTimer.current) clearTimeout(searchTimer.current);
@@ -191,32 +188,37 @@ export default function AdminProductosPage() {
     }, 350);
   }
 
-  // ── Subir imagen ─────────────────────────────────────────
   async function uploadMainImage(file: File): Promise<string | null> {
     setUploading(true);
     const path = `productos/${Date.now()}.${file.name.split(".").pop()}`;
+
     const { error } = await supabase.storage
       .from("imagenes")
       .upload(path, file, { upsert: true });
+
     setUploading(false);
+
     if (error) {
       alert("Error: " + error.message);
       return null;
     }
+
     return supabase.storage.from("imagenes").getPublicUrl(path).data.publicUrl;
   }
 
-  // ── Guardar producto ─────────────────────────────────────
   async function saveProducto(): Promise<number | null> {
     if (!form.name.trim()) {
       alert("Nombre requerido");
       return null;
     }
+
     if (!form.code.trim()) {
       alert("Código requerido");
       return null;
     }
+
     setSaving(true);
+
     const payload = {
       code: form.code,
       name: form.name,
@@ -233,16 +235,20 @@ export default function AdminProductosPage() {
       is_new: form.is_new,
       low_stock: form.low_stock,
     };
+
     if (editId) {
       const { error } = await supabase
         .from("productos")
         .update(payload)
         .eq("id", editId);
+
       setSaving(false);
+
       if (error) {
         alert(error.message);
         return null;
       }
+
       return editId;
     } else {
       const { data, error } = await supabase
@@ -250,11 +256,14 @@ export default function AdminProductosPage() {
         .insert(payload)
         .select("id")
         .single();
+
       setSaving(false);
+
       if (error) {
         alert(error.message);
         return null;
       }
+
       return data.id;
     }
   }
@@ -263,9 +272,11 @@ export default function AdminProductosPage() {
     e.preventDefault();
     const id = await saveProducto();
     if (!id) return;
+
     setSavedId(id);
     setEditId(id);
-    load();
+    await load();
+
     if (closeAfter) goToList();
   }
 
@@ -295,7 +306,7 @@ export default function AdminProductosPage() {
   async function onDelete(id: number) {
     if (!confirm("¿Eliminar producto?")) return;
     await supabase.from("productos").delete().eq("id", id);
-    load();
+    await load();
   }
 
   function goToList() {
@@ -359,8 +370,8 @@ export default function AdminProductosPage() {
         .ap-card{background:#fff;border:1px solid #e8e8e8;border-radius:12px;padding:24px;margin-bottom:28px;border-top:3px solid #f5a623}
         .ap-section{background:#fafafa;border:1px solid #e8e8e8;border-radius:10px;padding:16px;margin-bottom:12px}
         .ap-badge{display:inline-flex;align-items:center;padding:2px 10px;border-radius:20px;font-size:.75rem;font-weight:700}
-        .ap-table-wrap{background:#fff;border:1px solid #e8e8e8;border-radius:12px;overflow:hidden}
-        .ap-table{width:100%;border-collapse:collapse;font-size:.875rem}
+        .ap-table-wrap{background:#fff;border:1px solid #e8e8e8;border-radius:12px;overflow:auto;width:100%}
+        .ap-table{width:100%;min-width:1400px;border-collapse:collapse;font-size:.875rem}
         .ap-th{padding:12px 16px;text-align:left;font-size:.7rem;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;background:#fafafa;border-bottom:1px solid #e8e8e8}
         .ap-td{padding:12px 16px}
         .ap-row{border-bottom:1px solid #f0f0f0;background:#fff;transition:background .12s}
@@ -386,9 +397,13 @@ export default function AdminProductosPage() {
 
       <div
         ref={topRef}
-        style={{ maxWidth: 1150, margin: "0 auto", padding: "20px" }}
+        style={{
+          width: "100%",
+          maxWidth: "100%",
+          margin: 0,
+          padding: "20px 24px",
+        }}
       >
-        {/* ════════ FORMULARIO ════════ */}
         {formMode !== "list" && (
           <div className="ap-card ap-fadein">
             <div
@@ -397,6 +412,8 @@ export default function AdminProductosPage() {
                 alignItems: "center",
                 justifyContent: "space-between",
                 marginBottom: 20,
+                gap: 12,
+                flexWrap: "wrap",
               }}
             >
               <div>
@@ -424,6 +441,7 @@ export default function AdminProductosPage() {
                     : "Modifica los campos y guarda los cambios"}
                 </p>
               </div>
+
               <button
                 className="ap-btn ap-btn--ghost ap-btn--sm"
                 onClick={goToList}
@@ -433,7 +451,6 @@ export default function AdminProductosPage() {
             </div>
 
             <form onSubmit={(e) => handleSave(e, false)}>
-              {/* Fila 1 */}
               <div
                 style={{
                   display: "grid",
@@ -452,6 +469,7 @@ export default function AdminProductosPage() {
                     required
                   />
                 </div>
+
                 <div>
                   <label className="ap-lbl">Nombre *</label>
                   <input
@@ -462,6 +480,7 @@ export default function AdminProductosPage() {
                     required
                   />
                 </div>
+
                 <div>
                   <label className="ap-lbl">Categoría</label>
                   <select
@@ -481,7 +500,6 @@ export default function AdminProductosPage() {
                 </div>
               </div>
 
-              {/* Fila 2 */}
               <div
                 style={{
                   display: "grid",
@@ -503,6 +521,7 @@ export default function AdminProductosPage() {
                     required
                   />
                 </div>
+
                 <div>
                   <label className="ap-lbl">Precio caja (S/)</label>
                   <input
@@ -515,6 +534,7 @@ export default function AdminProductosPage() {
                     }
                   />
                 </div>
+
                 <div>
                   <label className="ap-lbl">Unidades por caja</label>
                   <input
@@ -528,7 +548,6 @@ export default function AdminProductosPage() {
                 </div>
               </div>
 
-              {/* Fila 3 */}
               <div
                 style={{
                   display: "grid",
@@ -552,6 +571,7 @@ export default function AdminProductosPage() {
                     }
                   />
                 </div>
+
                 <div>
                   <label className="ap-lbl">Unidades mayorista</label>
                   <input
@@ -568,7 +588,6 @@ export default function AdminProductosPage() {
                 </div>
               </div>
 
-              {/* Imagen */}
               <div style={{ marginBottom: 16 }}>
                 <label className="ap-lbl">Imagen principal</label>
                 <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
@@ -581,6 +600,7 @@ export default function AdminProductosPage() {
                       setForm({ ...form, image_url: e.target.value })
                     }
                   />
+
                   <button
                     type="button"
                     className="ap-btn ap-btn--secondary"
@@ -597,6 +617,7 @@ export default function AdminProductosPage() {
                       </>
                     )}
                   </button>
+
                   <input
                     ref={fileRef}
                     type="file"
@@ -611,6 +632,7 @@ export default function AdminProductosPage() {
                     }}
                   />
                 </div>
+
                 {form.image_url && (
                   <img
                     src={form.image_url}
@@ -629,7 +651,6 @@ export default function AdminProductosPage() {
                 )}
               </div>
 
-              {/* Descripción */}
               <div style={{ marginBottom: 16 }}>
                 <label className="ap-lbl">Descripción</label>
                 <textarea
@@ -643,7 +664,6 @@ export default function AdminProductosPage() {
                 />
               </div>
 
-              {/* Checkboxes */}
               <div
                 style={{
                   display: "flex",
@@ -684,7 +704,6 @@ export default function AdminProductosPage() {
                 ))}
               </div>
 
-              {/* Botones */}
               <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                 <button
                   type="submit"
@@ -705,6 +724,7 @@ export default function AdminProductosPage() {
                     </>
                   )}
                 </button>
+
                 <button
                   type="button"
                   className="ap-btn ap-btn--secondary"
@@ -713,6 +733,7 @@ export default function AdminProductosPage() {
                 >
                   <CheckCircle size={15} /> Guardar y cerrar
                 </button>
+
                 <button
                   type="button"
                   className="ap-btn ap-btn--ghost ap-btn--sm"
@@ -733,12 +754,14 @@ export default function AdminProductosPage() {
                   alignItems: "center",
                   justifyContent: "space-between",
                   gap: 12,
+                  flexWrap: "wrap",
                 }}
               >
                 <p style={{ margin: 0, fontSize: ".875rem", color: "#555" }}>
                   ✅ Producto guardado. Ahora puedes gestionar su galería y
                   videos.
                 </p>
+
                 <Link
                   href={`/admin/productos/${savedId}/media`}
                   className="ap-btn ap-btn--primary ap-btn--sm"
@@ -748,6 +771,7 @@ export default function AdminProductosPage() {
                 </Link>
               </div>
             )}
+
             {!savedId && formMode === "create" && (
               <div className="ap-info-box" style={{ marginTop: 16 }}>
                 💡 Primero guarda el producto para habilitar la galería de
@@ -757,10 +781,8 @@ export default function AdminProductosPage() {
           </div>
         )}
 
-        {/* ════════ LISTADO ════════ */}
         {formMode === "list" && (
           <div className="ap-fadein">
-            {/* Header */}
             <div
               style={{
                 display: "flex",
@@ -792,12 +814,12 @@ export default function AdminProductosPage() {
                   {totalCount} producto{totalCount !== 1 ? "s" : ""} en total
                 </p>
               </div>
+
               <button className="ap-btn ap-btn--primary" onClick={openCreate}>
                 <PlusCircle size={15} /> Nuevo producto
               </button>
             </div>
 
-            {/* View Mode Tabs */}
             <div
               style={{
                 display: "flex",
@@ -809,16 +831,19 @@ export default function AdminProductosPage() {
             >
               <div className="ap-view-tabs">
                 <button
-                  className={`ap-view-tab${viewMode === "todos" ? " ap-view-tab--active" : ""}`}
+                  className={`ap-view-tab${
+                    viewMode === "todos" ? " ap-view-tab--active" : ""
+                  }`}
                   onClick={() => setViewMode("todos")}
                 >
                   <List size={14} /> Todos
-                  <span className="ap-count ap-count--default">
-                    {totalCount}
-                  </span>
+                  <span className="ap-count ap-count--default">{totalCount}</span>
                 </button>
+
                 <button
-                  className={`ap-view-tab ap-view-tab--success${viewMode === "completos" ? " ap-view-tab--active" : ""}`}
+                  className={`ap-view-tab ap-view-tab--success${
+                    viewMode === "completos" ? " ap-view-tab--active" : ""
+                  }`}
                   onClick={() => setViewMode("completos")}
                 >
                   <LayoutGrid size={14} /> Con media
@@ -826,8 +851,11 @@ export default function AdminProductosPage() {
                     {totalCompletos}
                   </span>
                 </button>
+
                 <button
-                  className={`ap-view-tab ap-view-tab--warning${viewMode === "incompletos" ? " ap-view-tab--active" : ""}`}
+                  className={`ap-view-tab ap-view-tab--warning${
+                    viewMode === "incompletos" ? " ap-view-tab--active" : ""
+                  }`}
                   onClick={() => setViewMode("incompletos")}
                 >
                   <AlertCircle size={14} /> Sin media
@@ -858,7 +886,6 @@ export default function AdminProductosPage() {
               )}
             </div>
 
-            {/* Filtros */}
             <div
               style={{
                 display: "flex",
@@ -868,7 +895,7 @@ export default function AdminProductosPage() {
                 alignItems: "center",
               }}
             >
-              <div style={{ position: "relative", flex: 1, minWidth: 200 }}>
+              <div style={{ position: "relative", flex: 1, minWidth: 240 }}>
                 <Search
                   size={14}
                   style={{
@@ -888,9 +915,10 @@ export default function AdminProductosPage() {
                   onChange={(e) => handleSearchInput(e.target.value)}
                 />
               </div>
+
               <select
                 className="ap-inp"
-                style={{ minWidth: 200, width: "auto" }}
+                style={{ minWidth: 220, width: "auto" }}
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
               >
@@ -901,6 +929,7 @@ export default function AdminProductosPage() {
                   </option>
                 ))}
               </select>
+
               {(search || selectedCategory) && (
                 <button
                   className="ap-btn ap-btn--ghost ap-btn--sm"
@@ -915,7 +944,6 @@ export default function AdminProductosPage() {
               )}
             </div>
 
-            {/* Tabla */}
             {loading ? (
               <div
                 style={{
@@ -956,13 +984,11 @@ export default function AdminProductosPage() {
                       ))}
                     </tr>
                   </thead>
+
                   <tbody>
                     {rows.length === 0 ? (
                       <tr>
-                        <td
-                          colSpan={9}
-                          style={{ padding: 48, textAlign: "center" }}
-                        >
+                        <td colSpan={9} style={{ padding: 48, textAlign: "center" }}>
                           <div
                             style={{
                               display: "flex",
@@ -977,10 +1003,10 @@ export default function AdminProductosPage() {
                               {search || selectedCategory
                                 ? "Sin resultados para esa búsqueda"
                                 : viewMode === "completos"
-                                  ? "Ningún producto tiene galería y video completos aún"
-                                  : viewMode === "incompletos"
-                                    ? "¡Todos los productos tienen media completa!"
-                                    : "No hay productos aún"}
+                                ? "Ningún producto tiene galería y video completos aún"
+                                : viewMode === "incompletos"
+                                ? "¡Todos los productos tienen media completa!"
+                                : "No hay productos aún"}
                             </span>
                           </div>
                         </td>
@@ -990,10 +1016,15 @@ export default function AdminProductosPage() {
                         const hasImg = (p._imgCount ?? 0) > 0;
                         const hasVid = (p._vidCount ?? 0) > 0;
                         const incomplete = !hasImg || !hasVid;
+
                         return (
                           <tr
                             key={p.id}
-                            className={`ap-row${incomplete && viewMode === "incompletos" ? " ap-row--incomplete" : ""}`}
+                            className={`ap-row${
+                              incomplete && viewMode === "incompletos"
+                                ? " ap-row--incomplete"
+                                : ""
+                            }`}
                           >
                             <td className="ap-td" style={{ width: 52 }}>
                               {p.image_url ? (
@@ -1009,9 +1040,8 @@ export default function AdminProductosPage() {
                                     display: "block",
                                   }}
                                   onError={(e) => {
-                                    (
-                                      e.target as HTMLImageElement
-                                    ).style.display = "none";
+                                    (e.target as HTMLImageElement).style.display =
+                                      "none";
                                   }}
                                 />
                               ) : (
@@ -1026,13 +1056,11 @@ export default function AdminProductosPage() {
                                     justifyContent: "center",
                                   }}
                                 >
-                                  <Package
-                                    size={16}
-                                    style={{ color: "#ccc" }}
-                                  />
+                                  <Package size={16} style={{ color: "#ccc" }} />
                                 </div>
                               )}
                             </td>
+
                             <td className="ap-td">
                               <code
                                 style={{
@@ -1046,12 +1074,13 @@ export default function AdminProductosPage() {
                                 {p.code}
                               </code>
                             </td>
+
                             <td
                               className="ap-td"
                               style={{
                                 fontWeight: 600,
                                 color: "#1a1a1a",
-                                maxWidth: 180,
+                                maxWidth: 220,
                               }}
                             >
                               <span
@@ -1065,12 +1094,14 @@ export default function AdminProductosPage() {
                                 {p.name}
                               </span>
                             </td>
+
                             <td
                               className="ap-td"
                               style={{ fontWeight: 600, whiteSpace: "nowrap" }}
                             >
                               S/ {p.price?.toFixed(2)}
                             </td>
+
                             <td className="ap-td">
                               <span
                                 style={{
@@ -1084,6 +1115,7 @@ export default function AdminProductosPage() {
                                 {getCategoryName(p.category)}
                               </span>
                             </td>
+
                             <td className="ap-td">
                               <div
                                 style={{
@@ -1116,8 +1148,21 @@ export default function AdminProductosPage() {
                                     🆕
                                   </span>
                                 )}
+                                {p.low_stock && (
+                                  <span
+                                    className="ap-badge"
+                                    style={{
+                                      background: "#fff1f2",
+                                      color: "#be123c",
+                                      border: "1px solid #e11d4833",
+                                    }}
+                                  >
+                                    Stock bajo
+                                  </span>
+                                )}
                               </div>
                             </td>
+
                             <td className="ap-td">
                               <span
                                 className="ap-badge"
@@ -1129,6 +1174,7 @@ export default function AdminProductosPage() {
                                 {p.activo ? "Activo" : "Inactivo"}
                               </span>
                             </td>
+
                             <td className="ap-td">
                               <div
                                 style={{
@@ -1138,15 +1184,20 @@ export default function AdminProductosPage() {
                                 }}
                               >
                                 <span
-                                  className={`ap-media-pip${hasImg ? " ap-media-pip--ok" : " ap-media-pip--empty"}`}
+                                  className={`ap-media-pip${
+                                    hasImg ? " ap-media-pip--ok" : " ap-media-pip--empty"
+                                  }`}
                                 >
                                   <ImageIcon size={10} />
                                   {hasImg
                                     ? `${p._imgCount} foto${p._imgCount !== 1 ? "s" : ""}`
                                     : "Sin fotos"}
                                 </span>
+
                                 <span
-                                  className={`ap-media-pip${hasVid ? " ap-media-pip--ok" : " ap-media-pip--empty"}`}
+                                  className={`ap-media-pip${
+                                    hasVid ? " ap-media-pip--ok" : " ap-media-pip--empty"
+                                  }`}
                                 >
                                   <Video size={10} />
                                   {hasVid
@@ -1155,6 +1206,7 @@ export default function AdminProductosPage() {
                                 </span>
                               </div>
                             </td>
+
                             <td className="ap-td">
                               <div
                                 style={{
@@ -1169,6 +1221,7 @@ export default function AdminProductosPage() {
                                 >
                                   <Pencil size={11} /> Editar
                                 </button>
+
                                 <Link
                                   href={`/admin/productos/${p.id}/media`}
                                   className="ap-btn ap-btn--sm ap-btn--media"
@@ -1176,6 +1229,7 @@ export default function AdminProductosPage() {
                                 >
                                   <ImageIcon size={11} /> Media
                                 </Link>
+
                                 <button
                                   className="ap-btn ap-btn--sm ap-btn--delete"
                                   onClick={() => onDelete(p.id)}
@@ -1191,13 +1245,16 @@ export default function AdminProductosPage() {
                   </tbody>
                 </table>
 
-                {/* Paginador */}
                 <div className="ap-pager">
                   <span>
                     {totalCount === 0
                       ? "Sin resultados"
-                      : `Mostrando ${startIndex + 1}–${Math.min(startIndex + ITEMS_PER_PAGE, totalCount)} de ${totalCount}`}
+                      : `Mostrando ${startIndex + 1}–${Math.min(
+                          startIndex + ITEMS_PER_PAGE,
+                          totalCount
+                        )} de ${totalCount}`}
                   </span>
+
                   <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                     <button
                       className="ap-page-btn"
@@ -1206,9 +1263,10 @@ export default function AdminProductosPage() {
                     >
                       ← Anterior
                     </button>
+
                     {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
-                      // Ventana deslizante de páginas para no mostrar 100 botones
                       let page: number;
+
                       if (totalPages <= 7) {
                         page = i + 1;
                       } else if (currentPage <= 4) {
@@ -1218,16 +1276,20 @@ export default function AdminProductosPage() {
                       } else {
                         page = currentPage - 3 + i;
                       }
+
                       return (
                         <button
                           key={page}
-                          className={`ap-page-btn${currentPage === page ? " ap-page-btn--active" : ""}`}
+                          className={`ap-page-btn${
+                            currentPage === page ? " ap-page-btn--active" : ""
+                          }`}
                           onClick={() => setCurrentPage(page)}
                         >
                           {page}
                         </button>
                       );
                     })}
+
                     <button
                       className="ap-page-btn"
                       disabled={currentPage === totalPages || totalPages === 0}
