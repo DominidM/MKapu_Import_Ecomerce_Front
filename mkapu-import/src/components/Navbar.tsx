@@ -9,6 +9,7 @@ import { supabase } from "@/lib/supabase";
 import {
   ShieldCheckIcon,
   ShoppingCartIcon,
+  MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
 
 type Categoria =
@@ -18,6 +19,14 @@ type Categoria =
       name: string;
       activo?: boolean;
     };
+
+type SearchSuggestion = {
+  id: number;
+  name: string;
+  image_url: string | null;
+  price: number;
+  category_name?: string | null;
+};
 
 interface NavbarProps {
   categories?: Categoria[];
@@ -53,6 +62,12 @@ export default function Navbar({ categories = [] }: NavbarProps) {
   const [authChecked, setAuthChecked] = useState(false);
   const [isLogged, setIsLogged] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+
+  const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
+  const [suggestOpen, setSuggestOpen] = useState(false);
+  const [loadingSuggest, setLoadingSuggest] = useState(false);
+  const searchBoxRef = useRef<HTMLDivElement | null>(null);
+  const suggestTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (categories.length > 0) {
@@ -111,12 +126,66 @@ export default function Navbar({ categories = [] }: NavbarProps) {
     };
   }, []);
 
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (
+        searchBoxRef.current &&
+        !searchBoxRef.current.contains(e.target as Node)
+      ) {
+        setSuggestOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    if (suggestTimer.current) clearTimeout(suggestTimer.current);
+
+    const term = search.trim();
+
+    if (term.length < 2) {
+      setSuggestions([]);
+      setSuggestOpen(false);
+      setLoadingSuggest(false);
+      return;
+    }
+
+    suggestTimer.current = setTimeout(async () => {
+      setLoadingSuggest(true);
+
+      const { data } = await supabase
+        .from("productos")
+        .select("id, name, image_url, price, categorias(name)")
+        .eq("activo", true)
+        .ilike("name", `%${term}%`)
+        .limit(6);
+
+      const mapped: SearchSuggestion[] = (data ?? []).map((p: any) => ({
+        id: p.id,
+        name: p.name,
+        image_url: p.image_url ?? null,
+        price: p.price,
+        category_name: p.categorias?.name ?? null,
+      }));
+
+      setSuggestions(mapped);
+      setSuggestOpen(true);
+      setLoadingSuggest(false);
+    }, 250);
+
+    return () => {
+      if (suggestTimer.current) clearTimeout(suggestTimer.current);
+    };
+  }, [search]);
+
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
     if (!search.trim()) return;
 
+    setSuggestOpen(false);
     router.push(`/productos?q=${encodeURIComponent(search.trim())}`);
-    setSearch("");
     setMobileOpen(false);
   }
 
@@ -133,6 +202,14 @@ export default function Navbar({ categories = [] }: NavbarProps) {
 
   function closeMega() {
     megaTimeout.current = setTimeout(() => setMegaOpen(false), 180);
+  }
+
+  function handleSuggestionClick(item: SearchSuggestion) {
+    setSearch("");
+    setSuggestions([]);
+    setSuggestOpen(false);
+    setMobileOpen(false);
+    router.push(`/productos/${item.id}`);
   }
 
   return (
@@ -219,30 +296,84 @@ export default function Navbar({ categories = [] }: NavbarProps) {
             )}
           </div>
 
-          <form className="nb__search" onSubmit={handleSearch}>
-            <input
-              type="search"
-              placeholder="Buscar productos..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="nb__search-input"
-            />
-            <button type="submit" className="nb__search-btn" aria-label="Buscar">
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+          <div className="nb__search-wrap" ref={searchBoxRef}>
+            <form className="nb__search" onSubmit={handleSearch}>
+              <input
+                type="search"
+                placeholder="Buscar productos..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                onFocus={() => {
+                  if (search.trim().length >= 2) setSuggestOpen(true);
+                }}
+                className="nb__search-input"
+                role="combobox"
+                aria-expanded={suggestOpen}
+                aria-autocomplete="list"
+                aria-controls="navbar-search-suggestions"
+              />
+              <button
+                type="submit"
+                className="nb__search-btn"
+                aria-label="Buscar"
               >
-                <circle cx="11" cy="11" r="8" />
-                <path d="m21 21-4.35-4.35" />
-              </svg>
-            </button>
-          </form>
+                <MagnifyingGlassIcon className="h-4 w-4" />
+              </button>
+            </form>
+
+            {suggestOpen && (search.trim().length >= 2 || loadingSuggest) && (
+              <div
+                className="nb__suggest"
+                id="navbar-search-suggestions"
+                role="listbox"
+              >
+                {loadingSuggest ? (
+                  <div className="nb__suggest-state">Buscando productos...</div>
+                ) : suggestions.length > 0 ? (
+                  <>
+                    {suggestions.map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        className="nb__suggest-item"
+                        onClick={() => handleSuggestionClick(item)}
+                        role="option"
+                      >
+                        <div className="nb__suggest-thumb">
+                          {item.image_url ? (
+                            <img src={item.image_url} alt={item.name} />
+                          ) : (
+                            <div className="nb__suggest-thumb-empty">📦</div>
+                          )}
+                        </div>
+                        <div className="nb__suggest-text">
+                          <span className="nb__suggest-name">{item.name}</span>
+                          <span className="nb__suggest-meta">
+                            {item.category_name ?? "Sin categoría"} ·{" "}
+                            {item.price > 0
+                              ? `S/ ${item.price.toFixed(2)}`
+                              : "Consultar"}
+                          </span>
+                        </div>
+                      </button>
+                    ))}
+
+                    <button
+                      type="button"
+                      className="nb__suggest-all"
+                      onClick={handleSearch as any}
+                    >
+                      Ver resultados para “{search.trim()}”
+                    </button>
+                  </>
+                ) : (
+                  <div className="nb__suggest-state">
+                    No encontramos coincidencias para “{search.trim()}”
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
 
           <div className="nb__right">
             <div className="nb__socials">
@@ -276,7 +407,12 @@ export default function Navbar({ categories = [] }: NavbarProps) {
                 className="nb__social"
                 aria-label="Facebook"
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
                   <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
                 </svg>
               </a>
@@ -288,7 +424,12 @@ export default function Navbar({ categories = [] }: NavbarProps) {
                 className="nb__social"
                 aria-label="TikTok"
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
                   <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.17 8.17 0 0 0 4.78 1.52V6.75a4.85 4.85 0 0 1-1.01-.06z" />
                 </svg>
               </a>
@@ -300,9 +441,11 @@ export default function Navbar({ categories = [] }: NavbarProps) {
               aria-label="Carrito"
               type="button"
             >
-              <ShoppingCartIcon className="h-4 w-4 shrink-0" />
+              <span className="nb__cart-icon-wrap">
+                <ShoppingCartIcon className="nb__cart-icon" />
+                {count > 0 && <span className="nb__badge">{count}</span>}
+              </span>
               <span className="nb__cart-label">Carrito</span>
-              {count > 0 && <span className="nb__badge">{count}</span>}
             </button>
 
             {authChecked && isLogged && isAdmin && (
@@ -390,31 +533,69 @@ export default function Navbar({ categories = [] }: NavbarProps) {
 
         {mobileOpen && (
           <div className="nb__mobile">
-            <form className="nb__mobile-search" onSubmit={handleSearch}>
-              <input
-                type="search"
-                placeholder="Buscar productos..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="nb__mobile-input"
-                autoFocus
-              />
-              <button type="submit" className="nb__search-btn" aria-label="Buscar">
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+            <div className="nb__mobile-search-wrap">
+              <form className="nb__mobile-search" onSubmit={handleSearch}>
+                <input
+                  type="search"
+                  placeholder="Buscar productos..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="nb__mobile-input"
+                  autoFocus
+                />
+                <button
+                  type="submit"
+                  className="nb__search-btn"
+                  aria-label="Buscar"
                 >
-                  <circle cx="11" cy="11" r="8" />
-                  <path d="m21 21-4.35-4.35" />
-                </svg>
-              </button>
-            </form>
+                  <MagnifyingGlassIcon className="h-4 w-4" />
+                </button>
+              </form>
+
+              {suggestOpen && (search.trim().length >= 2 || loadingSuggest) && (
+                <div className="nb__suggest nb__suggest--mobile">
+                  {loadingSuggest ? (
+                    <div className="nb__suggest-state">
+                      Buscando productos...
+                    </div>
+                  ) : suggestions.length > 0 ? (
+                    <>
+                      {suggestions.map((item) => (
+                        <button
+                          key={item.id}
+                          type="button"
+                          className="nb__suggest-item"
+                          onClick={() => handleSuggestionClick(item)}
+                        >
+                          <div className="nb__suggest-thumb">
+                            {item.image_url ? (
+                              <img src={item.image_url} alt={item.name} />
+                            ) : (
+                              <div className="nb__suggest-thumb-empty">📦</div>
+                            )}
+                          </div>
+                          <div className="nb__suggest-text">
+                            <span className="nb__suggest-name">
+                              {item.name}
+                            </span>
+                            <span className="nb__suggest-meta">
+                              {item.category_name ?? "Sin categoría"} ·{" "}
+                              {item.price > 0
+                                ? `S/ ${item.price.toFixed(2)}`
+                                : "Consultar"}
+                            </span>
+                          </div>
+                        </button>
+                      ))}
+                    </>
+                  ) : (
+                    <div className="nb__suggest-state">
+                      No encontramos coincidencias para “{search.trim()}”
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
 
             <div className="nb__mobile-section">
               <p className="nb__mobile-label">Páginas</p>
@@ -533,6 +714,160 @@ export default function Navbar({ categories = [] }: NavbarProps) {
       </div>
 
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
+
+      <style jsx>{`
+        .nb__search-wrap,
+        .nb__mobile-search-wrap {
+          position: relative;
+        }
+
+        .nb__suggest {
+          position: absolute;
+          top: calc(100% + 8px);
+          left: 0;
+          width: 100%;
+          background: #fff;
+          border: 1px solid #ece3d8;
+          border-radius: 16px;
+          box-shadow: 0 18px 36px rgba(0, 0, 0, 0.12);
+          overflow: hidden;
+          z-index: 60;
+        }
+
+        .nb__suggest--mobile {
+          position: static;
+          margin-top: 10px;
+          box-shadow: none;
+        }
+
+        .nb__suggest-item,
+        .nb__suggest-all {
+          width: 100%;
+          border: none;
+          background: #fff;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 12px 14px;
+          text-align: left;
+          transition: background 0.15s ease;
+        }
+
+        .nb__suggest-item:hover,
+        .nb__suggest-all:hover {
+          background: #faf6f1;
+        }
+
+        .nb__suggest-thumb {
+          width: 44px;
+          height: 44px;
+          border-radius: 10px;
+          overflow: hidden;
+          background: #f3ede5;
+          flex-shrink: 0;
+        }
+
+        .nb__suggest-thumb img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+        }
+
+        .nb__suggest-thumb-empty {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #8c8177;
+        }
+
+        .nb__suggest-text {
+          min-width: 0;
+          display: flex;
+          flex-direction: column;
+          gap: 3px;
+        }
+
+        .nb__suggest-name {
+          font-size: 0.9rem;
+          font-weight: 700;
+          color: #1f1a17;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .nb__suggest-meta {
+          font-size: 0.78rem;
+          color: #756a60;
+        }
+
+        .nb__suggest-state {
+          padding: 14px;
+          font-size: 0.85rem;
+          color: #756a60;
+        }
+
+        .nb__suggest-all {
+          justify-content: center;
+          font-weight: 700;
+          color: #d2691e;
+          border-top: 1px solid #f2e7db;
+        }
+
+        .nb__cart {
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
+          border: none;
+          background: #fff7f1;
+          color: #d2691e;
+          padding: 9px 14px;
+          font-weight: 800;
+          cursor: pointer;
+          position: relative;
+        }
+
+        .nb__cart-icon-wrap {
+          position: relative;
+          width: 22px;
+          height: 22px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+        }
+
+        .nb__cart-icon {
+          width: 20px;
+          height: 20px;
+        }
+
+        .nb__badge {
+          position: absolute;
+          top: -7px;
+          right: -9px;
+          min-width: 18px;
+          height: 18px;
+          border-radius: 999px;
+          background: #e05c2a;
+          color: #fff;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 0.68rem;
+          font-weight: 800;
+          padding: 0 5px;
+          line-height: 1;
+        }
+
+        .nb__cart-label {
+          line-height: 1;
+        }
+      `}</style>
     </>
   );
 }

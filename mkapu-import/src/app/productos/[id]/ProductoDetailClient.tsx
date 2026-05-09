@@ -110,14 +110,10 @@ export default function ProductoDetailClient({ producto }: Props) {
       name: producto.name,
       price: producto.price,
       itemTotal: producto.price,
-      imageUrl: producto.image_url,
+      imageUrl: producto.image_url ?? undefined,
       emoji: "📦",
       product: {
         price: producto.price,
-        price_caja: producto.price_caja,
-        unidad_caja: producto.unidad_caja,
-        price_mayorista: producto.price_mayorista,
-        unidad_mayorista: producto.unidad_mayorista,
       },
     });
   }

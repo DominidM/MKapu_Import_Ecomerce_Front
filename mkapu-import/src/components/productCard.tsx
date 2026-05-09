@@ -9,15 +9,10 @@ interface Product {
   id: number;
   code: string;
   name: string;
-  category: number;
+  category: number | null;
   category_name?: string;
   description: string;
   price: number;
-  old_price?: number;
-  price_caja?: number;
-  unidad_caja?: number;
-  price_mayorista?: number;
-  unidad_mayorista?: number;
   featured: boolean;
   is_new?: boolean;
   low_stock?: boolean;
@@ -58,10 +53,6 @@ export default function ProductCard({ product }: Props) {
       emoji: "📦",
       product: {
         price: product.price,
-        price_caja: product.price_caja,
-        unidad_caja: product.unidad_caja,
-        price_mayorista: product.price_mayorista,
-        unidad_mayorista: product.unidad_mayorista,
       },
     });
     setAdded(true);

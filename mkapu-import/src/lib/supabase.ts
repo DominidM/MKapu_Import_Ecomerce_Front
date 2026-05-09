@@ -4,20 +4,16 @@ export interface Producto {
   id: number;
   code: string;
   name: string;
-  category: number;
+  category: number | null;
   category_name?: string;
-  description?: string;
+  description: string | null;
   price: number;
-  price_caja?: number;
-  unidad_caja?: number;
-  price_mayorista?: number;
-  unidad_mayorista?: number;
-  featured?: boolean;
-  image_url?: string;
-  activo?: boolean;
+  featured: boolean;
+  image_url: string | null;
+  activo: boolean;
   created_at?: string;
-  is_new?: boolean;
-  low_stock?: boolean;
+  is_new: boolean;
+  low_stock: boolean;
 }
 
 export type Categoria = {
