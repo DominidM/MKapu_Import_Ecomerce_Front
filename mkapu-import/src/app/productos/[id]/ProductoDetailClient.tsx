@@ -51,7 +51,8 @@ export default function ProductoDetailClient({ producto }: Props) {
   const cartItem = items.find((item) => item.id === String(producto.id));
   const qty = cartItem?.qty ?? 0;
   const isConsult = producto.price === 0;
-  const categoryLabel = producto.category_name || `Categoría ${producto.category}`;
+  const categoryLabel =
+    producto.category_name || `Categoría ${producto.category}`;
 
   useEffect(() => {
     async function loadMedia() {
@@ -147,9 +148,11 @@ export default function ProductoDetailClient({ producto }: Props) {
               <span className="detail-chip detail-chip--soft">
                 {categoryLabel}
               </span>
+
               {producto.is_new && (
                 <span className="detail-badge detail-badge--new">Nuevo</span>
               )}
+
               {producto.featured && (
                 <span className="detail-badge detail-badge--featured">
                   Destacado
@@ -208,7 +211,9 @@ export default function ProductoDetailClient({ producto }: Props) {
                 {allMedia.map((media, i) => (
                   <button
                     key={i}
-                    className={`detail-thumb${i === activeMediaIdx ? " detail-thumb--active" : ""}`}
+                    className={`detail-thumb${
+                      i === activeMediaIdx ? " detail-thumb--active" : ""
+                    }`}
                     onClick={() => setActiveMediaIdx(i)}
                     type="button"
                   >
@@ -250,6 +255,31 @@ export default function ProductoDetailClient({ producto }: Props) {
               {producto.description ||
                 "Este producto no tiene descripción por ahora."}
             </p>
+
+            {producto.low_stock && (
+              <div className="detail-stock-alert">
+                <div className="detail-stock-alert__icon">
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                    <line x1="12" y1="9" x2="12" y2="13" />
+                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                  </svg>
+                </div>
+                <div className="detail-stock-alert__body">
+                  <strong>¡Últimas unidades disponibles!</strong>
+                  <span>Este producto se está agotando. Aprovecha ahora.</span>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="detail-meta">
@@ -259,10 +289,12 @@ export default function ProductoDetailClient({ producto }: Props) {
                 <strong>{producto.code}</strong>
               </div>
             )}
+
             <div className="detail-meta-card">
               <span className="detail-meta-label">Categoría</span>
               <strong>{categoryLabel}</strong>
             </div>
+
             <div className="detail-meta-card">
               <span className="detail-meta-label">Estado de compra</span>
               <strong>
@@ -299,7 +331,9 @@ export default function ProductoDetailClient({ producto }: Props) {
 
             {qty === 0 ? (
               <button
-                className={`detail-cta${isConsult ? " detail-cta--consult" : ""}`}
+                className={`detail-cta${
+                  isConsult ? " detail-cta--consult" : ""
+                }`}
                 onClick={handleAdd}
                 type="button"
               >
@@ -327,7 +361,9 @@ export default function ProductoDetailClient({ producto }: Props) {
                 </button>
 
                 <div className="detail-stepper__body">
-                  <strong className="detail-stepper__qty">{qty} unidades</strong>
+                  <strong className="detail-stepper__qty">
+                    {qty} unidades
+                  </strong>
                   <span className="detail-stepper__tier">
                     {formatPrice(producto.price)} c/u
                   </span>
@@ -649,6 +685,85 @@ export default function ProductoDetailClient({ producto }: Props) {
           line-height: 1.7;
         }
 
+        .detail-stock-alert {
+          display: flex;
+          align-items: flex-start;
+          gap: 14px;
+          padding: 16px 18px;
+          border-radius: 16px;
+          background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%);
+          border: 1.5px solid #fecdd3;
+          margin-top: 8px;
+          animation: stock-pulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes stock-pulse {
+          0%,
+          100% {
+            box-shadow: 0 0 0 0 rgba(220, 38, 38, 0);
+            border-color: #fecdd3;
+          }
+          50% {
+            box-shadow: 0 0 0 6px rgba(220, 38, 38, 0.12);
+            border-color: #fca5a5;
+          }
+        }
+
+        .detail-stock-alert__icon {
+          flex-shrink: 0;
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          background: #fef2f2;
+          border: 2px solid #fca5a5;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #dc2626;
+          animation: icon-shake 3s ease-in-out infinite;
+        }
+
+        @keyframes icon-shake {
+          0%,
+          100% {
+            transform: translateX(0) rotate(0deg);
+          }
+          10%,
+          30%,
+          50%,
+          70% {
+            transform: translateX(-2px) rotate(-2deg);
+          }
+          20%,
+          40%,
+          60% {
+            transform: translateX(2px) rotate(2deg);
+          }
+          80% {
+            transform: translateX(0) rotate(0deg);
+          }
+        }
+
+        .detail-stock-alert__body {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+          flex: 1;
+        }
+
+        .detail-stock-alert__body strong {
+          font-size: 0.94rem;
+          color: #991b1b;
+          font-weight: 800;
+          line-height: 1.3;
+        }
+
+        .detail-stock-alert__body span {
+          font-size: 0.84rem;
+          color: #b91c1c;
+          line-height: 1.5;
+        }
+
         .detail-meta {
           display: grid;
           grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -858,6 +973,24 @@ export default function ProductoDetailClient({ producto }: Props) {
           .detail-section-head {
             flex-direction: column;
             align-items: stretch;
+          }
+
+          .detail-stock-alert {
+            padding: 14px 16px;
+            gap: 12px;
+          }
+
+          .detail-stock-alert__icon {
+            width: 32px;
+            height: 32px;
+          }
+
+          .detail-stock-alert__body strong {
+            font-size: 0.88rem;
+          }
+
+          .detail-stock-alert__body span {
+            font-size: 0.8rem;
           }
         }
 
