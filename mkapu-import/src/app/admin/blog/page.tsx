@@ -489,7 +489,6 @@ export default function AdminBlogPage() {
                     fontWeight: 400,
                   }}
                 >
-                  (HTML permitido)
                 </span>
               </label>
               <textarea

@@ -433,7 +433,7 @@ export default function AdminSobreNosotrosPage() {
             </div>
 
             <div style={{ marginBottom: "1rem" }}>
-              <label style={lbl}>Descripción / Texto (HTML permitido)</label>
+              <label style={lbl}>Descripción</label>
               <textarea
                 style={{ ...inp, minHeight: "140px", resize: "vertical" }}
                 placeholder="<p>Escribe el contenido de esta sección...</p>"
