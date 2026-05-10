@@ -69,6 +69,23 @@ export default function Navbar({ categories = [] }: NavbarProps) {
   const searchBoxRef = useRef<HTMLDivElement | null>(null);
   const suggestTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // ✅ FIX: useEffect que faltaba para verificar auth desde localStorage
+  useEffect(() => {
+    const adminId = localStorage.getItem("admin_id");
+    const adminNombre = localStorage.getItem("admin_nombre");
+
+    if (adminId && adminNombre) {
+      setIsLogged(true);
+      setIsAdmin(true);
+    } else {
+      setIsLogged(false);
+      setIsAdmin(false);
+    }
+
+    // Marca que ya se verificó — esto desbloquea el render del candado/panel
+    setAuthChecked(true);
+  }, []);
+
   useEffect(() => {
     if (categories.length > 0) {
       setCats(categories);
@@ -98,6 +115,8 @@ export default function Navbar({ categories = [] }: NavbarProps) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // ✅ FIX: El buscador ahora muestra sugerencias correctamente
+  // Se eliminó el bug donde suggestOpen nunca se abría en el render inicial
   useEffect(() => {
     if (suggestTimer.current) clearTimeout(suggestTimer.current);
 
@@ -110,16 +129,18 @@ export default function Navbar({ categories = [] }: NavbarProps) {
       return;
     }
 
-    suggestTimer.current = setTimeout(async () => {
-      setLoadingSuggest(true);
+    setLoadingSuggest(true);
+    setSuggestOpen(true); // ✅ Abrir panel inmediatamente para mostrar "Buscando..."
 
+    suggestTimer.current = setTimeout(async () => {
       const { data } = await supabase
         .from("productos")
         .select("id, name, image_url, price, categorias(name)")
         .eq("activo", true)
         .or(`name.ilike.%${term}%,description.ilike.%${term}%`)
-        .order("featured", { ascending: false }) // destacados primero
+        .order("featured", { ascending: false })
         .limit(6);
+
       const mapped: SearchSuggestion[] = (data ?? []).map((p: any) => ({
         id: p.id,
         name: p.name,
@@ -150,6 +171,8 @@ export default function Navbar({ categories = [] }: NavbarProps) {
   function handleLogout() {
     localStorage.removeItem("admin_id");
     localStorage.removeItem("admin_nombre");
+    setIsLogged(false);
+    setIsAdmin(false);
     setMobileOpen(false);
     router.push("/");
   }
@@ -255,6 +278,7 @@ export default function Navbar({ categories = [] }: NavbarProps) {
             )}
           </div>
 
+          {/* ✅ Buscador desktop */}
           <div className="nb__search-wrap" ref={searchBoxRef}>
             <form className="nb__search" onSubmit={handleSearch}>
               <input
@@ -322,12 +346,13 @@ export default function Navbar({ categories = [] }: NavbarProps) {
                       className="nb__suggest-all"
                       onClick={handleSearch as any}
                     >
-                      Ver resultados para “{search.trim()}”
+                      Ver resultados para &quot;{search.trim()}&quot;
                     </button>
                   </>
                 ) : (
                   <div className="nb__suggest-state">
-                    No encontramos coincidencias para “{search.trim()}”
+                    No encontramos coincidencias para &quot;{search.trim()}
+                    &quot;
                   </div>
                 )}
               </div>
@@ -407,6 +432,7 @@ export default function Navbar({ categories = [] }: NavbarProps) {
               <span className="nb__cart-label">Carrito</span>
             </button>
 
+            {/* ✅ FIX: authChecked garantiza que solo renderiza después de leer localStorage */}
             {authChecked && isLogged && isAdmin && (
               <>
                 <Link
@@ -427,6 +453,7 @@ export default function Navbar({ categories = [] }: NavbarProps) {
               </>
             )}
 
+            {/* ✅ FIX: El candado ahora sí aparece cuando no hay sesión activa */}
             {authChecked && !(isLogged && isAdmin) && (
               <button
                 className="nb__lock-btn"
@@ -549,7 +576,8 @@ export default function Navbar({ categories = [] }: NavbarProps) {
                     </>
                   ) : (
                     <div className="nb__suggest-state">
-                      No encontramos coincidencias para “{search.trim()}”
+                      No encontramos coincidencias para &quot;{search.trim()}
+                      &quot;
                     </div>
                   )}
                 </div>
@@ -558,7 +586,6 @@ export default function Navbar({ categories = [] }: NavbarProps) {
 
             <div className="nb__mobile-section">
               <p className="nb__mobile-label">Páginas</p>
-
               <div className="nb__mobile-pages">
                 <Link
                   href="/productos"
@@ -567,7 +594,6 @@ export default function Navbar({ categories = [] }: NavbarProps) {
                 >
                   Nuestros productos
                 </Link>
-
                 <Link
                   href="/blog"
                   className="nb__mobile-page"
@@ -575,7 +601,6 @@ export default function Navbar({ categories = [] }: NavbarProps) {
                 >
                   Blog
                 </Link>
-
                 <Link
                   href="/quienes-somos"
                   className="nb__mobile-page"
@@ -583,7 +608,6 @@ export default function Navbar({ categories = [] }: NavbarProps) {
                 >
                   Quiénes Somos
                 </Link>
-
                 <Link
                   href="/contacto"
                   className="nb__mobile-page"
@@ -614,7 +638,6 @@ export default function Navbar({ categories = [] }: NavbarProps) {
                   >
                     Panel Admin
                   </Link>
-
                   <button
                     type="button"
                     className="nb__mobile-social nb__mobile-logout"
@@ -633,7 +656,6 @@ export default function Navbar({ categories = [] }: NavbarProps) {
               >
                 Instagram
               </a>
-
               <a
                 href="https://www.facebook.com/mkapu.peru/?locale=es_LA"
                 target="_blank"
@@ -642,7 +664,6 @@ export default function Navbar({ categories = [] }: NavbarProps) {
               >
                 Facebook
               </a>
-
               <a
                 href="https://www.tiktok.com/@mkapu.import"
                 target="_blank"
@@ -661,11 +682,9 @@ export default function Navbar({ categories = [] }: NavbarProps) {
           <Link href="/blog" className="nb__subnav-link">
             <span className="nb__subnav-text">Blog</span>
           </Link>
-
           <Link href="/quienes-somos" className="nb__subnav-link">
             <span className="nb__subnav-text">Quiénes Somos</span>
           </Link>
-
           <Link href="/contacto" className="nb__subnav-link">
             <span className="nb__subnav-text">Contacto</span>
           </Link>
