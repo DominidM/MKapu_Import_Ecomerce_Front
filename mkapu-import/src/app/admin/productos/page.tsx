@@ -28,19 +28,19 @@ type Producto = {
   category: number | null;
   image_url: string | null;
   description: string | null;
-  price_caja: number | null;
-  unidad_caja: number | null;
-  price_mayorista: number | null;
-  unidad_mayorista: number | null;
   featured: boolean;
   activo: boolean;
   is_new: boolean;
   low_stock: boolean;
-  _imgCount?: number;
-  _vidCount?: number;
+  imgCount?: number;
+  vidCount?: number;
 };
 
-type Categoria = { id: string; name: string };
+type Categoria = {
+  id: string;
+  name: string;
+};
+
 type ViewMode = "todos" | "completos" | "incompletos";
 type FormMode = "list" | "create" | "edit";
 
@@ -53,10 +53,6 @@ const initialForm = {
   category: "",
   image_url: "",
   description: "",
-  price_caja: 0,
-  unidad_caja: 0,
-  price_mayorista: 0,
-  unidad_mayorista: 0,
   featured: false,
   activo: true,
   is_new: false,
@@ -79,7 +75,6 @@ export default function AdminProductosPage() {
   const [uploading, setUploading] = useState(false);
   const [savedId, setSavedId] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-
   const [totalCompletos, setTotalCompletos] = useState(0);
   const [totalIncompletos, setTotalIncompletos] = useState(0);
 
@@ -92,7 +87,7 @@ export default function AdminProductosPage() {
       .from("categorias")
       .select("id, name")
       .then(({ data }) => {
-        if (data) setCategorias(data);
+        if (data) setCategorias(data as Categoria[]);
       });
   }, []);
 
@@ -103,14 +98,14 @@ export default function AdminProductosPage() {
     const to = from + ITEMS_PER_PAGE - 1;
 
     let query = supabase
-      .from("productos")
+      .from("productos_con_media")
       .select("*", { count: "exact" })
       .order("id", { ascending: false })
       .range(from, to);
 
     if (search.trim()) {
       query = query.or(
-        `name.ilike.%${search.trim()}%,code.ilike.%${search.trim()}%`
+        `name.ilike.%${search.trim()}%,code.ilike.%${search.trim()}%`,
       );
     }
 
@@ -118,57 +113,41 @@ export default function AdminProductosPage() {
       query = query.eq("category", selectedCategory);
     }
 
-    const [prodRes, imgRes, vidRes] = await Promise.all([
-      query,
-      supabase.from("producto_imagenes").select("producto_id"),
-      supabase.from("producto_videos").select("producto_id"),
-    ]);
-
-    const imgCount: Record<number, number> = {};
-    const vidCount: Record<number, number> = {};
-
-    (imgRes.data ?? []).forEach((r: { producto_id: number }) => {
-      imgCount[r.producto_id] = (imgCount[r.producto_id] ?? 0) + 1;
-    });
-
-    (vidRes.data ?? []).forEach((r: { producto_id: number }) => {
-      vidCount[r.producto_id] = (vidCount[r.producto_id] ?? 0) + 1;
-    });
+    const prodRes = await query;
 
     const products = ((prodRes.data as Producto[]) ?? []).map((p) => ({
       ...p,
-      _imgCount: imgCount[p.id] ?? 0,
-      _vidCount: vidCount[p.id] ?? 0,
+      imgCount: (p as any).img_count ?? 0, // ← vienen de la vista
+      vidCount: (p as any).vid_count ?? 0,
     }));
 
-    const allIds = Array.from(
-      new Set([
-        ...Object.keys(imgCount).map(Number),
-        ...Object.keys(vidCount).map(Number),
-      ])
-    );
+    const { data: allCounts } = await supabase
+      .from("productos_con_media")
+      .select("img_count, vid_count")
+      .eq("activo", true);
 
-    const completosSet = new Set(
-      allIds.filter((id) => (imgCount[id] ?? 0) > 0 && (vidCount[id] ?? 0) > 0)
-    );
+    const totalCompletos = (allCounts ?? []).filter(
+      (p: any) => p.img_count > 0 && p.vid_count > 0,
+    ).length;
+    const totalIncompletos = (allCounts ?? []).length - totalCompletos;
 
     let finalProducts = products;
     const finalCount = prodRes.count ?? 0;
 
     if (viewMode === "completos") {
       finalProducts = products.filter(
-        (p) => (p._imgCount ?? 0) > 0 && (p._vidCount ?? 0) > 0
+        (p) => (p.imgCount ?? 0) > 0 && (p.vidCount ?? 0) > 0,
       );
     } else if (viewMode === "incompletos") {
       finalProducts = products.filter(
-        (p) => (p._imgCount ?? 0) === 0 || (p._vidCount ?? 0) === 0
+        (p) => (p.imgCount ?? 0) === 0 || (p.vidCount ?? 0) === 0,
       );
     }
 
     setRows(finalProducts);
     setTotalCount(finalCount);
-    setTotalCompletos(completosSet.size);
-    setTotalIncompletos((prodRes.count ?? 0) - completosSet.size);
+    setTotalCompletos(totalCompletos);
+    setTotalIncompletos(totalIncompletos);
     setLoading(false);
   }, [currentPage, search, selectedCategory, viewMode]);
 
@@ -190,8 +169,8 @@ export default function AdminProductosPage() {
 
   async function uploadMainImage(file: File): Promise<string | null> {
     setUploading(true);
-    const path = `productos/${Date.now()}.${file.name.split(".").pop()}`;
 
+    const path = `productos/${Date.now()}.${file.name.split(".").pop()}`;
     const { error } = await supabase.storage
       .from("imagenes")
       .upload(path, file, { upsert: true });
@@ -199,7 +178,7 @@ export default function AdminProductosPage() {
     setUploading(false);
 
     if (error) {
-      alert("Error: " + error.message);
+      alert(`Error: ${error.message}`);
       return null;
     }
 
@@ -226,10 +205,6 @@ export default function AdminProductosPage() {
       category: form.category || null,
       image_url: form.image_url || null,
       description: form.description || null,
-      price_caja: form.price_caja || null,
-      unidad_caja: form.unidad_caja || null,
-      price_mayorista: form.price_mayorista || null,
-      unidad_mayorista: form.unidad_mayorista || null,
       featured: form.featured,
       activo: form.activo,
       is_new: form.is_new,
@@ -270,6 +245,7 @@ export default function AdminProductosPage() {
 
   async function handleSave(e: React.FormEvent, closeAfter = false) {
     e.preventDefault();
+
     const id = await saveProducto();
     if (!id) return;
 
@@ -290,10 +266,6 @@ export default function AdminProductosPage() {
       category: String(p.category ?? ""),
       image_url: p.image_url ?? "",
       description: p.description ?? "",
-      price_caja: p.price_caja ?? 0,
-      unidad_caja: p.unidad_caja ?? 0,
-      price_mayorista: p.price_mayorista ?? 0,
-      unidad_mayorista: p.unidad_mayorista ?? 0,
       featured: p.featured ?? false,
       activo: p.activo ?? true,
       is_new: p.is_new ?? false,
@@ -325,7 +297,7 @@ export default function AdminProductosPage() {
   }
 
   const getCategoryName = (catId: string | number | null) => {
-    if (!catId) return "—";
+    if (!catId) return "-";
     return (
       categorias.find((c) => String(c.id) === String(catId))?.name ??
       String(catId)
@@ -376,19 +348,19 @@ export default function AdminProductosPage() {
         .ap-td{padding:12px 16px}
         .ap-row{border-bottom:1px solid #f0f0f0;background:#fff;transition:background .12s}
         .ap-row:last-child{border-bottom:none}
-        .ap-row:hover{background:#fafafa!important}
+        .ap-row:hover{background:#fafafa !important}
         .ap-media-pip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:6px;font-size:.72rem;font-weight:700}
         .ap-media-pip--ok{background:#dcfce7;color:#166534}
         .ap-media-pip--empty{background:#fee2e2;color:#991b1b}
         .ap-pager{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding:14px 20px;border-top:1px solid #e8e8e8;background:#fafafa;font-size:.875rem;color:#888}
         .ap-page-btn{padding:6px 10px;border:1px solid #e0e0e0;border-radius:6px;background:#fff;color:#666;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .15s}
         .ap-page-btn:hover:not(:disabled){border-color:#f5a623;color:#f5a623}
-        .ap-page-btn--active{border:2px solid #f5a623!important;background:#fff8e6!important;color:#f5a623!important;font-weight:700!important}
+        .ap-page-btn--active{border:2px solid #f5a623 !important;background:#fff8e6 !important;color:#f5a623 !important;font-weight:700 !important}
         .ap-page-btn:disabled{opacity:.4;cursor:not-allowed}
         .ap-info-box{background:#fff8e6;border:1px solid #f5a62333;border-radius:10px;padding:14px 16px;text-align:center;font-size:.875rem;color:#b37400}
         .ap-warn-box{background:#fef3c7;border:1px solid #f59e0b44;border-radius:10px;padding:14px 16px;font-size:.875rem;color:#92400e}
-        .ap-row--incomplete{background:#fffbeb!important}
-        .ap-row--incomplete:hover{background:#fef3c7!important}
+        .ap-row--incomplete{background:#fffbeb !important}
+        .ap-row--incomplete:hover{background:#fef3c7 !important}
         @keyframes ap-spin{to{transform:rotate(360deg)}}
         .ap-spin{animation:ap-spin .8s linear infinite}
         @keyframes ap-fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
@@ -446,7 +418,8 @@ export default function AdminProductosPage() {
                 className="ap-btn ap-btn--ghost ap-btn--sm"
                 onClick={goToList}
               >
-                <X size={14} /> Volver al listado
+                <X size={14} />
+                Volver al listado
               </button>
             </div>
 
@@ -460,7 +433,7 @@ export default function AdminProductosPage() {
                 }}
               >
                 <div>
-                  <label className="ap-lbl">Código *</label>
+                  <label className="ap-lbl">Código</label>
                   <input
                     className="ap-inp"
                     placeholder="SKU-001"
@@ -471,7 +444,7 @@ export default function AdminProductosPage() {
                 </div>
 
                 <div>
-                  <label className="ap-lbl">Nombre *</label>
+                  <label className="ap-lbl">Nombre</label>
                   <input
                     className="ap-inp"
                     placeholder="Nombre del producto"
@@ -503,7 +476,7 @@ export default function AdminProductosPage() {
               <div
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "1fr 1fr 1fr",
+                  gridTemplateColumns: "1fr",
                   gap: 16,
                   marginBottom: 16,
                 }}
@@ -519,71 +492,6 @@ export default function AdminProductosPage() {
                       setForm({ ...form, price: Number(e.target.value) })
                     }
                     required
-                  />
-                </div>
-
-                <div>
-                  <label className="ap-lbl">Precio caja (S/)</label>
-                  <input
-                    className="ap-inp"
-                    type="number"
-                    step="0.01"
-                    value={form.price_caja}
-                    onChange={(e) =>
-                      setForm({ ...form, price_caja: Number(e.target.value) })
-                    }
-                  />
-                </div>
-
-                <div>
-                  <label className="ap-lbl">Unidades por caja</label>
-                  <input
-                    className="ap-inp"
-                    type="number"
-                    value={form.unidad_caja}
-                    onChange={(e) =>
-                      setForm({ ...form, unidad_caja: Number(e.target.value) })
-                    }
-                  />
-                </div>
-              </div>
-
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: 16,
-                  marginBottom: 16,
-                }}
-              >
-                <div>
-                  <label className="ap-lbl">Precio mayorista (S/)</label>
-                  <input
-                    className="ap-inp"
-                    type="number"
-                    step="0.01"
-                    value={form.price_mayorista}
-                    onChange={(e) =>
-                      setForm({
-                        ...form,
-                        price_mayorista: Number(e.target.value),
-                      })
-                    }
-                  />
-                </div>
-
-                <div>
-                  <label className="ap-lbl">Unidades mayorista</label>
-                  <input
-                    className="ap-inp"
-                    type="number"
-                    value={form.unidad_mayorista}
-                    onChange={(e) =>
-                      setForm({
-                        ...form,
-                        unidad_mayorista: Number(e.target.value),
-                      })
-                    }
                   />
                 </div>
               </div>
@@ -609,11 +517,13 @@ export default function AdminProductosPage() {
                   >
                     {uploading ? (
                       <>
-                        <Loader2 size={14} className="ap-spin" /> Subiendo...
+                        <Loader2 size={14} className="ap-spin" />
+                        Subiendo...
                       </>
                     ) : (
                       <>
-                        <Upload size={14} /> Subir
+                        <Upload size={14} />
+                        Subir
                       </>
                     )}
                   </button>
@@ -644,9 +554,9 @@ export default function AdminProductosPage() {
                       objectFit: "cover",
                       border: "1px solid #e0e0e0",
                     }}
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = "none";
-                    }}
+                    onError={(e) =>
+                      ((e.target as HTMLImageElement).style.display = "none")
+                    }
                   />
                 )}
               </div>
@@ -672,14 +582,12 @@ export default function AdminProductosPage() {
                   flexWrap: "wrap",
                 }}
               >
-                {(
-                  [
-                    { key: "featured" as const, label: "⭐ Destacado" },
-                    { key: "activo" as const, label: "✅ Activo" },
-                    { key: "is_new" as const, label: "🆕 Nuevo" },
-                    { key: "low_stock" as const, label: "⚠️ Últimas unidades" },
-                  ] as { key: keyof typeof form; label: string }[]
-                ).map(({ key, label }) => (
+                {[
+                  { key: "featured", label: "Destacado" },
+                  { key: "activo", label: "Activo" },
+                  { key: "is_new", label: "Nuevo" },
+                  { key: "low_stock", label: "Últimas unidades" },
+                ].map(({ key, label }) => (
                   <label
                     key={key}
                     style={{
@@ -693,7 +601,7 @@ export default function AdminProductosPage() {
                   >
                     <input
                       type="checkbox"
-                      checked={form[key] as boolean}
+                      checked={form[key as keyof typeof form] as boolean}
                       onChange={(e) =>
                         setForm({ ...form, [key]: e.target.checked })
                       }
@@ -712,15 +620,18 @@ export default function AdminProductosPage() {
                 >
                   {saving ? (
                     <>
-                      <Loader2 size={15} className="ap-spin" /> Guardando...
+                      <Loader2 size={15} className="ap-spin" />
+                      Guardando...
                     </>
                   ) : formMode === "create" ? (
                     <>
-                      <PlusCircle size={15} /> Crear y continuar
+                      <PlusCircle size={15} />
+                      Crear y continuar
                     </>
                   ) : (
                     <>
-                      <CheckCircle size={15} /> Guardar cambios
+                      <CheckCircle size={15} />
+                      Guardar cambios
                     </>
                   )}
                 </button>
@@ -728,10 +639,13 @@ export default function AdminProductosPage() {
                 <button
                   type="button"
                   className="ap-btn ap-btn--secondary"
-                  onClick={(e) => handleSave(e, true)}
+                  onClick={(e) =>
+                    handleSave(e as unknown as React.FormEvent, true)
+                  }
                   disabled={saving}
                 >
-                  <CheckCircle size={15} /> Guardar y cerrar
+                  <CheckCircle size={15} />
+                  Guardar y cerrar
                 </button>
 
                 <button
@@ -740,7 +654,8 @@ export default function AdminProductosPage() {
                   style={{ marginLeft: "auto" }}
                   onClick={goToList}
                 >
-                  <X size={14} /> Cancelar
+                  <X size={14} />
+                  Cancelar
                 </button>
               </div>
             </form>
@@ -758,8 +673,7 @@ export default function AdminProductosPage() {
                 }}
               >
                 <p style={{ margin: 0, fontSize: ".875rem", color: "#555" }}>
-                  ✅ Producto guardado. Ahora puedes gestionar su galería y
-                  videos.
+                  Producto guardado. Ahora puedes gestionar su galería y videos.
                 </p>
 
                 <Link
@@ -767,15 +681,16 @@ export default function AdminProductosPage() {
                   className="ap-btn ap-btn--primary ap-btn--sm"
                   style={{ textDecoration: "none" }}
                 >
-                  <ImageIcon size={14} /> Ir a galería &amp; videos
+                  <ImageIcon size={14} />
+                  Ir a galería & videos
                 </Link>
               </div>
             )}
 
             {!savedId && formMode === "create" && (
               <div className="ap-info-box" style={{ marginTop: 16 }}>
-                💡 Primero guarda el producto para habilitar la galería de
-                imágenes y videos.
+                Primero guarda el producto para habilitar la galería de imágenes
+                y videos.
               </div>
             )}
           </div>
@@ -816,7 +731,8 @@ export default function AdminProductosPage() {
               </div>
 
               <button className="ap-btn ap-btn--primary" onClick={openCreate}>
-                <PlusCircle size={15} /> Nuevo producto
+                <PlusCircle size={15} />
+                Nuevo producto
               </button>
             </div>
 
@@ -831,34 +747,33 @@ export default function AdminProductosPage() {
             >
               <div className="ap-view-tabs">
                 <button
-                  className={`ap-view-tab${
-                    viewMode === "todos" ? " ap-view-tab--active" : ""
-                  }`}
+                  className={`ap-view-tab ${viewMode === "todos" ? "ap-view-tab--active" : ""}`}
                   onClick={() => setViewMode("todos")}
                 >
-                  <List size={14} /> Todos
-                  <span className="ap-count ap-count--default">{totalCount}</span>
+                  <List size={14} />
+                  Todos
+                  <span className="ap-count ap-count--default">
+                    {totalCount}
+                  </span>
                 </button>
 
                 <button
-                  className={`ap-view-tab ap-view-tab--success${
-                    viewMode === "completos" ? " ap-view-tab--active" : ""
-                  }`}
+                  className={`ap-view-tab ap-view-tab--success ${viewMode === "completos" ? "ap-view-tab--active" : ""}`}
                   onClick={() => setViewMode("completos")}
                 >
-                  <LayoutGrid size={14} /> Con media
+                  <LayoutGrid size={14} />
+                  Con media
                   <span className="ap-count ap-count--success">
                     {totalCompletos}
                   </span>
                 </button>
 
                 <button
-                  className={`ap-view-tab ap-view-tab--warning${
-                    viewMode === "incompletos" ? " ap-view-tab--active" : ""
-                  }`}
+                  className={`ap-view-tab ap-view-tab--warning ${viewMode === "incompletos" ? "ap-view-tab--active" : ""}`}
                   onClick={() => setViewMode("incompletos")}
                 >
-                  <AlertCircle size={14} /> Sin media
+                  <AlertCircle size={14} />
+                  Sin media
                   <span className="ap-count ap-count--warning">
                     {totalIncompletos}
                   </span>
@@ -939,7 +854,8 @@ export default function AdminProductosPage() {
                     setSelectedCategory("");
                   }}
                 >
-                  <X size={14} /> Limpiar
+                  <X size={14} />
+                  Limpiar
                 </button>
               )}
             </div>
@@ -984,11 +900,13 @@ export default function AdminProductosPage() {
                       ))}
                     </tr>
                   </thead>
-
                   <tbody>
                     {rows.length === 0 ? (
                       <tr>
-                        <td colSpan={9} style={{ padding: 48, textAlign: "center" }}>
+                        <td
+                          colSpan={9}
+                          style={{ padding: 48, textAlign: "center" }}
+                        >
                           <div
                             style={{
                               display: "flex",
@@ -1003,28 +921,24 @@ export default function AdminProductosPage() {
                               {search || selectedCategory
                                 ? "Sin resultados para esa búsqueda"
                                 : viewMode === "completos"
-                                ? "Ningún producto tiene galería y video completos aún"
-                                : viewMode === "incompletos"
-                                ? "¡Todos los productos tienen media completa!"
-                                : "No hay productos aún"}
+                                  ? "Ningún producto tiene galería y video completos aún"
+                                  : viewMode === "incompletos"
+                                    ? "Todos los productos tienen media completa"
+                                    : "No hay productos aún"}
                             </span>
                           </div>
                         </td>
                       </tr>
                     ) : (
                       rows.map((p) => {
-                        const hasImg = (p._imgCount ?? 0) > 0;
-                        const hasVid = (p._vidCount ?? 0) > 0;
+                        const hasImg = (p.imgCount ?? 0) > 0;
+                        const hasVid = (p.vidCount ?? 0) > 0;
                         const incomplete = !hasImg || !hasVid;
 
                         return (
                           <tr
                             key={p.id}
-                            className={`ap-row${
-                              incomplete && viewMode === "incompletos"
-                                ? " ap-row--incomplete"
-                                : ""
-                            }`}
+                            className={`ap-row ${incomplete && viewMode === "incompletos" ? "ap-row--incomplete" : ""}`}
                           >
                             <td className="ap-td" style={{ width: 52 }}>
                               {p.image_url ? (
@@ -1039,10 +953,11 @@ export default function AdminProductosPage() {
                                     border: "1px solid #e0e0e0",
                                     display: "block",
                                   }}
-                                  onError={(e) => {
-                                    (e.target as HTMLImageElement).style.display =
-                                      "none";
-                                  }}
+                                  onError={(e) =>
+                                    ((
+                                      e.target as HTMLImageElement
+                                    ).style.display = "none")
+                                  }
                                 />
                               ) : (
                                 <div
@@ -1056,7 +971,10 @@ export default function AdminProductosPage() {
                                     justifyContent: "center",
                                   }}
                                 >
-                                  <Package size={16} style={{ color: "#ccc" }} />
+                                  <Package
+                                    size={16}
+                                    style={{ color: "#ccc" }}
+                                  />
                                 </div>
                               )}
                             </td>
@@ -1133,9 +1051,10 @@ export default function AdminProductosPage() {
                                       border: "1px solid #f5a62355",
                                     }}
                                   >
-                                    ★
+                                    Destacado
                                   </span>
                                 )}
+
                                 {p.is_new && (
                                   <span
                                     className="ap-badge"
@@ -1145,9 +1064,10 @@ export default function AdminProductosPage() {
                                       border: "1px solid #0066cc33",
                                     }}
                                   >
-                                    🆕
+                                    Nuevo
                                   </span>
                                 )}
+
                                 {p.low_stock && (
                                   <span
                                     className="ap-badge"
@@ -1184,24 +1104,20 @@ export default function AdminProductosPage() {
                                 }}
                               >
                                 <span
-                                  className={`ap-media-pip${
-                                    hasImg ? " ap-media-pip--ok" : " ap-media-pip--empty"
-                                  }`}
+                                  className={`ap-media-pip ${hasImg ? "ap-media-pip--ok" : "ap-media-pip--empty"}`}
                                 >
                                   <ImageIcon size={10} />
                                   {hasImg
-                                    ? `${p._imgCount} foto${p._imgCount !== 1 ? "s" : ""}`
+                                    ? `${p.imgCount} foto${p.imgCount !== 1 ? "s" : ""}`
                                     : "Sin fotos"}
                                 </span>
 
                                 <span
-                                  className={`ap-media-pip${
-                                    hasVid ? " ap-media-pip--ok" : " ap-media-pip--empty"
-                                  }`}
+                                  className={`ap-media-pip ${hasVid ? "ap-media-pip--ok" : "ap-media-pip--empty"}`}
                                 >
                                   <Video size={10} />
                                   {hasVid
-                                    ? `${p._vidCount} video${p._vidCount !== 1 ? "s" : ""}`
+                                    ? `${p.vidCount} video${p.vidCount !== 1 ? "s" : ""}`
                                     : "Sin videos"}
                                 </span>
                               </div>
@@ -1219,7 +1135,8 @@ export default function AdminProductosPage() {
                                   className="ap-btn ap-btn--sm ap-btn--edit"
                                   onClick={() => onEdit(p)}
                                 >
-                                  <Pencil size={11} /> Editar
+                                  <Pencil size={11} />
+                                  Editar
                                 </button>
 
                                 <Link
@@ -1227,7 +1144,8 @@ export default function AdminProductosPage() {
                                   className="ap-btn ap-btn--sm ap-btn--media"
                                   style={{ textDecoration: "none" }}
                                 >
-                                  <ImageIcon size={11} /> Media
+                                  <ImageIcon size={11} />
+                                  Media
                                 </Link>
 
                                 <button
@@ -1249,9 +1167,9 @@ export default function AdminProductosPage() {
                   <span>
                     {totalCount === 0
                       ? "Sin resultados"
-                      : `Mostrando ${startIndex + 1}–${Math.min(
+                      : `Mostrando ${startIndex + 1}-${Math.min(
                           startIndex + ITEMS_PER_PAGE,
-                          totalCount
+                          totalCount,
                         )} de ${totalCount}`}
                   </span>
 
@@ -1261,28 +1179,22 @@ export default function AdminProductosPage() {
                       disabled={currentPage === 1}
                       onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                     >
-                      ← Anterior
+                      Anterior
                     </button>
 
                     {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
                       let page: number;
 
-                      if (totalPages <= 7) {
-                        page = i + 1;
-                      } else if (currentPage <= 4) {
-                        page = i + 1;
-                      } else if (currentPage >= totalPages - 3) {
+                      if (totalPages <= 7) page = i + 1;
+                      else if (currentPage <= 4) page = i + 1;
+                      else if (currentPage >= totalPages - 3)
                         page = totalPages - 6 + i;
-                      } else {
-                        page = currentPage - 3 + i;
-                      }
+                      else page = currentPage - 3 + i;
 
                       return (
                         <button
                           key={page}
-                          className={`ap-page-btn${
-                            currentPage === page ? " ap-page-btn--active" : ""
-                          }`}
+                          className={`ap-page-btn ${currentPage === page ? "ap-page-btn--active" : ""}`}
                           onClick={() => setCurrentPage(page)}
                         >
                           {page}
@@ -1297,7 +1209,7 @@ export default function AdminProductosPage() {
                         setCurrentPage((p) => Math.min(totalPages, p + 1))
                       }
                     >
-                      Siguiente →
+                      Siguiente
                     </button>
                   </div>
                 </div>

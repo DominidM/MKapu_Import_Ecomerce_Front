@@ -27,27 +27,31 @@ type Seccion = {
 };
 
 export default async function HomeSecciones() {
-  const { data: secciones } = await supabase
-    .from("home_secciones")
-    .select("orden, categoria_id, categorias(id, name, slug)")
-    .eq("activo", true)
-    .order("orden");
+  // ANTES: 3 queries — secciones → catIds → productos filtrados
+  // AHORA: 2 queries en paralelo con Promise.all
+  const [{ data: secciones }, { data: productos }] = await Promise.all([
+    supabase
+      .from("home_secciones")
+      .select("orden, categoria_id, categorias(id, name, slug)")
+      .eq("activo", true)
+      .order("orden"),
+    supabase
+      .from("productos")
+      .select("*")
+      .eq("activo", true)
+      .order("name"),
+  ]);
 
   if (!secciones?.length) return null;
 
   const seccionesTyped = secciones as Seccion[];
-  const catIds = seccionesTyped.map((s) => s.categoria_id);
 
-  const { data: productos } = await supabase
-    .from("productos")
-    .select("*")
-    .in("category", catIds)
-    .eq("activo", true)
-    .order("name");
+  // Filtrar en memoria — sin query adicional
+  const catIds = new Set(seccionesTyped.map((s) => s.categoria_id));
 
   const prodPorCat: Record<number, Producto[]> = {};
-
   for (const p of (productos ?? []) as Producto[]) {
+    if (!catIds.has(p.category)) continue;
     if (!prodPorCat[p.category]) prodPorCat[p.category] = [];
     prodPorCat[p.category].push(p);
   }
@@ -97,7 +101,6 @@ export default async function HomeSecciones() {
                 >
                   Categoría
                 </p>
-
                 <h2
                   style={{
                     margin: 0,

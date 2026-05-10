@@ -2,8 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { supabase } from "@/lib/supabase";
-import { getColaboradores, Colaborador } from "@/lib/queries";
+import {
+  Colaborador,
+  getColaboradoresWithMedia,
+  ColaboradorWithMedia,
+} from "@/lib/queries";
+
 import {
   X,
   ChevronLeft,
@@ -569,31 +573,21 @@ function ColabCard({
 // ── CAROUSEL ───────────────────────────────────────────────────────────────
 export default function CollaboratorsCarousel() {
   const [colaboradores, setColaboradores] = useState<
-    (Colaborador & { media?: MediaItem[] })[]
+    (ColaboradorWithMedia & { media?: MediaItem[] })[]
   >([]);
   const [modalCollab, setModalCollab] = useState<
-    (Colaborador & { media?: MediaItem[] }) | null
+    (ColaboradorWithMedia & { media?: MediaItem[] }) | null
   >(null);
   const trackRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    async function load() {
-      const colabs = await getColaboradores();
-      const withMedia = await Promise.all(
-        colabs.map(async (c) => {
-          const { data } = await supabase
-            .from("colaborador_media")
-            .select("*")
-            .eq("colaborador_id", c.id)
-            .order("orden");
-
-          return { ...c, media: (data as MediaItem[]) ?? [] };
-        }),
-      );
-      setColaboradores(withMedia);
-    }
-
-    load();
+    getColaboradoresWithMedia().then((data) => {
+      const mapped = data.map((c) => ({
+        ...c,
+        media: c.colaborador_media as MediaItem[],
+      }));
+      setColaboradores(mapped);
+    });
   }, []);
 
   const shouldScroll = colaboradores.length > SCROLL_THRESHOLD;

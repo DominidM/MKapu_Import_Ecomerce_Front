@@ -1,10 +1,16 @@
 "use client";
+
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import ProductCard from "@/components/productCard";
 import type { Producto } from "@/lib/supabase";
 import { supabase } from "@/lib/supabase";
+import {
+  SparklesIcon,
+  StarIcon,
+  ExclamationTriangleIcon,
+} from "@heroicons/react/24/solid";
 
 type BannerConfig = {
   titulo: string;
@@ -16,7 +22,6 @@ type BannerConfig = {
 interface Props {
   allCats: string[];
   banner: BannerConfig | null;
-  // Ya no recibe initialProducts — los carga paginado desde el cliente
 }
 
 const ITEMS_PER_PAGE = 24;
@@ -33,10 +38,10 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
   const [search, setSearch] = useState(searchParams.get("q") ?? "");
   const [searchInput, setSearchInput] = useState(searchParams.get("q") ?? "");
   const [cats, setCats] = useState<string[]>(
-    searchParams.get("cat") ? [searchParams.get("cat")!] : [],
+    searchParams.get("cat") ? [searchParams.get("cat")!] : []
   );
   const [maxPrice, setMaxPrice] = useState<number>(99999);
-  const [priceMax, setPriceMax] = useState<number>(99999); // máximo real de los datos
+  const [priceMax, setPriceMax] = useState<number>(99999);
   const [onlyFeatured, setOnlyFeatured] = useState(false);
   const [onlyNew, setOnlyNew] = useState(false);
   const [onlyLowStock, setOnlyLowStock] = useState(false);
@@ -44,7 +49,6 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
 
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // ── Carga paginada con filtros ────────────────────────────
   const load = useCallback(async () => {
     setLoading(true);
 
@@ -80,7 +84,7 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
 
     if (search.trim()) {
       query = query.or(
-        `name.ilike.%${search.trim()}%,description.ilike.%${search.trim()}%`,
+        `name.ilike.%${search.trim()}%,description.ilike.%${search.trim()}%`
       );
     }
 
@@ -100,10 +104,10 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
         category_name: p.categorias?.name ?? null,
         categorias: undefined,
       }));
+
       setProductos(mapped);
       setTotalCount(count ?? 0);
 
-      // Calcular precio máximo real solo la primera vez
       if (priceMax === 99999 && mapped.length > 0) {
         const { data: maxData } = await supabase
           .from("productos")
@@ -112,6 +116,7 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
           .order("price", { ascending: false })
           .limit(1)
           .single();
+
         if (maxData) {
           const rounded = Math.ceil(maxData.price / 100) * 100;
           setPriceMax(rounded);
@@ -136,12 +141,10 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
     load();
   }, [load]);
 
-  // Reset a página 1 cuando cambian filtros
   useEffect(() => {
     setCurrentPage(1);
   }, [search, cats, maxPrice, onlyFeatured, onlyNew, onlyLowStock]);
 
-  // Sincronizar searchParams con estado
   useEffect(() => {
     const q = searchParams.get("q") ?? "";
     const cat = searchParams.get("cat");
@@ -152,10 +155,11 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
 
   function handleSearchInput(value: string) {
     setSearchInput(value);
+
     if (searchTimer.current) clearTimeout(searchTimer.current);
+
     searchTimer.current = setTimeout(() => {
       setSearch(value);
-      // Actualizar URL sin navegar
       const params = new URLSearchParams(searchParams.toString());
       if (value) params.set("q", value);
       else params.delete("q");
@@ -165,7 +169,7 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
 
   function toggleCat(cat: string) {
     setCats((prev) =>
-      prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat],
+      prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
     );
   }
 
@@ -195,7 +199,6 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
 
   return (
     <main style={{ background: "#f8f7f4", minHeight: "100vh" }}>
-      {/* ── HERO ── */}
       <section
         style={{
           position: "relative",
@@ -217,6 +220,7 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
             style={{ objectFit: "cover", objectPosition: "center" }}
           />
         )}
+
         <div
           style={{
             position: "absolute",
@@ -226,6 +230,7 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
             zIndex: 1,
           }}
         />
+
         <div
           style={{
             position: "relative",
@@ -247,6 +252,7 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
           >
             Catálogo
           </p>
+
           <h1
             style={{
               fontSize: "clamp(1.8rem, 4vw, 2.8rem)",
@@ -258,6 +264,7 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
           >
             {heroTitulo}
           </h1>
+
           <p
             style={{
               fontSize: "1rem",
@@ -271,7 +278,6 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
         </div>
       </section>
 
-      {/* ── PRODUCTOS ── */}
       <div className="productos-page">
         <button
           className="filter-toggle"
@@ -299,7 +305,6 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
         </button>
 
         <div className="productos-layout">
-          {/* ── SIDEBAR ── */}
           <aside className={`sidebar${sidebarOpen ? " sidebar--open" : ""}`}>
             <div className="sidebar__header">
               <h2 className="sidebar__title">Filtros</h2>
@@ -345,6 +350,7 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
                     : `S/ ${maxPrice.toLocaleString("es-PE")}`}
                 </span>
               </label>
+
               <input
                 type="range"
                 min={0}
@@ -354,6 +360,7 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
                 onChange={(e) => setMaxPrice(Number(e.target.value))}
                 className="sidebar__range"
               />
+
               <div className="sidebar__range-labels">
                 <span>S/ 0</span>
                 <span>S/ {priceMax.toLocaleString("es-PE")}</span>
@@ -368,8 +375,9 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
                   onChange={(e) => setOnlyFeatured(e.target.checked)}
                   className="sidebar__checkbox"
                 />
-                <span className="sidebar__check-label">Solo destacados ⭐</span>
+                <span className="sidebar__check-label">Solo destacados</span>
               </label>
+
               <label className="sidebar__check-row" style={{ marginTop: 6 }}>
                 <input
                   type="checkbox"
@@ -378,9 +386,10 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
                   className="sidebar__checkbox"
                 />
                 <span className="sidebar__check-label">
-                  Solo productos nuevos 🆕
+                  Solo productos nuevos
                 </span>
               </label>
+
               <label className="sidebar__check-row" style={{ marginTop: 6 }}>
                 <input
                   type="checkbox"
@@ -389,7 +398,7 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
                   className="sidebar__checkbox"
                 />
                 <span className="sidebar__check-label">
-                  Solo últimas unidades ⚠️
+                  Solo últimas unidades
                 </span>
               </label>
             </div>
@@ -403,9 +412,7 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
             />
           )}
 
-          {/* ── MAIN ── */}
           <main className="productos-main">
-            {/* Buscador */}
             <div style={{ marginBottom: "1rem" }}>
               <div style={{ position: "relative", maxWidth: 480 }}>
                 <svg
@@ -429,6 +436,7 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
                   <circle cx="11" cy="11" r="8" />
                   <path d="m21 21-4.35-4.35" />
                 </svg>
+
                 <input
                   style={{
                     width: "100%",
@@ -455,10 +463,10 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
 
             <div className="productos-main__top">
               <p className="productos-main__count">
-                <strong>{totalCount}</strong> producto
-                {totalCount !== 1 ? "s" : ""}
+                <strong>{totalCount}</strong> producto{totalCount !== 1 ? "s" : ""}
                 {cats.length > 0 && ` en ${cats.join(", ")}`}
               </p>
+
               {activeFilters > 0 && (
                 <button
                   className="productos-main__clear"
@@ -493,7 +501,7 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
                     padding: "4px 10px",
                   }}
                 >
-                  Buscando:{" "}
+                  Buscando:
                   <strong style={{ color: "#1a1a1a" }}>
                     &ldquo;{search.trim()}&rdquo;
                   </strong>
@@ -517,7 +525,6 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
               </div>
             )}
 
-            {/* Grid o loading */}
             {loading ? (
               <div
                 style={{
@@ -539,9 +546,7 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
                     animation: "spin 0.8s linear infinite",
                   }}
                 />
-                <span style={{ fontSize: "0.9rem" }}>
-                  Buscando productos...
-                </span>
+                <span style={{ fontSize: "0.9rem" }}>Buscando productos...</span>
                 <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
               </div>
             ) : totalCount === 0 ? (
@@ -563,16 +568,13 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
                         description: p.description ?? "",
                         featured: p.featured ?? false,
                         image_url: p.image_url ?? undefined,
-                        price_caja: p.price_caja ?? undefined,
-                        unidad_caja: p.unidad_caja ?? undefined,
-                        price_mayorista: p.price_mayorista ?? undefined,
-                        unidad_mayorista: p.unidad_mayorista ?? undefined,
+                        is_new: p.is_new ?? false,
+                        low_stock: p.low_stock ?? false,
                       }}
                     />
                   ))}
                 </div>
 
-                {/* Paginador */}
                 {totalPages > 1 && (
                   <div
                     style={{
@@ -604,13 +606,14 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
                     >
                       ← Anterior
                     </button>
+
                     {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
                       let page: number;
                       if (totalPages <= 7) page = i + 1;
                       else if (currentPage <= 4) page = i + 1;
-                      else if (currentPage >= totalPages - 3)
-                        page = totalPages - 6 + i;
+                      else if (currentPage >= totalPages - 3) page = totalPages - 6 + i;
                       else page = currentPage - 3 + i;
+
                       return (
                         <button
                           key={page}
@@ -637,6 +640,7 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
                         </button>
                       );
                     })}
+
                     <button
                       onClick={() => {
                         setCurrentPage((p) => Math.min(totalPages, p + 1));
@@ -651,10 +655,7 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
                         color: "#666",
                         fontSize: "0.85rem",
                         fontWeight: 600,
-                        cursor:
-                          currentPage === totalPages
-                            ? "not-allowed"
-                            : "pointer",
+                        cursor: currentPage === totalPages ? "not-allowed" : "pointer",
                         opacity: currentPage === totalPages ? 0.4 : 1,
                       }}
                     >

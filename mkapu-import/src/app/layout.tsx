@@ -15,7 +15,6 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// Ahora sí funciona porque este archivo es Server Component
 export const metadata: Metadata = {
   title: {
     default: "Mkapu Import — Equipos de cocina industrial",
@@ -65,11 +64,6 @@ export default function RootLayout({
         }}
       >
         <CartProvider>
-          {/*
-           * ClientShell se encarga de leer el pathname y decidir
-           * si mostrar Navbar y Footer — toda esa lógica queda
-           * aislada en el Client Component
-           */}
           <ClientShell>{children}</ClientShell>
           <WhatsAppButton />
         </CartProvider>
