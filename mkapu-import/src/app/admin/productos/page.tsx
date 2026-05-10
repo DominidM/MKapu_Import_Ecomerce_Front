@@ -98,7 +98,7 @@ export default function AdminProductosPage() {
     const to = from + ITEMS_PER_PAGE - 1;
 
     let query = supabase
-      .from("productos")
+      .from("productos_con_media")
       .select("*", { count: "exact" })
       .order("id", { ascending: false })
       .range(from, to);
@@ -113,39 +113,23 @@ export default function AdminProductosPage() {
       query = query.eq("category", selectedCategory);
     }
 
-    const [prodRes, imgRes, vidRes] = await Promise.all([
-      query,
-      supabase.from("producto_imagenes").select("producto_id"),
-      supabase.from("producto_videos").select("producto_id"),
-    ]);
-
-    const imgCount: Record<number, number> = {};
-    const vidCount: Record<number, number> = {};
-
-    (imgRes.data ?? []).forEach((r: { producto_id: number }) => {
-      imgCount[r.producto_id] = (imgCount[r.producto_id] ?? 0) + 1;
-    });
-
-    (vidRes.data ?? []).forEach((r: { producto_id: number }) => {
-      vidCount[r.producto_id] = (vidCount[r.producto_id] ?? 0) + 1;
-    });
+    const prodRes = await query;
 
     const products = ((prodRes.data as Producto[]) ?? []).map((p) => ({
       ...p,
-      imgCount: imgCount[p.id] ?? 0,
-      vidCount: vidCount[p.id] ?? 0,
+      imgCount: (p as any).img_count ?? 0, // ← vienen de la vista
+      vidCount: (p as any).vid_count ?? 0,
     }));
 
-    const allIds = Array.from(
-      new Set([
-        ...Object.keys(imgCount).map(Number),
-        ...Object.keys(vidCount).map(Number),
-      ]),
-    );
+    const { data: allCounts } = await supabase
+      .from("productos_con_media")
+      .select("img_count, vid_count")
+      .eq("activo", true);
 
-    const completosSet = new Set(
-      allIds.filter((id) => (imgCount[id] ?? 0) > 0 && (vidCount[id] ?? 0) > 0),
-    );
+    const totalCompletos = (allCounts ?? []).filter(
+      (p: any) => p.img_count > 0 && p.vid_count > 0,
+    ).length;
+    const totalIncompletos = (allCounts ?? []).length - totalCompletos;
 
     let finalProducts = products;
     const finalCount = prodRes.count ?? 0;
@@ -162,8 +146,8 @@ export default function AdminProductosPage() {
 
     setRows(finalProducts);
     setTotalCount(finalCount);
-    setTotalCompletos(completosSet.size);
-    setTotalIncompletos((prodRes.count ?? 0) - completosSet.size);
+    setTotalCompletos(totalCompletos);
+    setTotalIncompletos(totalIncompletos);
     setLoading(false);
   }, [currentPage, search, selectedCategory, viewMode]);
 

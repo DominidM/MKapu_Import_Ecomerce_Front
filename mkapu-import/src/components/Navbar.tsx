@@ -59,9 +59,9 @@ export default function Navbar({ categories = [] }: NavbarProps) {
   const router = useRouter();
   const fetchedRef = useRef(false);
 
-  const [authChecked, setAuthChecked] = useState(false);
   const [isLogged, setIsLogged] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
 
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
   const [suggestOpen, setSuggestOpen] = useState(false);
@@ -83,48 +83,6 @@ export default function Navbar({ categories = [] }: NavbarProps) {
       .then((data: Categoria[]) => setCats(data))
       .catch(() => setCats([]));
   }, [categories]);
-
-  useEffect(() => {
-    let mounted = true;
-
-    async function checkAuthAndRole() {
-      const { data: userData } = await supabase.auth.getUser();
-      const user = userData.user;
-
-      if (!mounted) return;
-
-      if (!user) {
-        setIsLogged(false);
-        setIsAdmin(false);
-        setAuthChecked(true);
-        return;
-      }
-
-      setIsLogged(true);
-
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", user.id)
-        .maybeSingle();
-
-      if (!mounted) return;
-
-      setIsAdmin(profile?.role === "admin");
-      setAuthChecked(true);
-    }
-
-    checkAuthAndRole();
-
-    const { data: sub } = supabase.auth.onAuthStateChange(() => {
-      checkAuthAndRole();
-    });
-
-    return () => {
-      mounted = false;
-      sub.subscription.unsubscribe();
-    };
-  }, []);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -159,9 +117,9 @@ export default function Navbar({ categories = [] }: NavbarProps) {
         .from("productos")
         .select("id, name, image_url, price, categorias(name)")
         .eq("activo", true)
-        .ilike("name", `%${term}%`)
+        .or(`name.ilike.%${term}%,description.ilike.%${term}%`)
+        .order("featured", { ascending: false }) // destacados primero
         .limit(6);
-
       const mapped: SearchSuggestion[] = (data ?? []).map((p: any) => ({
         id: p.id,
         name: p.name,
@@ -189,8 +147,9 @@ export default function Navbar({ categories = [] }: NavbarProps) {
     setMobileOpen(false);
   }
 
-  async function handleLogout() {
-    await supabase.auth.signOut();
+  function handleLogout() {
+    localStorage.removeItem("admin_id");
+    localStorage.removeItem("admin_nombre");
     setMobileOpen(false);
     router.push("/");
   }
