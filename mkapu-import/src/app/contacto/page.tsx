@@ -69,7 +69,7 @@ const contactInfo = [
       </svg>
     ),
     label: "Email",
-    value: "ventas@mkapu.pe",
+    value: "marlomauriciop1@gmail.com",
   },
   {
     icon: (
