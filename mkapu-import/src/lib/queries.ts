@@ -246,22 +246,6 @@ export async function getMarcas(): Promise<Marca[]> {
   return data ?? [];
 }
 
-// ── COLABORADORES ──────────────────────────────────────────
-
-export async function getColaboradores(): Promise<Colaborador[]> {
-  const { data, error } = await supabase
-    .from("colaboradores")
-    .select("*")
-    .eq("activo", true)
-    .order("orden", { ascending: true });
-
-  if (error) {
-    console.error("Error fetching colaboradores:", error.message);
-    return [];
-  }
-  return data ?? [];
-}
-
 // ── VIDEOS ─────────────────────────────────────────────────
 
 export async function getVideos(tipo?: "video" | "vlog"): Promise<Video[]> {
@@ -282,4 +266,47 @@ export async function getVideos(tipo?: "video" | "vlog"): Promise<Video[]> {
     return [];
   }
   return data ?? [];
+}
+
+export type ColaboradorWithMedia = Colaborador & {
+  colaborador_media: {
+    id: number;
+    url: string;
+    tipo: "imagen" | "video";
+    orden: number;
+    titulo: string | null;
+  }[];
+};
+
+export async function getColaboradoresWithMedia(): Promise<
+  ColaboradorWithMedia[]
+> {
+  const { data, error } = await supabase
+    .from("colaboradores")
+    .select(
+      `
+      *,
+      colaborador_media (
+        id,
+        url,
+        tipo,
+        orden,
+        titulo
+      )
+    `,
+    )
+    .eq("activo", true)
+    .order("orden", { ascending: true });
+
+  if (error) {
+    console.error("Error fetching colaboradores with media:", error.message);
+    return [];
+  }
+
+  return (data ?? []).map((c: any) => ({
+    ...c,
+    colaborador_media: (c.colaborador_media ?? []).sort(
+      (a: any, b: any) => a.orden - b.orden,
+    ),
+  }));
 }

@@ -9,15 +9,10 @@ interface Product {
   id: number;
   code: string;
   name: string;
-  category: number;
+  category: number | null;
   category_name?: string;
   description: string;
   price: number;
-  old_price?: number;
-  price_caja?: number;
-  unidad_caja?: number;
-  price_mayorista?: number;
-  unidad_mayorista?: number;
   featured: boolean;
   is_new?: boolean;
   low_stock?: boolean;
@@ -58,10 +53,6 @@ export default function ProductCard({ product }: Props) {
       emoji: "📦",
       product: {
         price: product.price,
-        price_caja: product.price_caja,
-        unidad_caja: product.unidad_caja,
-        price_mayorista: product.price_mayorista,
-        unidad_mayorista: product.unidad_mayorista,
       },
     });
     setAdded(true);
@@ -94,17 +85,22 @@ export default function ProductCard({ product }: Props) {
           </div>
         )}
 
-        {/* Badges */}
-        {product.is_new && (
-          <span className="pcard__badge pcard__badge--new">Nuevo</span>
-        )}
-        {product.featured && (
-          <span className="pcard__badge pcard__badge--featured">Destacado</span>
-        )}
-        {product.low_stock && (
-          <span className="pcard__badge pcard__badge--low">
-            Últimas unidades
-          </span>
+        {(product.is_new || product.featured || product.low_stock) && (
+          <div className="pcard__badges">
+            {product.is_new && (
+              <span className="pcard__badge pcard__badge--new">Nuevo</span>
+            )}
+            {product.featured && (
+              <span className="pcard__badge pcard__badge--featured">
+                Destacado
+              </span>
+            )}
+            {product.low_stock && (
+              <span className="pcard__badge pcard__badge--low">
+                Últimas unidades
+              </span>
+            )}
+          </div>
         )}
 
         {qty > 0 && <span className="pcard__qty-badge">{qty}</span>}
@@ -198,13 +194,16 @@ export default function ProductCard({ product }: Props) {
             transform 0.22s;
           position: relative;
         }
+
         .pcard:hover {
           box-shadow: 0 10px 32px rgba(0, 0, 0, 0.13);
           transform: translateY(-4px);
         }
+
         .pcard--pop {
           animation: pop 0.3s cubic-bezier(0.36, 0.07, 0.19, 0.97);
         }
+
         @keyframes pop {
           0% {
             transform: scale(1);
@@ -225,6 +224,7 @@ export default function ProductCard({ product }: Props) {
           background: #f5f2ee;
           overflow: hidden;
         }
+
         .pcard__img {
           width: 100%;
           height: 100%;
@@ -232,9 +232,11 @@ export default function ProductCard({ product }: Props) {
           display: block;
           transition: transform 0.5s;
         }
+
         .pcard:hover .pcard__img {
           transform: scale(1.06);
         }
+
         .pcard__no-img {
           width: 100%;
           height: 100%;
@@ -247,30 +249,51 @@ export default function ProductCard({ product }: Props) {
           font-size: 0.7rem;
         }
 
-        .pcard__badge {
+        .pcard__badges {
           position: absolute;
-          left: 9px;
-          font-size: 0.6rem;
+          top: 10px;
+          left: 10px;
+          z-index: 3;
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          row-gap: 4px;
+          pointer-events: none;
+        }
+
+        .pcard__badge {
+          position: static !important;
+          top: auto !important;
+          left: auto !important;
+          right: auto !important;
+          bottom: auto !important;
+          margin: 0 !important;
+          display: inline-flex;
+          align-items: center;
+          width: fit-content;
+          min-height: 24px;
+          padding: 0 10px;
+          border-radius: 999px;
+          font-size: 0.68rem;
           font-weight: 800;
-          letter-spacing: 0.03em;
-          padding: 3px 9px;
-          border-radius: 6px;
+          line-height: 1;
+          letter-spacing: 0.02em;
           text-transform: uppercase;
-          z-index: 1;
+          white-space: nowrap;
           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
         }
+
         .pcard__badge--new {
-          top: 9px;
           background: #f59e0b;
           color: #fff;
         }
+
         .pcard__badge--featured {
-          top: 34px;
           background: #10b981;
           color: #fff;
         }
+
         .pcard__badge--low {
-          top: 59px;
           background: #b91c1c;
           color: #fff;
         }
@@ -289,6 +312,7 @@ export default function ProductCard({ product }: Props) {
           background: var(--accent);
           color: #fff;
         }
+
         @keyframes bdg {
           from {
             transform: scale(0.5);
@@ -304,6 +328,7 @@ export default function ProductCard({ product }: Props) {
           padding: 0.75rem 0.85rem 0.4rem;
           overflow: hidden;
         }
+
         .pcard__cat {
           font-size: 0.6rem;
           font-weight: 700;
@@ -312,6 +337,7 @@ export default function ProductCard({ product }: Props) {
           color: var(--muted);
           margin: 0 0 3px;
         }
+
         .pcard__name {
           font-size: 0.86rem;
           font-weight: 800;
@@ -323,6 +349,7 @@ export default function ProductCard({ product }: Props) {
           -webkit-box-orient: vertical;
           overflow: hidden;
         }
+
         .pcard__desc {
           font-size: 0.71rem;
           color: var(--muted);
@@ -344,11 +371,13 @@ export default function ProductCard({ product }: Props) {
           border-bottom: 1px solid var(--border);
           background: #fafaf9;
         }
+
         .pcard__price-label {
           font-size: 0.71rem;
           font-weight: 600;
           color: var(--text);
         }
+
         .pcard__price-value {
           font-size: 0.92rem;
           font-weight: 900;
@@ -360,6 +389,7 @@ export default function ProductCard({ product }: Props) {
           display: flex;
           align-items: center;
         }
+
         .pcard__btn {
           width: 100%;
           display: flex;
@@ -379,17 +409,21 @@ export default function ProductCard({ product }: Props) {
             transform 0.12s,
             box-shadow 0.15s;
         }
+
         .pcard__btn:hover {
           background: var(--accent-h);
           box-shadow: 0 4px 12px rgba(224, 92, 42, 0.35);
           transform: translateY(-1px);
         }
+
         .pcard__btn:active {
           transform: scale(0.97);
         }
+
         .pcard__btn--wsp {
           background: var(--wsp);
         }
+
         .pcard__btn--wsp:hover {
           background: var(--wsp-h);
         }
@@ -403,6 +437,7 @@ export default function ProductCard({ product }: Props) {
           overflow: hidden;
           height: 38px;
         }
+
         .pcard__step {
           background: transparent;
           border: none;
@@ -418,9 +453,11 @@ export default function ProductCard({ product }: Props) {
           flex-shrink: 0;
           transition: background 0.15s;
         }
+
         .pcard__step:hover {
           background: #fbd5c5;
         }
+
         .pcard__step-info {
           flex: 1;
           display: flex;
@@ -428,12 +465,14 @@ export default function ProductCard({ product }: Props) {
           align-items: center;
           gap: 1px;
         }
+
         .pcard__step-qty {
           font-size: 0.8rem;
           font-weight: 800;
           color: var(--text);
           line-height: 1;
         }
+
         .pcard__step-tier {
           font-size: 0.58rem;
           font-weight: 600;
