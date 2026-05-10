@@ -49,7 +49,7 @@ const contactInfo = [
       </svg>
     ),
     label: "Teléfono / WhatsApp",
-    value: "+51 999 999 999",
+    value: "+51 977 600 019",
   },
   {
     icon: (
@@ -521,7 +521,7 @@ export default function ContactoPage() {
                       name="telefono"
                       value={form.telefono}
                       onChange={handleChange}
-                      placeholder="+51 999 999 999"
+                      placeholder="+51 977 600 019"
                       style={inputStyle}
                       onFocus={(e) => (e.target.style.borderColor = "#f5a623")}
                       onBlur={(e) => (e.target.style.borderColor = "#ddd")}
