@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
+import { useState } from "react";
 
 type Banner = {
   id: number;
@@ -13,28 +12,17 @@ type Banner = {
   activo: boolean;
 };
 
-// Color accent por índice (ya que la tabla no tiene columna color)
 const COLORS = ["#0ea5e9", "#6366f1", "#e05c2a", "#854d0e", "#16a34a"];
 
-export default function HeroAccordion() {
-  const [items, setItems] = useState<Banner[]>([]);
-  const [activeIdx, setActiveIdx] = useState(0);
+export default function HeroAccordion({ initialBanners }: { initialBanners: Banner[] }) {
+  const [items] = useState<Banner[]>(initialBanners);
+  const [activeIdx, setActiveIdx] = useState(Math.min(2, initialBanners.length - 1));
 
-  useEffect(() => {
-    supabase
-      .from("banners_carousel")
-      .select("*")
-      .eq("activo", true)
-      .order("orden", { ascending: true })
-      .then(({ data }) => {
-        if (data && data.length > 0) {
-          setItems(data);
-          setActiveIdx(Math.min(2, data.length - 1));
-        }
-      });
-  }, []);
-
-  if (items.length === 0) return null;
+  if (items.length === 0) return (
+    <section className="hacc">
+      <div style={{ minHeight: "560px" }} />
+    </section>
+  );
 
   const active = items[activeIdx];
   const activeColor = COLORS[activeIdx % COLORS.length];
@@ -111,6 +99,9 @@ export default function HeroAccordion() {
               src={active.image_url}
               alt={active.titulo}
               className="hacc__bigimg"
+              fetchPriority="high"
+              decoding="async"
+              loading="eager"
             />
             <div className="hacc__panel-overlay" />
             <span className="hacc__bigimg-label">{active.titulo}</span>
