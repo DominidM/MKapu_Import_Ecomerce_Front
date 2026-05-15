@@ -11,13 +11,15 @@ export default async function Page({ params }: PageProps) {
 
   const { data, error } = await supabase
     .from("productos")
-    .select(`
+    .select(
+      `
       *,
       categorias (
         id,
         name
       )
-    `)
+    `,
+    )
     .eq("id", Number(id))
     .eq("activo", true)
     .single();
@@ -29,8 +31,8 @@ export default async function Page({ params }: PageProps) {
   const producto = {
     ...data,
     category_name: Array.isArray(data.categorias)
-      ? data.categorias[0]?.name ?? null
-      : data.categorias?.name ?? null,
+      ? (data.categorias[0]?.name ?? null)
+      : (data.categorias?.name ?? null),
   };
 
   const { data: sugeridos } = await supabase
@@ -42,9 +44,6 @@ export default async function Page({ params }: PageProps) {
     .limit(8);
 
   return (
-    <ProductoDetailClient
-      producto={producto}
-      sugeridos={sugeridos ?? []}
-    />
+    <ProductoDetailClient producto={producto} sugeridos={sugeridos ?? []} />
   );
 }

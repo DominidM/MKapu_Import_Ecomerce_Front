@@ -1,7 +1,6 @@
 export default function TerminosYCondiciones() {
   return (
     <main className="legal-page">
-        
       <style>{`
         .legal-page {
           background: #111;
@@ -74,8 +73,10 @@ export default function TerminosYCondiciones() {
             El presente sitio web es operado por <strong>Mkapu Import</strong>,
             empresa debidamente registrada en el Perú con RUC activo. Para
             cualquier consulta puedes contactarnos a través de{" "}
-            <a href="mailto:marlomauriciop1@gmail.com">marlomauriciop1@gmail.com</a> o por
-            WhatsApp.
+            <a href="mailto:marlomauriciop1@gmail.com">
+              marlomauriciop1@gmail.com
+            </a>{" "}
+            o por WhatsApp.
           </p>
         </section>
 
@@ -163,8 +164,8 @@ export default function TerminosYCondiciones() {
         <section className="legal-page__section">
           <h2>7. Devoluciones y cambios</h2>
           <p>
-            De acuerdo con el Código de Protección y Defensa del Consumidor
-            (Ley N° 29571), el usuario tiene derecho a solicitar la reparación,
+            De acuerdo con el Código de Protección y Defensa del Consumidor (Ley
+            N° 29571), el usuario tiene derecho a solicitar la reparación,
             reposición o devolución del producto en caso de defecto o
             disconformidad. Las solicitudes deben realizarse dentro del plazo
             legal aplicable, contactando a nuestro equipo a través de los
@@ -213,7 +214,6 @@ export default function TerminosYCondiciones() {
           </p>
         </section>
       </div>
-
     </main>
   );
 }

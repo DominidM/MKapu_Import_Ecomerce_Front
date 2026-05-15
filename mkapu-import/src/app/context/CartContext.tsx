@@ -18,7 +18,7 @@ export interface CartProduct {
 
 export interface CartItem {
   id: number | string;
-  code: string;       
+  code: string;
   name: string;
   price: number;
   itemTotal: number;
@@ -41,38 +41,39 @@ interface CartContextType {
 }
 
 function calcTier(qty: number, p: CartProduct): { price: number } {
-  const hasCaja      = !!p.price_caja && !!p.unidad_caja;
+  const hasCaja = !!p.price_caja && !!p.unidad_caja;
   const hasMayorista = !!p.price_mayorista && !!p.unidad_mayorista;
 
-  if (hasCaja && qty >= p.unidad_caja!)           return { price: p.price_caja! / p.unidad_caja! };
-  if (hasMayorista && qty >= p.unidad_mayorista!) return { price: p.price_mayorista! };
+  if (hasCaja && qty >= p.unidad_caja!)
+    return { price: p.price_caja! / p.unidad_caja! };
+  if (hasMayorista && qty >= p.unidad_mayorista!)
+    return { price: p.price_mayorista! };
   return { price: p.price };
 }
 
 function calcTotal(qty: number, p: CartProduct): number {
   if (qty <= 0) return 0;
 
-  const hasCaja      = !!p.price_caja && !!p.unidad_caja;
+  const hasCaja = !!p.price_caja && !!p.unidad_caja;
   const hasMayorista = !!p.price_mayorista && !!p.unidad_mayorista;
 
   if (hasCaja && qty >= p.unidad_caja!) {
-    const cajas   = Math.floor(qty / p.unidad_caja!);
+    const cajas = Math.floor(qty / p.unidad_caja!);
     const sueltas = qty % p.unidad_caja!;
     const precioSueltas =
-      hasMayorista && qty >= p.unidad_mayorista!
-        ? p.price_mayorista!
-        : p.price;
+      hasMayorista && qty >= p.unidad_mayorista! ? p.price_mayorista! : p.price;
     return cajas * p.price_caja! + sueltas * precioSueltas;
   }
 
-  if (hasMayorista && qty >= p.unidad_mayorista!) return qty * p.price_mayorista!;
+  if (hasMayorista && qty >= p.unidad_mayorista!)
+    return qty * p.price_mayorista!;
   return qty * p.price;
 }
 
 const CartContext = createContext<CartContextType | null>(null);
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>([]);   // ← línea que faltaba
+  const [items, setItems] = useState<CartItem[]>([]); // ← línea que faltaba
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
@@ -90,13 +91,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems((prev) => {
       const existing = prev.find((i) => i.id === item.id);
       if (existing) {
-        const newQty   = existing.qty + 1;
+        const newQty = existing.qty + 1;
         const newPrice = calcTier(newQty, item.product).price;
         const newTotal = calcTotal(newQty, item.product);
         return prev.map((i) =>
           i.id === item.id
             ? { ...i, qty: newQty, price: newPrice, itemTotal: newTotal }
-            : i
+            : i,
         );
       }
       return [...prev, { ...item, qty: 1 }];
@@ -115,7 +116,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         const newPrice = calcTier(qty, i.product).price;
         const newTotal = calcTotal(qty, i.product);
         return { ...i, qty, price: newPrice, itemTotal: newTotal };
-      })
+      }),
     );
   };
 
@@ -126,7 +127,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   return (
     <CartContext.Provider
-      value={{ items, addItem, removeItem, updateQty, clearCart, total, count, isOpen, setIsOpen }}
+      value={{
+        items,
+        addItem,
+        removeItem,
+        updateQty,
+        clearCart,
+        total,
+        count,
+        isOpen,
+        setIsOpen,
+      }}
     >
       {children}
     </CartContext.Provider>

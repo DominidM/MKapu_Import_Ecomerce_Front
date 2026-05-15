@@ -8,15 +8,17 @@ export default function PoliticaDePrivacidad() {
         <section className="legal-page__section">
           <h2>1. Responsable del tratamiento</h2>
           <p>
-            <strong>Mkapu Import</strong>, empresa registrada en el Perú con
-            RUC activo, es responsable del banco de datos personales recopilados
-            a través de este sitio web, en cumplimiento de la Ley N° 29733, Ley
-            de Protección de Datos Personales, y su Reglamento (D.S.
-            N° 003-2013-JUS).
+            <strong>Mkapu Import</strong>, empresa registrada en el Perú con RUC
+            activo, es responsable del banco de datos personales recopilados a
+            través de este sitio web, en cumplimiento de la Ley N° 29733, Ley de
+            Protección de Datos Personales, y su Reglamento (D.S. N°
+            003-2013-JUS).
           </p>
           <p>
             Contacto:{" "}
-            <a href="mailto:marlomauriciop1@gmail.com">marlomauriciop1@gmail.com</a>
+            <a href="mailto:marlomauriciop1@gmail.com">
+              marlomauriciop1@gmail.com
+            </a>
           </p>
         </section>
 
@@ -47,12 +49,10 @@ export default function PoliticaDePrivacidad() {
             <li>Gestionar envíos y seguimiento de entregas.</li>
             <li>Brindar soporte técnico posventa.</li>
             <li>
-              Enviarte información comercial sobre productos y promociones
-              (solo si diste tu consentimiento).
+              Enviarte información comercial sobre productos y promociones (solo
+              si diste tu consentimiento).
             </li>
-            <li>
-              Cumplir con obligaciones legales y tributarias aplicables.
-            </li>
+            <li>Cumplir con obligaciones legales y tributarias aplicables.</li>
           </ul>
         </section>
 
@@ -90,8 +90,8 @@ export default function PoliticaDePrivacidad() {
           <p>
             Adoptamos medidas técnicas y organizativas razonables para proteger
             tus datos personales contra accesos no autorizados, pérdida,
-            alteración o divulgación indebida, conforme al artículo 16 de la
-            Ley N° 29733.
+            alteración o divulgación indebida, conforme al artículo 16 de la Ley
+            N° 29733.
           </p>
         </section>
 
@@ -107,9 +107,7 @@ export default function PoliticaDePrivacidad() {
 
         <section className="legal-page__section">
           <h2>8. Derechos del titular (Derechos ARCO)</h2>
-          <p>
-            De conformidad con la Ley N° 29733, tienes derecho a:
-          </p>
+          <p>De conformidad con la Ley N° 29733, tienes derecho a:</p>
           <ul>
             <li>
               <strong>Acceso:</strong> conocer qué datos tuyos tratamos.
@@ -129,7 +127,9 @@ export default function PoliticaDePrivacidad() {
           </ul>
           <p>
             Para ejercer cualquiera de estos derechos, escríbenos a{" "}
-            <a href="mailto:marlomauriciop1@gmail.com">marlomauriciop1@gmail.com</a>{" "}
+            <a href="mailto:marlomauriciop1@gmail.com">
+              marlomauriciop1@gmail.com
+            </a>{" "}
             indicando tu nombre completo, el derecho que deseas ejercer y
             adjuntando una copia de tu DNI. Responderemos en un plazo máximo de
             20 días hábiles.
