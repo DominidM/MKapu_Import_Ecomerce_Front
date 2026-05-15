@@ -17,9 +17,8 @@ import { supabase } from "@/lib/supabase";
 import type { Producto } from "@/lib/supabase";
 
 interface Props {
-  producto: Producto & {
-    category_name?: string | null;
-  };
+  producto: Producto & { category_name?: string | null };
+  sugeridos: any[];
 }
 
 type ProductoImagen = {
@@ -41,7 +40,7 @@ function formatPrice(value: number) {
   return `S/ ${value.toFixed(2)}`;
 }
 
-export default function ProductoDetailClient({ producto }: Props) {
+export default function ProductoDetailClient({ producto, sugeridos }: Props) {
   const { addItem, items, updateQty, removeItem } = useCart();
   const [imgError, setImgError] = useState(false);
   const [imagenes, setImagenes] = useState<ProductoImagen[]>([]);
@@ -103,10 +102,10 @@ export default function ProductoDetailClient({ producto }: Props) {
     }
     updateQty(String(producto.id), newQty);
   }
-
   function handleAdd() {
     addItem({
       id: String(producto.id),
+      code: producto.code ?? "",
       name: producto.name,
       price: producto.price,
       itemTotal: producto.price,
@@ -378,6 +377,37 @@ export default function ProductoDetailClient({ producto }: Props) {
           </div>
         </div>
       </section>
+
+      {sugeridos.length > 0 && (
+        <section className="detail-sugeridos">
+          <h2 className="detail-sugeridos__title">
+            También te puede interesar
+          </h2>
+          <div className="detail-sugeridos__scroll">
+            {sugeridos.map((p) => (
+              <a
+                key={p.id}
+                href={`/productos/${p.id}`}
+                className="detail-sug-card"
+              >
+                <div className="detail-sug-img">
+                  {p.image_url ? (
+                    <img src={p.image_url} alt={p.name} loading="lazy" />
+                  ) : (
+                    <div className="detail-sug-noimg">Sin imagen</div>
+                  )}
+                </div>
+                <div className="detail-sug-body">
+                  <p className="detail-sug-price">
+                    {p.price === 0 ? "Consultar" : `S/ ${p.price.toFixed(2)}`}
+                  </p>
+                  <p className="detail-sug-name">{p.name}</p>
+                </div>
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
 
       <style jsx>{`
         .detail-shell {
@@ -1003,6 +1033,79 @@ export default function ProductoDetailClient({ producto }: Props) {
             font-size: 0.86rem;
           }
         }
+ .detail-sugeridos {
+  margin-top: 48px;
+  padding-top: 32px;
+  border-top: 1px solid #ece3d6;
+}
+.detail-sugeridos__title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin: 0 0 20px;
+}
+.detail-sugeridos__scroll {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 12px;
+  scrollbar-width: none;
+}
+.detail-sugeridos__scroll::-webkit-scrollbar {
+  display: none;
+}
+.detail-sug-card {
+  flex: 0 0 180px;
+  scroll-snap-align: start;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+.detail-sug-img {
+  aspect-ratio: 1/1;
+  background: #f5f2ee;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+.detail-sug-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s;
+}
+.detail-sug-card:hover .detail-sug-img img {
+  transform: scale(1.04);
+}
+.detail-sug-noimg {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  color: #bbb;
+}
+.detail-sug-body { padding: 0 2px; }
+.detail-sug-price {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 3px;
+}
+.detail-sug-name {
+  font-size: 0.78rem;
+  color: #555;
+  margin: 0;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
       `}</style>
     </div>
   );

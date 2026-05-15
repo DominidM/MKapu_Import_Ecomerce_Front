@@ -22,9 +22,6 @@ export default async function Page({ params }: PageProps) {
     .eq("activo", true)
     .single();
 
-  console.log("PRODUCTO RAW:", data);
-  console.log("ERROR:", error);
-
   if (error || !data) {
     notFound();
   }
@@ -36,7 +33,18 @@ export default async function Page({ params }: PageProps) {
       : data.categorias?.name ?? null,
   };
 
-  console.log("PRODUCTO MAPEADO:", producto);
+  const { data: sugeridos } = await supabase
+    .from("productos")
+    .select("*")
+    .eq("category", data.category)
+    .eq("activo", true)
+    .neq("id", Number(id))
+    .limit(8);
 
-  return <ProductoDetailClient producto={producto} />;
+  return (
+    <ProductoDetailClient
+      producto={producto}
+      sugeridos={sugeridos ?? []}
+    />
+  );
 }
