@@ -94,18 +94,24 @@ export default function AdminBannersPage() {
     file: File,
     folder: string,
   ): Promise<string | null> {
-    const ext = file.name.split(".").pop();
-    const path = `banners/${folder}/${Date.now()}.${ext}`;
-    const { error } = await supabase.storage
-      .from("imagenes")
-      .upload(path, file, { upsert: true });
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("folder", `banners/${folder}`);
 
-    if (error) {
-      alert("Error: " + error.message);
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) throw new Error("Upload fallido");
+
+      const data = await res.json();
+      return data.url;
+    } catch (error) {
+      alert("Error subiendo imagen: " + error);
       return null;
     }
-
-    return supabase.storage.from("imagenes").getPublicUrl(path).data.publicUrl;
   }
 
   async function persistOrder(list: BannerCarousel[]) {

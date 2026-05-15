@@ -35,14 +35,10 @@ export default async function HomeSecciones() {
       .select("orden, categoria_id, categorias(id, name, slug)")
       .eq("activo", true)
       .order("orden"),
-    supabase
-      .from("productos")
-      .select("*")
-      .eq("activo", true)
-      .order("name"),
+    supabase.from("productos").select("*").eq("activo", true).order("name"),
   ]);
 
-  if (!secciones?.length) return null;
+  if (!secciones?.length) return <div style={{ minHeight: "400px" }} />;
 
   const seccionesTyped = secciones as Seccion[];
 

@@ -41,7 +41,13 @@ function CarouselSection({
   href: string;
   dark?: boolean;
 }) {
-  if (products.length === 0) return null;
+  if (products.length === 0)
+    return (
+      <section
+        className={`csec${dark ? " csec--dark" : ""}`}
+        style={{ minHeight: "420px" }}
+      />
+    );
   return (
     <section className={`csec${dark ? " csec--dark" : ""}`}>
       <div className="csec__inner">
