@@ -35,7 +35,7 @@ export default function BrandsCarousel() {
     return () => cancelAnimationFrame(raf);
   }, [marcas, shouldScroll]);
 
-  if (marcas.length === 0) return null;
+  if (marcas.length === 0) return <section style={{ minHeight: "280px" }} />;
 
   const items = shouldScroll ? [...marcas, ...marcas] : marcas;
 
