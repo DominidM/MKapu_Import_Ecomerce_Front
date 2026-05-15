@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "es_PE",
-    url: "https://mkapu.pe",
+    url: "https://mkapu.com",
     siteName: "Mkapu Import",
   },
 };
@@ -52,6 +52,8 @@ export default function RootLayout({
           rel="apple-touch-icon"
           href="https://res.cloudinary.com/dxuk9bogw/image/upload/w_180,h_180,c_fill/v1767836605/474716814_581641201299027_4444346315622797816_n_karlgu.png"
         />
+        <link rel="preconnect" href="https://kodmbciwlfscwtdaejen.supabase.co" />
+        <link rel="dns-prefetch" href="https://kodmbciwlfscwtdaejen.supabase.co" />
       </head>
       <body
         suppressHydrationWarning

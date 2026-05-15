@@ -310,3 +310,29 @@ export async function getColaboradoresWithMedia(): Promise<
     ),
   }));
 }
+
+// ── BANNERS ────────────────────────────────────────────────
+
+export type Banner = {
+  id: number;
+  titulo: string;
+  subtitulo: string;
+  image_url: string;
+  link_url: string;
+  orden: number;
+  activo: boolean;
+};
+
+export async function getBanners(): Promise<Banner[]> {
+  const { data, error } = await supabase
+    .from("banners_carousel")
+    .select("*")
+    .eq("activo", true)
+    .order("orden", { ascending: true });
+
+  if (error) {
+    console.error("Error fetching banners:", error.message);
+    return [];
+  }
+  return data ?? [];
+}

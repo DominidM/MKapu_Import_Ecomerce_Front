@@ -4,9 +4,8 @@ import BrandsCarousel from "@/components/BrandsCarousel";
 import CollaboratorsCarousel from "@/components/CollaboratorsCarousel";
 import VideoSection from "@/components/VideoSection";
 import HeroAccordion from "@/components/HeroAccordion";
-import { getProductos, getProductosNuevos } from "@/lib/queries";
+import { getProductos, getProductosNuevos, getBanners } from "@/lib/queries";
 import HomeSecciones from "@/components/HomeSecciones";
-
 
 type AnyProduct = any;
 
@@ -126,20 +125,17 @@ const WHY_ITEMS = [
 ];
 
 export default async function HomePage() {
-  const [products, nuevos] = await Promise.all([
+  const [products, nuevos, banners] = await Promise.all([
     getProductos(),
     getProductosNuevos(),
+    getBanners(),
   ]);
 
   const featured = products.filter((p: AnyProduct) => p.featured);
-  const hornos = byCategory(products, "horno");
-  const freidorasAire = byCategory(products, "freidora-aire");
-  const maquinaHielo = byCategory(products, "maquina-hielo");
-  const refrigeracion = byCategory(products, "refrigeracion");
 
   return (
     <div className="home">
-      <HeroAccordion />
+      <HeroAccordion initialBanners={banners} />
 
       <CarouselSection
         tag="Más vendidos"
