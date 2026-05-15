@@ -18,6 +18,7 @@ export interface CartProduct {
 
 export interface CartItem {
   id: number | string;
+  code: string;       
   name: string;
   price: number;
   itemTotal: number;
