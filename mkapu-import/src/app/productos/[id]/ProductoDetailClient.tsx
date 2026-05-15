@@ -155,7 +155,10 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
               )}
             </div>
 
-            <div className="detail-image-stage">
+            <div
+              className={`detail-image-stage${currentMedia?.type === "video" ? " detail-image-stage--video" : ""}`}
+            >
+              {" "}
               {currentMedia && currentMedia.url && !imgError ? (
                 currentMedia.type === "video" ? (
                   <video
@@ -178,7 +181,6 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
                   <span>Imagen no disponible</span>
                 </div>
               )}
-
               {hasMultipleMedia && (
                 <>
                   <button
@@ -541,6 +543,8 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
 
         .detail-image-stage {
           aspect-ratio: 1 / 1;
+          min-height: 0;
+          transition: aspect-ratio 0.2s;
           border-radius: 22px;
           overflow: hidden;
           position: relative;
@@ -553,14 +557,24 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
           border: 1px solid #ece3d7;
         }
 
-        .detail-image,
-        .detail-video {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          display: block;
+        .detail-image-stage--video {
+          aspect-ratio: unset !important;
+          max-height: 500px;
+          height: 500px;
         }
 
+        .detail-image,
+        .detail-video {
+          width: auto;
+          height: 100%;
+          max-width: 100%;
+          object-fit: contain;
+          display: block;
+          background: #000;
+          margin: 0 auto;
+          position: static;
+          transform: none;
+        }
         .detail-image-empty {
           width: 100%;
           height: 100%;
@@ -1033,79 +1047,81 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
             font-size: 0.86rem;
           }
         }
- .detail-sugeridos {
-  margin-top: 48px;
-  padding-top: 32px;
-  border-top: 1px solid #ece3d6;
-}
-.detail-sugeridos__title {
-  font-size: 1.1rem;
-  font-weight: 800;
-  color: #1a1a1a;
-  margin: 0 0 20px;
-}
-.detail-sugeridos__scroll {
-  display: flex;
-  gap: 16px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-  padding-bottom: 12px;
-  scrollbar-width: none;
-}
-.detail-sugeridos__scroll::-webkit-scrollbar {
-  display: none;
-}
-.detail-sug-card {
-  flex: 0 0 180px;
-  scroll-snap-align: start;
-  text-decoration: none;
-  color: inherit;
-  cursor: pointer;
-}
-.detail-sug-img {
-  aspect-ratio: 1/1;
-  background: #f5f2ee;
-  border-radius: 12px;
-  overflow: hidden;
-  margin-bottom: 8px;
-}
-.detail-sug-img img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  transition: transform 0.3s;
-}
-.detail-sug-card:hover .detail-sug-img img {
-  transform: scale(1.04);
-}
-.detail-sug-noimg {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.7rem;
-  color: #bbb;
-}
-.detail-sug-body { padding: 0 2px; }
-.detail-sug-price {
-  font-size: 0.88rem;
-  font-weight: 700;
-  color: #1a1a1a;
-  margin: 0 0 3px;
-}
-.detail-sug-name {
-  font-size: 0.78rem;
-  color: #555;
-  margin: 0;
-  line-height: 1.3;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
+        .detail-sugeridos {
+          margin-top: 48px;
+          padding-top: 32px;
+          border-top: 1px solid #ece3d6;
+        }
+        .detail-sugeridos__title {
+          font-size: 1.1rem;
+          font-weight: 800;
+          color: #1a1a1a;
+          margin: 0 0 20px;
+        }
+        .detail-sugeridos__scroll {
+          display: flex;
+          gap: 16px;
+          overflow-x: auto;
+          scroll-snap-type: x mandatory;
+          -webkit-overflow-scrolling: touch;
+          padding-bottom: 12px;
+          scrollbar-width: none;
+        }
+        .detail-sugeridos__scroll::-webkit-scrollbar {
+          display: none;
+        }
+        .detail-sug-card {
+          flex: 0 0 180px;
+          scroll-snap-align: start;
+          text-decoration: none;
+          color: inherit;
+          cursor: pointer;
+        }
+        .detail-sug-img {
+          aspect-ratio: 1/1;
+          background: #f5f2ee;
+          border-radius: 12px;
+          overflow: hidden;
+          margin-bottom: 8px;
+        }
+        .detail-sug-img img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+          transition: transform 0.3s;
+        }
+        .detail-sug-card:hover .detail-sug-img img {
+          transform: scale(1.04);
+        }
+        .detail-sug-noimg {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 0.7rem;
+          color: #bbb;
+        }
+        .detail-sug-body {
+          padding: 0 2px;
+        }
+        .detail-sug-price {
+          font-size: 0.88rem;
+          font-weight: 700;
+          color: #1a1a1a;
+          margin: 0 0 3px;
+        }
+        .detail-sug-name {
+          font-size: 0.78rem;
+          color: #555;
+          margin: 0;
+          line-height: 1.3;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
       `}</style>
     </div>
   );
