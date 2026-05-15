@@ -102,8 +102,8 @@ export default function ProductoMediaPage() {
 
       if (error) continue;
 
-      const url = supabase.storage.from("imagenes").getPublicUrl(path).data
-        .publicUrl;
+      const url = supabase.storage.from("imagenes").getPublicUrl(path)
+        .data.publicUrl;
 
       await supabase
         .from("producto_imagenes")
@@ -143,8 +143,8 @@ export default function ProductoMediaPage() {
         supabase
           .from("producto_imagenes")
           .update({ orden: i })
-          .eq("id", img.id)
-      )
+          .eq("id", img.id),
+      ),
     );
 
     await loadAll();
@@ -159,7 +159,7 @@ export default function ProductoMediaPage() {
 
     if (file.size > 100 * 1024 * 1024) {
       setVidError(
-        `El video pesa ${(file.size / 1024 / 1024).toFixed(1)} MB. Máximo permitido: 100 MB.`
+        `El video pesa ${(file.size / 1024 / 1024).toFixed(1)} MB. Máximo permitido: 100 MB.`,
       );
       if (vidRef.current) vidRef.current.value = "";
       return;
@@ -181,15 +181,17 @@ export default function ProductoMediaPage() {
       return;
     }
 
-    const url = supabase.storage.from("imagenes").getPublicUrl(path).data
-      .publicUrl;
+    const url = supabase.storage.from("imagenes").getPublicUrl(path)
+      .data.publicUrl;
 
-    const { error: insertError } = await supabase.from("producto_videos").insert({
-      producto_id: productoId,
-      video_url: url,
-      titulo: videoTitulo || null,
-      orden: videos.length,
-    });
+    const { error: insertError } = await supabase
+      .from("producto_videos")
+      .insert({
+        producto_id: productoId,
+        video_url: url,
+        titulo: videoTitulo || null,
+        orden: videos.length,
+      });
 
     setUploadingVid(false);
 
@@ -221,8 +223,8 @@ export default function ProductoMediaPage() {
 
     await Promise.all(
       arr.map((v, i) =>
-        supabase.from("producto_videos").update({ orden: i }).eq("id", v.id)
-      )
+        supabase.from("producto_videos").update({ orden: i }).eq("id", v.id),
+      ),
     );
 
     await loadAll();
