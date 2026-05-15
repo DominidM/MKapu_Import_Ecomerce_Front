@@ -6,6 +6,7 @@ import VideoSection from "@/components/VideoSection";
 import HeroAccordion from "@/components/HeroAccordion";
 import { getProductos, getProductosNuevos, getBanners } from "@/lib/queries";
 import HomeSecciones from "@/components/HomeSecciones";
+import MapaLocal from "@/components/MapaLocal";
 
 type AnyProduct = any;
 
@@ -161,6 +162,8 @@ export default async function HomePage() {
       />
 
       <BrandsCarousel />
+
+      <MapaLocal />
 
       <HomeSecciones />
 
