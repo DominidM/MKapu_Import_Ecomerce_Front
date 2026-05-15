@@ -71,10 +71,21 @@ export default function Footer() {
       </div>
 
       <div className="footer__bottom">
-        <p>
-          © {new Date().getFullYear()} MKAPU IMPORT S.A.C. Todos los derechos
-          reservados. | Designed & Built by SolveGrades
-        </p>
+        <div className="footer__bottom-inner">
+          <p>© {new Date().getFullYear()} MKAPU IMPORT S.A.C. Todos los derechos reservados.</p>
+          <a
+            href="https://www.instagram.com/solvegrades.com_/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="footer__solvegrades"
+          >
+            <img
+              src="https://res.cloudinary.com/dp1vgjhsq/image/upload/v1778834655/WhatsApp_Image_2026-05-15_at_3.21.36_AM-removebg-preview_wtgmkr.png"
+              alt="Designed & Built by SolveGrades"
+              className="footer__solvegrades-img"
+            />
+          </a>
+        </div>
       </div>
 
       <style>{`
@@ -177,10 +188,35 @@ export default function Footer() {
 
         .footer__bottom {
           border-top: 1px solid #2a2a2a;
-          text-align: center;
-          padding: 1rem 1.5rem;
+          padding: 1.5rem 1.5rem;
           font-size: 0.75rem;
-          color: #555;
+          color: #888;
+        }
+
+        .footer__bottom-inner {
+          max-width: 1200px;
+          margin: 0 auto;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 1.5rem;
+          flex-wrap: wrap;
+        }
+
+        .footer__solvegrades {
+          display: inline-flex;
+          opacity: 0.7;
+          transition: opacity 0.2s;
+        }
+
+        .footer__solvegrades:hover {
+          opacity: 1;
+        }
+
+        .footer__solvegrades-img {
+          height: 120px;
+          width: auto;
+          display: block;
         }
       `}</style>
     </footer>
