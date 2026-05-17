@@ -14,7 +14,21 @@ export interface Producto {
   created_at?: string;
   is_new: boolean;
   low_stock: boolean;
+  agotado: boolean;
+  slug?: string;
 }
+
+export type Promocion = {
+  id: number;
+  producto_id: number;
+  producto_nombre?: string;
+  tipo_descuento: "porcentaje" | "monto_fijo";
+  valor_descuento: number;
+  fecha_inicio: string | null;
+  fecha_fin: string | null;
+  activo: boolean;
+  created_at?: string;
+};
 
 export type Categoria = {
   id: number;

@@ -18,7 +18,23 @@ import {
   FolderTree,
   Info,
   LayoutDashboard,
+  Percent,
+  X,
 } from "lucide-react";
+
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 900px)");
+    setIsMobile(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
+  return isMobile;
+}
 
 export default function AdminLayout({
   children,
@@ -27,8 +43,9 @@ export default function AdminLayout({
 }) {
   const router = useRouter();
   const pathname = usePathname();
+  const isMobile = useIsMobile();
   const [loading, setLoading] = useState(true);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const isLogin = pathname.includes("login");
 
@@ -54,7 +71,7 @@ export default function AdminLayout({
         .eq("id", Number(adminId))
         .single();
 
-      if (!isMounted) return; // componente desmontado, no actualizar estado
+      if (!isMounted) return;
 
       if (!empleado || !empleado.activo) {
         localStorage.removeItem("admin_id");
@@ -73,6 +90,15 @@ export default function AdminLayout({
       isMounted = false;
     };
   }, [router, isLogin]);
+
+  useEffect(() => {
+    if (isMobile) setSidebarOpen(false);
+    else setSidebarOpen(true);
+  }, [isMobile]);
+
+  useEffect(() => {
+    if (isMobile) setSidebarOpen(false);
+  }, [pathname, isMobile]);
 
   
   if (isLogin) {
@@ -106,6 +132,7 @@ export default function AdminLayout({
 
   const menuItems = [
     { name: "Productos", icon: Package, href: "/admin/productos" },
+    { name: "Promociones", icon: Percent, href: "/admin/promociones" },
     { name: "Marcas", icon: Tag, href: "/admin/marcas" },
     { name: "Colaboradores", icon: Users, href: "/admin/colaboradores" },
     { name: "Videos", icon: Video, href: "/admin/videos" },
@@ -139,49 +166,86 @@ export default function AdminLayout({
         .btn-logout { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 9px 12px; background: rgba(220,53,69,0.12); color: #ff6b7a; border: 1px solid rgba(220,53,69,0.25); border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.2s; }
         .btn-logout:hover { background: rgba(220,53,69,0.22); border-color: rgba(220,53,69,0.45); }
         .menu-toggle:hover { background: rgba(245,166,35,0.1); border-radius: 8px; }
+        .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 998; }
+        @media (max-width: 900px) {
+          .admin-content { padding: 16px !important; }
+          .admin-topbar { padding: 0 12px !important; }
+        }
       `}</style>
 
       <div className="admin-layout">
+        {/* Mobile overlay */}
+        {isMobile && sidebarOpen && (
+          <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />
+        )}
+
         {/* Sidebar */}
         <aside
           style={{
-            width: sidebarOpen ? "240px" : "64px",
+            width: isMobile ? (sidebarOpen ? "280px" : "0px") : (sidebarOpen ? "240px" : "64px"),
             background: "#141414",
             color: "#fff",
             display: "flex",
             flexDirection: "column",
             transition: "width 0.25s ease",
-            overflowY: "auto",
-            overflowX: "hidden",
-            borderRight: "1px solid #222",
+            overflow: "hidden",
+            borderRight: isMobile && !sidebarOpen ? "none" : "1px solid #222",
             flexShrink: 0,
+            position: isMobile ? "fixed" : "static",
+            left: 0,
+            top: 0,
+            bottom: 0,
+            zIndex: 999,
           }}
         >
           {/* Logo */}
           <div
             style={{
-              padding: sidebarOpen ? "20px 16px 18px" : "20px 0 18px",
+              padding: isMobile ? "20px 16px 18px" : (sidebarOpen ? "20px 16px 18px" : "20px 0 18px"),
               textAlign: "center",
               fontWeight: 800,
-              fontSize: sidebarOpen ? "1rem" : "0.75rem",
+              fontSize: isMobile || sidebarOpen ? "1rem" : "0.75rem",
               color: "#f5a623",
-              borderBottom: "1px solid #222",
+              borderBottom: isMobile || sidebarOpen ? "1px solid #222" : "none",
               letterSpacing: "0.08em",
               textTransform: "uppercase",
               whiteSpace: "nowrap",
+              display: isMobile || sidebarOpen ? "block" : "block",
+              visibility: isMobile || sidebarOpen ? "visible" : "hidden",
             }}
           >
-            {sidebarOpen ? "Panel Admin" : "PA"}
+            {isMobile || sidebarOpen ? "Panel Admin" : "PA"}
           </div>
+
+          {/* Close button on mobile */}
+          {isMobile && sidebarOpen && (
+            <button
+              onClick={() => setSidebarOpen(false)}
+              style={{
+                position: "absolute",
+                top: "18px",
+                right: "12px",
+                background: "none",
+                border: "none",
+                color: "#666",
+                cursor: "pointer",
+                padding: "4px",
+              }}
+            >
+              <X size={18} />
+            </button>
+          )}
 
           {/* Nav */}
           <nav
             style={{
               flex: 1,
-              padding: "12px 8px",
+              padding: isMobile || sidebarOpen ? "12px 8px" : "12px 4px",
               display: "flex",
               flexDirection: "column",
               gap: "2px",
+              opacity: isMobile || sidebarOpen ? 1 : 0,
+              transition: "opacity 0.15s",
             }}
           >
             {menuItems.map((item) => {
@@ -192,10 +256,10 @@ export default function AdminLayout({
                   key={item.href}
                   href={item.href}
                   className={`nav-link ${active ? "active" : ""}`}
-                  title={!sidebarOpen ? item.name : undefined}
+                  title={!sidebarOpen && !isMobile ? item.name : undefined}
                 >
                   <Icon size={18} style={{ flexShrink: 0 }} />
-                  {sidebarOpen && <span>{item.name}</span>}
+                  {(sidebarOpen || isMobile) && <span>{item.name}</span>}
                 </Link>
               );
             })}
@@ -204,28 +268,30 @@ export default function AdminLayout({
           {/* Footer buttons */}
           <div
             style={{
-              padding: "12px 8px 16px",
-              borderTop: "1px solid #222",
+              padding: isMobile || sidebarOpen ? "12px 8px 16px" : "12px 4px 16px",
+              borderTop: isMobile || sidebarOpen ? "1px solid #222" : "none",
               display: "flex",
               flexDirection: "column",
               gap: "8px",
+              opacity: isMobile || sidebarOpen ? 1 : 0,
+              transition: "opacity 0.15s",
             }}
           >
             <Link
               href="/"
               className="btn-store"
-              title={!sidebarOpen ? "Ir a tienda" : undefined}
+              title={!sidebarOpen && !isMobile ? "Ir a tienda" : undefined}
             >
               <Home size={16} style={{ flexShrink: 0 }} />
-              {sidebarOpen && "Ir a tienda"}
+              {(sidebarOpen || isMobile) && "Ir a tienda"}
             </Link>
             <button
               onClick={logout}
               className="btn-logout"
-              title={!sidebarOpen ? "Salir" : undefined}
+              title={!sidebarOpen && !isMobile ? "Salir" : undefined}
             >
               <LogOut size={16} style={{ flexShrink: 0 }} />
-              {sidebarOpen && "Salir"}
+              {(sidebarOpen || isMobile) && "Salir"}
             </button>
           </div>
         </aside>
@@ -238,10 +304,12 @@ export default function AdminLayout({
             flexDirection: "column",
             overflow: "hidden",
             background: "#f7f7f5",
+            marginLeft: isMobile ? 0 : undefined,
           }}
         >
           {/* Topbar */}
           <div
+            className="admin-topbar"
             style={{
               background: "#fff",
               padding: "0 20px",
@@ -284,7 +352,7 @@ export default function AdminLayout({
 
           {/* Content */}
           <div
-            className="main-content"
+            className="main-content admin-content"
             style={{ flex: 1, overflow: "auto", padding: "28px 32px" }}
           >
             {children}

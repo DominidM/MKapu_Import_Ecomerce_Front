@@ -6,6 +6,7 @@ import Image from "next/image";
 import ProductCard from "@/components/productCard";
 import type { Producto } from "@/lib/supabase";
 import { supabase } from "@/lib/supabase";
+import { getPromocionesActivasMap } from "@/lib/queries";
 import {
   SparklesIcon,
   StarIcon,
@@ -45,9 +46,15 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
   const [onlyFeatured, setOnlyFeatured] = useState(false);
   const [onlyNew, setOnlyNew] = useState(false);
   const [onlyLowStock, setOnlyLowStock] = useState(false);
+  const [hideAgotado, setHideAgotado] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [promocionesMap, setPromocionesMap] = useState<Record<number, any>>({});
 
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    getPromocionesActivasMap().then(setPromocionesMap);
+  }, []);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -95,6 +102,7 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
     if (onlyFeatured) query = query.eq("featured", true);
     if (onlyNew) query = query.eq("is_new", true);
     if (onlyLowStock) query = query.eq("low_stock", true);
+    if (hideAgotado) query = query.eq("agotado", false);
 
     const { data, count, error } = await query;
 
@@ -135,6 +143,7 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
     onlyFeatured,
     onlyNew,
     onlyLowStock,
+    hideAgotado,
   ]);
 
   useEffect(() => {
@@ -401,6 +410,18 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
                   Solo últimas unidades
                 </span>
               </label>
+
+              <label className="sidebar__check-row" style={{ marginTop: 6 }}>
+                <input
+                  type="checkbox"
+                  checked={!hideAgotado}
+                  onChange={(e) => setHideAgotado(!e.target.checked)}
+                  className="sidebar__checkbox"
+                />
+                <span className="sidebar__check-label">
+                  Mostrar agotados
+                </span>
+              </label>
             </div>
           </aside>
 
@@ -573,6 +594,8 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
                         image_url: p.image_url ?? undefined,
                         is_new: p.is_new ?? false,
                         low_stock: p.low_stock ?? false,
+                        agotado: p.agotado ?? false,
+                        descuento: promocionesMap[p.id] ?? undefined,
                       }}
                     />
                   ))}
