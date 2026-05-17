@@ -16,7 +16,9 @@ interface Product {
   featured: boolean;
   is_new?: boolean;
   low_stock?: boolean;
+  agotado?: boolean;
   image_url?: string;
+  descuento?: { tipo_descuento: string; valor_descuento: number };
 }
 
 interface Props {
@@ -29,12 +31,28 @@ export default function ProductCard({ product }: Props) {
   const [imgError, setImgError] = useState(false);
 
   const cartItem = items.find((i) => i.id === String(product.id));
+  const isAgotado = product.agotado === true;
   const inCart = !!cartItem;
   const hasImage = !!product.image_url && !imgError;
   const isConsult = product.price === 0;
 
+  const descuento = product.descuento;
+  let precioFinal = product.price;
+  let descuentoTexto = "";
+  if (descuento && !isAgotado) {
+    if (descuento.tipo_descuento === "porcentaje") {
+      precioFinal = product.price * (1 - descuento.valor_descuento / 100);
+      descuentoTexto = `${descuento.valor_descuento}% OFF`;
+    } else {
+      precioFinal = Math.max(0, product.price - descuento.valor_descuento);
+      descuentoTexto = `-S/${descuento.valor_descuento.toFixed(2)}`;
+    }
+  }
+  const tieneDescuento = descuento && precioFinal < product.price;
+
   function handleHeartClick(e: React.MouseEvent) {
     e.stopPropagation();
+    if (isAgotado) return;
     if (inCart) {
       removeItem(String(product.id));
     } else {
@@ -73,8 +91,9 @@ export default function ProductCard({ product }: Props) {
         )}
 
         <button
-          className={`pcard__heart${inCart ? " pcard__heart--active" : ""}`}
+          className={`pcard__heart${inCart ? " pcard__heart--active" : ""}${isAgotado ? " pcard__heart--disabled" : ""}`}
           onClick={handleHeartClick}
+          disabled={isAgotado}
           aria-label={inCart ? "Quitar del carrito" : "Agregar al carrito"}
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill={inCart ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.5">
@@ -82,18 +101,25 @@ export default function ProductCard({ product }: Props) {
           </svg>
         </button>
 
-        {(product.is_new || product.featured || product.low_stock) && (
+        {(product.is_new || product.featured || product.low_stock || isAgotado || tieneDescuento) && (
           <div className="pcard__badges">
+            {tieneDescuento && <span className="pcard__badge pcard__badge--offer">{descuentoTexto}</span>}
+            {isAgotado && <span className="pcard__badge pcard__badge--agotado">Agotado</span>}
             {product.is_new && <span className="pcard__badge pcard__badge--new">Nuevo</span>}
             {product.featured && <span className="pcard__badge pcard__badge--feat">Destacado</span>}
-            {product.low_stock && <span className="pcard__badge pcard__badge--low">Últimas unidades</span>}
+            {product.low_stock && !isAgotado && <span className="pcard__badge pcard__badge--low">Últimas unidades</span>}
           </div>
         )}
       </div>
 
       <div className="pcard__body">
         <p className="pcard__price">
-          {isConsult ? "Consultar" : `S/ ${product.price.toFixed(2)}`}
+          {isConsult ? "Consultar" : tieneDescuento ? (
+            <>
+              <span className="pcard__price-old">S/ {product.price.toFixed(2)}</span>
+              <span className="pcard__price-offer">S/ {precioFinal.toFixed(2)}</span>
+            </>
+          ) : `S/ ${product.price.toFixed(2)}`}
         </p>
         <h3 className="pcard__name">{product.name}</h3>
         <p className="pcard__cat">{product.category_name ?? ""}</p>
@@ -157,6 +183,10 @@ export default function ProductCard({ product }: Props) {
           color: #e05c2a;
           background: #fff1ec;
         }
+        .pcard__heart--disabled {
+          opacity: 0.3;
+          cursor: not-allowed;
+        }
         .pcard__badges {
           position: absolute;
           top: 10px;
@@ -177,6 +207,8 @@ export default function ProductCard({ product }: Props) {
         .pcard__badge--new { background: #f59e0b; color: #fff; }
         .pcard__badge--feat { background: #10b981; color: #fff; }
         .pcard__badge--low { background: #b91c1c; color: #fff; }
+        .pcard__badge--agotado { background: #1a1a1a; color: #fff; }
+        .pcard__badge--offer { background: #dc2626; color: #fff; }
         .pcard__body {
           padding: 0.75rem 0.5rem 0.5rem;
         }
@@ -185,6 +217,19 @@ export default function ProductCard({ product }: Props) {
           font-weight: 700;
           color: #1a1a1a;
           margin: 0 0 4px;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          flex-wrap: wrap;
+        }
+        .pcard__price-old {
+          font-size: 0.78rem;
+          color: #999;
+          text-decoration: line-through;
+          font-weight: 500;
+        }
+        .pcard__price-offer {
+          color: #dc2626;
         }
         .pcard__name {
           font-size: 0.82rem;

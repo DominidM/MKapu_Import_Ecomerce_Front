@@ -15,6 +15,7 @@ import {
 import { useCart } from "@/app/context/CartContext";
 import { supabase } from "@/lib/supabase";
 import type { Producto } from "@/lib/supabase";
+import { getPromocionByProducto, calcularPrecioConDescuento } from "@/lib/queries";
 
 interface Props {
   producto: Producto & { category_name?: string | null };
@@ -43,19 +44,25 @@ function formatPrice(value: number) {
 export default function ProductoDetailClient({ producto, sugeridos }: Props) {
   const { addItem, items, updateQty, removeItem } = useCart();
   const [imgError, setImgError] = useState(false);
+  const [promocion, setPromocion] = useState<any>(null);
   const [imagenes, setImagenes] = useState<ProductoImagen[]>([]);
   const [videos, setVideos] = useState<ProductoVideo[]>([]);
   const [activeMediaIdx, setActiveMediaIdx] = useState(0);
 
+  const isAgotado = producto.agotado === true;
   const cartItem = items.find((item) => item.id === String(producto.id));
   const qty = cartItem?.qty ?? 0;
   const isConsult = producto.price === 0;
+
+  const descuentoInfo = calcularPrecioConDescuento(producto.price, promocion);
+  const precioFinal = descuentoInfo ? descuentoInfo.precioFinal : producto.price;
+  const tieneDescuento = !!descuentoInfo;
   const categoryLabel =
     producto.category_name || `Categoría ${producto.category}`;
 
   useEffect(() => {
     async function loadMedia() {
-      const [imgRes, vidRes] = await Promise.all([
+      const [imgRes, vidRes, promoRes] = await Promise.all([
         supabase
           .from("producto_imagenes")
           .select("*")
@@ -66,10 +73,12 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
           .select("*")
           .eq("producto_id", producto.id)
           .order("orden"),
+        getPromocionByProducto(producto.id),
       ]);
 
       setImagenes(imgRes.data ?? []);
       setVideos(vidRes.data ?? []);
+      setPromocion(promoRes);
     }
 
     loadMedia();
@@ -93,7 +102,7 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
 
   const currentMedia = allMedia[activeMediaIdx];
   const hasMultipleMedia = allMedia.length > 1;
-  const totalPrice = qty * producto.price;
+  const totalPrice = qty * precioFinal;
 
   function handleUpdateQty(newQty: number) {
     if (newQty <= 0) {
@@ -107,12 +116,12 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
       id: String(producto.id),
       code: producto.code ?? "",
       name: producto.name,
-      price: producto.price,
-      itemTotal: producto.price,
+      price: precioFinal,
+      itemTotal: precioFinal,
       imageUrl: producto.image_url ?? undefined,
       emoji: "📦",
       product: {
-        price: producto.price,
+        price: precioFinal,
       },
     });
   }
@@ -253,7 +262,23 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
                 "Este producto no tiene descripción por ahora."}
             </p>
 
-            {producto.low_stock && (
+              {isAgotado && (
+                <div className="detail-stock-alert" style={{ background: "linear-gradient(135deg, #1a1a1a 0%, #333 100%)", border: "1.5px solid #555" }}>
+                  <div className="detail-stock-alert__icon" style={{ background: "#333", border: "2px solid #666", color: "#fff" }}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10" />
+                      <line x1="15" y1="9" x2="9" y2="15" />
+                      <line x1="9" y1="9" x2="15" y2="15" />
+                    </svg>
+                  </div>
+                  <div className="detail-stock-alert__body">
+                    <strong style={{ color: "#fff" }}>Producto agotado</strong>
+                    <span style={{ color: "#ccc" }}>Este producto no está disponible por el momento. Vuelve a consultar pronto.</span>
+                  </div>
+                </div>
+              )}
+
+              {!isAgotado && producto.low_stock && (
               <div className="detail-stock-alert">
                 <div className="detail-stock-alert__icon">
                   <svg
@@ -311,7 +336,13 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
                 Precio por unidad
               </div>
               <div className="detail-price-value">
-                {isConsult ? "Consultar" : formatPrice(producto.price)}
+                {isConsult ? "Consultar" : tieneDescuento ? (
+                  <>
+                    <span className="detail-price-old">S/ {producto.price.toFixed(2)}</span>
+                    <span className="detail-price-final">S/ {precioFinal.toFixed(2)}</span>
+                    <span className="detail-price-badge">{descuentoInfo!.descuentoTexto}</span>
+                  </>
+                ) : formatPrice(producto.price)}
               </div>
             </div>
           </div>
@@ -326,7 +357,22 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
               )}
             </div>
 
-            {qty === 0 ? (
+            {isAgotado ? (
+              <div
+                style={{
+                  padding: "18px",
+                  borderRadius: "16px",
+                  background: "#f5f5f5",
+                  border: "1px solid #e0e0e0",
+                  textAlign: "center",
+                  color: "#888",
+                  fontSize: "0.9rem",
+                  fontWeight: 600,
+                }}
+              >
+                Producto agotado — no disponible para compra
+              </div>
+            ) : qty === 0 ? (
               <button
                 className={`detail-cta${
                   isConsult ? " detail-cta--consult" : ""
@@ -342,7 +388,7 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
                 ) : (
                   <>
                     <ShoppingCart size={18} />
-                    Agregar al carrito - {formatPrice(producto.price)}
+                    {tieneDescuento ? `${formatPrice(precioFinal)} (antes ${formatPrice(producto.price)})` : `Agregar al carrito - ${formatPrice(producto.price)}`}
                   </>
                 )}
               </button>
@@ -362,7 +408,7 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
                     {qty} unidades
                   </strong>
                   <span className="detail-stepper__tier">
-                    {formatPrice(producto.price)} c/u
+                    {tieneDescuento ? formatPrice(precioFinal) : formatPrice(producto.price)} c/u
                   </span>
                 </div>
 
@@ -879,6 +925,29 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
           font-size: 1.5rem;
           font-weight: 900;
           color: var(--orange);
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-wrap: wrap;
+        }
+        .detail-price-old {
+          font-size: 1rem;
+          color: #999;
+          text-decoration: line-through;
+          font-weight: 500;
+        }
+        .detail-price-final {
+          color: #dc2626;
+        }
+        .detail-price-badge {
+          font-size: 0.72rem;
+          font-weight: 800;
+          background: #dc2626;
+          color: #fff;
+          padding: 3px 8px;
+          border-radius: 4px;
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
         }
 
         .detail-total {

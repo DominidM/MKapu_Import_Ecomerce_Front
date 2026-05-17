@@ -4,7 +4,7 @@ import BrandsCarousel from "@/components/BrandsCarousel";
 import CollaboratorsCarousel from "@/components/CollaboratorsCarousel";
 import VideoSection from "@/components/VideoSection";
 import HeroAccordion from "@/components/HeroAccordion";
-import { getProductos, getProductosNuevos, getBanners } from "@/lib/queries";
+import { getProductos, getProductosNuevos, getBanners, getPromocionesActivasMap } from "@/lib/queries";
 import HomeSecciones from "@/components/HomeSecciones";
 import MapaLocal from "@/components/MapaLocal";
 
@@ -34,6 +34,7 @@ function CarouselSection({
   products,
   href,
   dark = false,
+  promocionesMap = {},
 }: {
   tag?: string;
   title: string;
@@ -41,6 +42,7 @@ function CarouselSection({
   products: AnyProduct[];
   href: string;
   dark?: boolean;
+  promocionesMap?: Record<number, { tipo_descuento: string; valor_descuento: number }>;
 }) {
   if (products.length === 0)
     return (
@@ -57,7 +59,7 @@ function CarouselSection({
           <h2 className="csec__title">{title}</h2>
           {subtitle && <p className="csec__sub">{subtitle}</p>}
         </div>
-        <Carousel products={products.map(toCarouselProduct)} title="" />
+        <Carousel products={products.map(toCarouselProduct)} title="" promocionesMap={promocionesMap} />
         <div className="csec__foot">
           <Link href={href} className="csec__link">
             Ver todos →
@@ -132,10 +134,11 @@ const WHY_ITEMS = [
 ];
 
 export default async function HomePage() {
-  const [products, nuevos, banners] = await Promise.all([
+  const [products, nuevos, banners, promocionesMap] = await Promise.all([
     getProductos(),
     getProductosNuevos(),
     getBanners(),
+    getPromocionesActivasMap(),
   ]);
 
   const featured = products.filter((p: AnyProduct) => p.featured);
@@ -150,6 +153,7 @@ export default async function HomePage() {
         subtitle="Los equipos más solicitados por restaurantes y hoteles de Lima."
         products={featured.length > 0 ? featured : products.slice(0, 10)}
         href="/productos"
+        promocionesMap={promocionesMap}
       />
 
       <CarouselSection
@@ -159,6 +163,7 @@ export default async function HomePage() {
         products={nuevos}
         href="/productos?new=true"
         dark
+        promocionesMap={promocionesMap}
       />
 
       <BrandsCarousel />
