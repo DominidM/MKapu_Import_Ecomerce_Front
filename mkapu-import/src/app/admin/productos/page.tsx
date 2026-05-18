@@ -32,6 +32,7 @@ type Producto = {
   activo: boolean;
   is_new: boolean;
   low_stock: boolean;
+  agotado: boolean;
   imgCount?: number;
   vidCount?: number;
 };
@@ -57,6 +58,7 @@ const initialForm = {
   activo: true,
   is_new: false,
   low_stock: false,
+  agotado: false,
 };
 
 export default function AdminProductosPage() {
@@ -270,6 +272,7 @@ export default function AdminProductosPage() {
       activo: p.activo ?? true,
       is_new: p.is_new ?? false,
       low_stock: p.low_stock ?? false,
+      agotado: p.agotado ?? false,
     });
     setFormMode("edit");
     topRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -587,6 +590,7 @@ export default function AdminProductosPage() {
                   { key: "activo", label: "Activo" },
                   { key: "is_new", label: "Nuevo" },
                   { key: "low_stock", label: "Últimas unidades" },
+                  { key: "agotado", label: "Agotado" },
                 ].map(({ key, label }) => (
                   <label
                     key={key}
@@ -1078,6 +1082,19 @@ export default function AdminProductosPage() {
                                     }}
                                   >
                                     Stock bajo
+                                  </span>
+                                )}
+
+                                {p.agotado && (
+                                  <span
+                                    className="ap-badge"
+                                    style={{
+                                      background: "#1a1a1a",
+                                      color: "#fff",
+                                      border: "1px solid #333",
+                                    }}
+                                  >
+                                    Agotado
                                   </span>
                                 )}
                               </div>

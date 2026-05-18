@@ -611,7 +611,8 @@ export default function CollaboratorsCarousel() {
     return () => cancelAnimationFrame(raf);
   }, [colaboradores, shouldScroll]);
 
-  if (colaboradores.length === 0) return null;
+  if (colaboradores.length === 0)
+    return <section style={{ minHeight: "280px" }} />;
 
   const items = shouldScroll
     ? [...colaboradores, ...colaboradores]

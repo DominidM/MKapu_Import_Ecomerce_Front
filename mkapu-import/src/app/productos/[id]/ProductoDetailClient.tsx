@@ -15,11 +15,11 @@ import {
 import { useCart } from "@/app/context/CartContext";
 import { supabase } from "@/lib/supabase";
 import type { Producto } from "@/lib/supabase";
+import { getPromocionByProducto, calcularPrecioConDescuento } from "@/lib/queries";
 
 interface Props {
-  producto: Producto & {
-    category_name?: string | null;
-  };
+  producto: Producto & { category_name?: string | null };
+  sugeridos: any[];
 }
 
 type ProductoImagen = {
@@ -41,22 +41,28 @@ function formatPrice(value: number) {
   return `S/ ${value.toFixed(2)}`;
 }
 
-export default function ProductoDetailClient({ producto }: Props) {
+export default function ProductoDetailClient({ producto, sugeridos }: Props) {
   const { addItem, items, updateQty, removeItem } = useCart();
   const [imgError, setImgError] = useState(false);
+  const [promocion, setPromocion] = useState<any>(null);
   const [imagenes, setImagenes] = useState<ProductoImagen[]>([]);
   const [videos, setVideos] = useState<ProductoVideo[]>([]);
   const [activeMediaIdx, setActiveMediaIdx] = useState(0);
 
+  const isAgotado = producto.agotado === true;
   const cartItem = items.find((item) => item.id === String(producto.id));
   const qty = cartItem?.qty ?? 0;
   const isConsult = producto.price === 0;
+
+  const descuentoInfo = calcularPrecioConDescuento(producto.price, promocion);
+  const precioFinal = descuentoInfo ? descuentoInfo.precioFinal : producto.price;
+  const tieneDescuento = !!descuentoInfo;
   const categoryLabel =
     producto.category_name || `Categoría ${producto.category}`;
 
   useEffect(() => {
     async function loadMedia() {
-      const [imgRes, vidRes] = await Promise.all([
+      const [imgRes, vidRes, promoRes] = await Promise.all([
         supabase
           .from("producto_imagenes")
           .select("*")
@@ -67,10 +73,12 @@ export default function ProductoDetailClient({ producto }: Props) {
           .select("*")
           .eq("producto_id", producto.id)
           .order("orden"),
+        getPromocionByProducto(producto.id),
       ]);
 
       setImagenes(imgRes.data ?? []);
       setVideos(vidRes.data ?? []);
+      setPromocion(promoRes);
     }
 
     loadMedia();
@@ -94,7 +102,7 @@ export default function ProductoDetailClient({ producto }: Props) {
 
   const currentMedia = allMedia[activeMediaIdx];
   const hasMultipleMedia = allMedia.length > 1;
-  const totalPrice = qty * producto.price;
+  const totalPrice = qty * precioFinal;
 
   function handleUpdateQty(newQty: number) {
     if (newQty <= 0) {
@@ -103,17 +111,17 @@ export default function ProductoDetailClient({ producto }: Props) {
     }
     updateQty(String(producto.id), newQty);
   }
-
   function handleAdd() {
     addItem({
       id: String(producto.id),
+      code: producto.code ?? "",
       name: producto.name,
-      price: producto.price,
-      itemTotal: producto.price,
+      price: precioFinal,
+      itemTotal: precioFinal,
       imageUrl: producto.image_url ?? undefined,
       emoji: "📦",
       product: {
-        price: producto.price,
+        price: precioFinal,
       },
     });
   }
@@ -156,7 +164,10 @@ export default function ProductoDetailClient({ producto }: Props) {
               )}
             </div>
 
-            <div className="detail-image-stage">
+            <div
+              className={`detail-image-stage${currentMedia?.type === "video" ? " detail-image-stage--video" : ""}`}
+            >
+              {" "}
               {currentMedia && currentMedia.url && !imgError ? (
                 currentMedia.type === "video" ? (
                   <video
@@ -179,7 +190,6 @@ export default function ProductoDetailClient({ producto }: Props) {
                   <span>Imagen no disponible</span>
                 </div>
               )}
-
               {hasMultipleMedia && (
                 <>
                   <button
@@ -252,7 +262,23 @@ export default function ProductoDetailClient({ producto }: Props) {
                 "Este producto no tiene descripción por ahora."}
             </p>
 
-            {producto.low_stock && (
+              {isAgotado && (
+                <div className="detail-stock-alert" style={{ background: "linear-gradient(135deg, #1a1a1a 0%, #333 100%)", border: "1.5px solid #555" }}>
+                  <div className="detail-stock-alert__icon" style={{ background: "#333", border: "2px solid #666", color: "#fff" }}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10" />
+                      <line x1="15" y1="9" x2="9" y2="15" />
+                      <line x1="9" y1="9" x2="15" y2="15" />
+                    </svg>
+                  </div>
+                  <div className="detail-stock-alert__body">
+                    <strong style={{ color: "#fff" }}>Producto agotado</strong>
+                    <span style={{ color: "#ccc" }}>Este producto no está disponible por el momento. Vuelve a consultar pronto.</span>
+                  </div>
+                </div>
+              )}
+
+              {!isAgotado && producto.low_stock && (
               <div className="detail-stock-alert">
                 <div className="detail-stock-alert__icon">
                   <svg
@@ -310,7 +336,13 @@ export default function ProductoDetailClient({ producto }: Props) {
                 Precio por unidad
               </div>
               <div className="detail-price-value">
-                {isConsult ? "Consultar" : formatPrice(producto.price)}
+                {isConsult ? "Consultar" : tieneDescuento ? (
+                  <>
+                    <span className="detail-price-old">S/ {producto.price.toFixed(2)}</span>
+                    <span className="detail-price-final">S/ {precioFinal.toFixed(2)}</span>
+                    <span className="detail-price-badge">{descuentoInfo!.descuentoTexto}</span>
+                  </>
+                ) : formatPrice(producto.price)}
               </div>
             </div>
           </div>
@@ -325,7 +357,22 @@ export default function ProductoDetailClient({ producto }: Props) {
               )}
             </div>
 
-            {qty === 0 ? (
+            {isAgotado ? (
+              <div
+                style={{
+                  padding: "18px",
+                  borderRadius: "16px",
+                  background: "#f5f5f5",
+                  border: "1px solid #e0e0e0",
+                  textAlign: "center",
+                  color: "#888",
+                  fontSize: "0.9rem",
+                  fontWeight: 600,
+                }}
+              >
+                Producto agotado — no disponible para compra
+              </div>
+            ) : qty === 0 ? (
               <button
                 className={`detail-cta${
                   isConsult ? " detail-cta--consult" : ""
@@ -341,7 +388,7 @@ export default function ProductoDetailClient({ producto }: Props) {
                 ) : (
                   <>
                     <ShoppingCart size={18} />
-                    Agregar al carrito - {formatPrice(producto.price)}
+                    {tieneDescuento ? `${formatPrice(precioFinal)} (antes ${formatPrice(producto.price)})` : `Agregar al carrito - ${formatPrice(producto.price)}`}
                   </>
                 )}
               </button>
@@ -361,7 +408,7 @@ export default function ProductoDetailClient({ producto }: Props) {
                     {qty} unidades
                   </strong>
                   <span className="detail-stepper__tier">
-                    {formatPrice(producto.price)} c/u
+                    {tieneDescuento ? formatPrice(precioFinal) : formatPrice(producto.price)} c/u
                   </span>
                 </div>
 
@@ -378,6 +425,37 @@ export default function ProductoDetailClient({ producto }: Props) {
           </div>
         </div>
       </section>
+
+      {sugeridos.length > 0 && (
+        <section className="detail-sugeridos">
+          <h2 className="detail-sugeridos__title">
+            También te puede interesar
+          </h2>
+          <div className="detail-sugeridos__scroll">
+            {sugeridos.map((p) => (
+              <a
+                key={p.id}
+                href={`/productos/${p.id}`}
+                className="detail-sug-card"
+              >
+                <div className="detail-sug-img">
+                  {p.image_url ? (
+                    <img src={p.image_url} alt={p.name} loading="lazy" />
+                  ) : (
+                    <div className="detail-sug-noimg">Sin imagen</div>
+                  )}
+                </div>
+                <div className="detail-sug-body">
+                  <p className="detail-sug-price">
+                    {p.price === 0 ? "Consultar" : `S/ ${p.price.toFixed(2)}`}
+                  </p>
+                  <p className="detail-sug-name">{p.name}</p>
+                </div>
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
 
       <style jsx>{`
         .detail-shell {
@@ -511,6 +589,8 @@ export default function ProductoDetailClient({ producto }: Props) {
 
         .detail-image-stage {
           aspect-ratio: 1 / 1;
+          min-height: 0;
+          transition: aspect-ratio 0.2s;
           border-radius: 22px;
           overflow: hidden;
           position: relative;
@@ -523,14 +603,24 @@ export default function ProductoDetailClient({ producto }: Props) {
           border: 1px solid #ece3d7;
         }
 
-        .detail-image,
-        .detail-video {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          display: block;
+        .detail-image-stage--video {
+          aspect-ratio: unset !important;
+          max-height: 500px;
+          height: 500px;
         }
 
+        .detail-image,
+        .detail-video {
+          width: auto;
+          height: 100%;
+          max-width: 100%;
+          object-fit: contain;
+          display: block;
+          background: #000;
+          margin: 0 auto;
+          position: static;
+          transform: none;
+        }
         .detail-image-empty {
           width: 100%;
           height: 100%;
@@ -835,6 +925,29 @@ export default function ProductoDetailClient({ producto }: Props) {
           font-size: 1.5rem;
           font-weight: 900;
           color: var(--orange);
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-wrap: wrap;
+        }
+        .detail-price-old {
+          font-size: 1rem;
+          color: #999;
+          text-decoration: line-through;
+          font-weight: 500;
+        }
+        .detail-price-final {
+          color: #dc2626;
+        }
+        .detail-price-badge {
+          font-size: 0.72rem;
+          font-weight: 800;
+          background: #dc2626;
+          color: #fff;
+          padding: 3px 8px;
+          border-radius: 4px;
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
         }
 
         .detail-total {
@@ -1002,6 +1115,81 @@ export default function ProductoDetailClient({ producto }: Props) {
           .detail-back {
             font-size: 0.86rem;
           }
+        }
+        .detail-sugeridos {
+          margin-top: 48px;
+          padding-top: 32px;
+          border-top: 1px solid #ece3d6;
+        }
+        .detail-sugeridos__title {
+          font-size: 1.1rem;
+          font-weight: 800;
+          color: #1a1a1a;
+          margin: 0 0 20px;
+        }
+        .detail-sugeridos__scroll {
+          display: flex;
+          gap: 16px;
+          overflow-x: auto;
+          scroll-snap-type: x mandatory;
+          -webkit-overflow-scrolling: touch;
+          padding-bottom: 12px;
+          scrollbar-width: none;
+        }
+        .detail-sugeridos__scroll::-webkit-scrollbar {
+          display: none;
+        }
+        .detail-sug-card {
+          flex: 0 0 180px;
+          scroll-snap-align: start;
+          text-decoration: none;
+          color: inherit;
+          cursor: pointer;
+        }
+        .detail-sug-img {
+          aspect-ratio: 1/1;
+          background: #f5f2ee;
+          border-radius: 12px;
+          overflow: hidden;
+          margin-bottom: 8px;
+        }
+        .detail-sug-img img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+          transition: transform 0.3s;
+        }
+        .detail-sug-card:hover .detail-sug-img img {
+          transform: scale(1.04);
+        }
+        .detail-sug-noimg {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 0.7rem;
+          color: #bbb;
+        }
+        .detail-sug-body {
+          padding: 0 2px;
+        }
+        .detail-sug-price {
+          font-size: 0.88rem;
+          font-weight: 700;
+          color: #1a1a1a;
+          margin: 0 0 3px;
+        }
+        .detail-sug-name {
+          font-size: 0.78rem;
+          color: #555;
+          margin: 0;
+          line-height: 1.3;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
         }
       `}</style>
     </div>

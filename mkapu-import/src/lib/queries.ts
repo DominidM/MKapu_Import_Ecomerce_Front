@@ -1,4 +1,4 @@
-import { supabase, Producto, Categoria } from "./supabase";
+import { supabase, Producto, Categoria, Promocion } from "./supabase";
 
 // ── TIPOS NUEVOS ───────────────────────────────────────────
 
@@ -309,4 +309,112 @@ export async function getColaboradoresWithMedia(): Promise<
       (a: any, b: any) => a.orden - b.orden,
     ),
   }));
+}
+
+// ── BANNERS ────────────────────────────────────────────────
+
+export type Banner = {
+  id: number;
+  titulo: string;
+  subtitulo: string;
+  image_url: string;
+  link_url: string;
+  orden: number;
+  activo: boolean;
+};
+
+// ── PROMOCIONES ────────────────────────────────────────────
+
+export async function getPromociones(): Promise<Promocion[]> {
+  const { data, error } = await supabase
+    .from("promociones")
+    .select("*, productos(name)")
+    .eq("activo", true)
+    .order("id", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching promociones:", error.message);
+    return [];
+  }
+
+  return (data ?? []).map((p: any) => ({
+    ...p,
+    producto_nombre: p.productos?.name ?? null,
+    productos: undefined,
+  }));
+}
+
+export async function getPromocionByProducto(
+  productoId: number,
+): Promise<Promocion | null> {
+  const now = new Date().toISOString();
+  const { data, error } = await supabase
+    .from("promociones")
+    .select("*")
+    .eq("producto_id", productoId)
+    .eq("activo", true)
+    .or(`fecha_inicio.is.null,fecha_inicio.lte.${now}`)
+    .or(`fecha_fin.is.null,fecha_fin.gte.${now}`)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Error fetching promocion for product:", error.message);
+    return null;
+  }
+
+  return data;
+}
+
+export async function getPromocionesActivasMap(): Promise<
+  Record<number, { tipo_descuento: string; valor_descuento: number }>
+> {
+  const promos = await getPromociones();
+  const map: Record<number, any> = {};
+
+  for (const p of promos) {
+    if (p.activo) {
+      map[p.producto_id] = {
+        tipo_descuento: p.tipo_descuento,
+        valor_descuento: p.valor_descuento,
+      };
+    }
+  }
+
+  return map;
+}
+
+export function calcularPrecioConDescuento(
+  precioOriginal: number,
+  promocion: Promocion | null,
+): { precioFinal: number; descuentoTexto: string } | null {
+  if (!promocion || !promocion.activo) return null;
+
+  let descuento = 0;
+  if (promocion.tipo_descuento === "porcentaje") {
+    descuento = (precioOriginal * promocion.valor_descuento) / 100;
+  } else {
+    descuento = promocion.valor_descuento;
+  }
+
+  const precioFinal = Math.max(0, precioOriginal - descuento);
+  const descuentoTexto =
+    promocion.tipo_descuento === "porcentaje"
+      ? `${promocion.valor_descuento}% OFF`
+      : `S/ ${promocion.valor_descuento.toFixed(2)} OFF`;
+
+  return { precioFinal, descuentoTexto };
+}
+
+export async function getBanners(): Promise<Banner[]> {
+  const { data, error } = await supabase
+    .from("banners_carousel")
+    .select("*")
+    .eq("activo", true)
+    .order("orden", { ascending: true });
+
+  if (error) {
+    console.error("Error fetching banners:", error.message);
+    return [];
+  }
+  return data ?? [];
 }

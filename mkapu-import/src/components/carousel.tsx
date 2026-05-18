@@ -8,19 +8,25 @@ interface Product {
   id: number;
   code: string;
   name: string;
-  category: number;
+  category: number | null;
   description: string;
   price: number;
   oldPrice: number;
   featured: boolean;
+  is_new?: boolean;
+  low_stock?: boolean;
+  agotado?: boolean;
+  image_url?: string;
+  category_name?: string;
 }
 
 interface Props {
   products: Product[];
   title?: string;
+  promocionesMap?: Record<number, { tipo_descuento: string; valor_descuento: number }>;
 }
 
-export default function Carousel({ products, title = "Destacados" }: Props) {
+export default function Carousel({ products, title = "Destacados", promocionesMap = {} }: Props) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [activeIdx, setActiveIdx] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -181,7 +187,7 @@ export default function Carousel({ products, title = "Destacados" }: Props) {
       >
         {products.map((p) => (
           <div className="carousel__slide" key={p.id}>
-            <ProductCard product={p} />
+            <ProductCard product={{ ...p, descuento: promocionesMap[p.id] ?? undefined }} />
           </div>
         ))}
       </div>

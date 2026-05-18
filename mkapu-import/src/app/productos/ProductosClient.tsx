@@ -6,6 +6,7 @@ import Image from "next/image";
 import ProductCard from "@/components/productCard";
 import type { Producto } from "@/lib/supabase";
 import { supabase } from "@/lib/supabase";
+import { getPromocionesActivasMap } from "@/lib/queries";
 import {
   SparklesIcon,
   StarIcon,
@@ -38,16 +39,22 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
   const [search, setSearch] = useState(searchParams.get("q") ?? "");
   const [searchInput, setSearchInput] = useState(searchParams.get("q") ?? "");
   const [cats, setCats] = useState<string[]>(
-    searchParams.get("cat") ? [searchParams.get("cat")!] : []
+    searchParams.get("cat") ? [searchParams.get("cat")!] : [],
   );
   const [maxPrice, setMaxPrice] = useState<number>(99999);
   const [priceMax, setPriceMax] = useState<number>(99999);
   const [onlyFeatured, setOnlyFeatured] = useState(false);
   const [onlyNew, setOnlyNew] = useState(false);
   const [onlyLowStock, setOnlyLowStock] = useState(false);
+  const [hideAgotado, setHideAgotado] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [promocionesMap, setPromocionesMap] = useState<Record<number, any>>({});
 
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    getPromocionesActivasMap().then(setPromocionesMap);
+  }, []);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -84,7 +91,7 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
 
     if (search.trim()) {
       query = query.or(
-        `name.ilike.%${search.trim()}%,description.ilike.%${search.trim()}%`
+        `name.ilike.%${search.trim()}%,description.ilike.%${search.trim()}%`,
       );
     }
 
@@ -95,6 +102,7 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
     if (onlyFeatured) query = query.eq("featured", true);
     if (onlyNew) query = query.eq("is_new", true);
     if (onlyLowStock) query = query.eq("low_stock", true);
+    if (hideAgotado) query = query.eq("agotado", false);
 
     const { data, count, error } = await query;
 
@@ -135,6 +143,7 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
     onlyFeatured,
     onlyNew,
     onlyLowStock,
+    hideAgotado,
   ]);
 
   useEffect(() => {
@@ -169,7 +178,7 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
 
   function toggleCat(cat: string) {
     setCats((prev) =>
-      prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
+      prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat],
     );
   }
 
@@ -401,6 +410,18 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
                   Solo últimas unidades
                 </span>
               </label>
+
+              <label className="sidebar__check-row" style={{ marginTop: 6 }}>
+                <input
+                  type="checkbox"
+                  checked={!hideAgotado}
+                  onChange={(e) => setHideAgotado(!e.target.checked)}
+                  className="sidebar__checkbox"
+                />
+                <span className="sidebar__check-label">
+                  Mostrar agotados
+                </span>
+              </label>
             </div>
           </aside>
 
@@ -463,7 +484,8 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
 
             <div className="productos-main__top">
               <p className="productos-main__count">
-                <strong>{totalCount}</strong> producto{totalCount !== 1 ? "s" : ""}
+                <strong>{totalCount}</strong> producto
+                {totalCount !== 1 ? "s" : ""}
                 {cats.length > 0 && ` en ${cats.join(", ")}`}
               </p>
 
@@ -546,7 +568,9 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
                     animation: "spin 0.8s linear infinite",
                   }}
                 />
-                <span style={{ fontSize: "0.9rem" }}>Buscando productos...</span>
+                <span style={{ fontSize: "0.9rem" }}>
+                  Buscando productos...
+                </span>
                 <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
               </div>
             ) : totalCount === 0 ? (
@@ -570,6 +594,8 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
                         image_url: p.image_url ?? undefined,
                         is_new: p.is_new ?? false,
                         low_stock: p.low_stock ?? false,
+                        agotado: p.agotado ?? false,
+                        descuento: promocionesMap[p.id] ?? undefined,
                       }}
                     />
                   ))}
@@ -611,7 +637,8 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
                       let page: number;
                       if (totalPages <= 7) page = i + 1;
                       else if (currentPage <= 4) page = i + 1;
-                      else if (currentPage >= totalPages - 3) page = totalPages - 6 + i;
+                      else if (currentPage >= totalPages - 3)
+                        page = totalPages - 6 + i;
                       else page = currentPage - 3 + i;
 
                       return (
@@ -655,7 +682,10 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
                         color: "#666",
                         fontSize: "0.85rem",
                         fontWeight: 600,
-                        cursor: currentPage === totalPages ? "not-allowed" : "pointer",
+                        cursor:
+                          currentPage === totalPages
+                            ? "not-allowed"
+                            : "pointer",
                         opacity: currentPage === totalPages ? 0.4 : 1,
                       }}
                     >

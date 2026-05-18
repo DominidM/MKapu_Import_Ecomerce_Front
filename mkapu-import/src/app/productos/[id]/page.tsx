@@ -11,19 +11,18 @@ export default async function Page({ params }: PageProps) {
 
   const { data, error } = await supabase
     .from("productos")
-    .select(`
+    .select(
+      `
       *,
       categorias (
         id,
         name
       )
-    `)
+    `,
+    )
     .eq("id", Number(id))
     .eq("activo", true)
     .single();
-
-  console.log("PRODUCTO RAW:", data);
-  console.log("ERROR:", error);
 
   if (error || !data) {
     notFound();
@@ -32,11 +31,19 @@ export default async function Page({ params }: PageProps) {
   const producto = {
     ...data,
     category_name: Array.isArray(data.categorias)
-      ? data.categorias[0]?.name ?? null
-      : data.categorias?.name ?? null,
+      ? (data.categorias[0]?.name ?? null)
+      : (data.categorias?.name ?? null),
   };
 
-  console.log("PRODUCTO MAPEADO:", producto);
+  const { data: sugeridos } = await supabase
+    .from("productos")
+    .select("*")
+    .eq("category", data.category)
+    .eq("activo", true)
+    .neq("id", Number(id))
+    .limit(8);
 
-  return <ProductoDetailClient producto={producto} />;
+  return (
+    <ProductoDetailClient producto={producto} sugeridos={sugeridos ?? []} />
+  );
 }

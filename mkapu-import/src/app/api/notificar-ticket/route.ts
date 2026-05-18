@@ -122,7 +122,7 @@ export async function POST(req: NextRequest) {
       },
       body: JSON.stringify({
         from: 'Notificaciones Web <onboarding@resend.dev>',
-        to: ['solvegrades@gmail.com'], 
+        to: ['mkapuperu@gmail.com'], 
         subject: `🚨 ALERTA: Nuevo ${tipo} - Ticket ${ticket}`,
         html: htmlInterno,
         attachments: [
