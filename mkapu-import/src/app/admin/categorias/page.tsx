@@ -97,8 +97,9 @@ export default function AdminCategoriasPage() {
       !confirm(
         "¿Eliminar esta categoría? Los productos asociados quedarán sin categoría.",
       )
-    )
+    ) {
       return;
+    }
     const { error } = await supabase.from("categorias").delete().eq("id", id);
     if (error) return alert(error.message);
     load();
@@ -231,7 +232,7 @@ export default function AdminCategoriasPage() {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "1fr 1fr 120px",
+                gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
                 gap: "1rem",
                 marginBottom: "1rem",
               }}
@@ -295,7 +296,7 @@ export default function AdminCategoriasPage() {
             </div>
 
             {form.slug && (
-              <div style={{ marginBottom: "1.25rem" }}>
+              <div style={{ marginBottom: "1.25rem", wordBreak: "break-all" }}>
                 <span style={{ fontSize: "0.78rem", color: "#aaa" }}>
                   Vista previa URL:{" "}
                 </span>
@@ -311,7 +312,7 @@ export default function AdminCategoriasPage() {
               </div>
             )}
 
-            <div style={{ display: "flex", gap: "10px" }}>
+            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
               <button
                 type="submit"
                 style={{
@@ -388,177 +389,217 @@ export default function AdminCategoriasPage() {
                 overflow: "hidden",
               }}
             >
-              <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                <thead>
-                  <tr
-                    style={{
-                      background: "#fafafa",
-                      borderBottom: "1px solid #e8e8e8",
-                    }}
-                  >
-                    {["Nombre", "Slug", "Estado", "Acciones"].map((h) => (
-                      <th
-                        key={h}
-                        style={{
-                          padding: "0.85rem 1rem",
-                          textAlign: "left",
-                          fontSize: "0.8rem",
-                          fontWeight: 600,
-                          color: "#888",
-                          textTransform: "uppercase",
-                          letterSpacing: "0.05em",
-                        }}
-                      >
-                        {h}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {filtered.length === 0 ? (
-                    <tr>
-                      <td
-                        colSpan={4}
-                        style={{
-                          padding: "3rem",
-                          textAlign: "center",
-                          color: "#aaa",
-                        }}
-                      >
-                        {search ? "Sin resultados" : "No hay categorías aún"}
-                      </td>
-                    </tr>
-                  ) : (
-                    filtered.map((c, i) => (
-                      <tr
-                        key={c.id}
-                        style={{
-                          borderBottom:
-                            i < filtered.length - 1
-                              ? "1px solid #f0f0f0"
-                              : "none",
-                        }}
-                      >
-                        <td
+              <div
+                style={{
+                  overflowX: "auto",
+                  WebkitOverflowScrolling: "touch",
+                }}
+              >
+                <table
+                  style={{
+                    width: "100%",
+                    minWidth: 640,
+                    borderCollapse: "collapse",
+                  }}
+                >
+                  <thead>
+                    <tr
+                      style={{
+                        background: "#fafafa",
+                        borderBottom: "1px solid #e8e8e8",
+                      }}
+                    >
+                      {["Nombre", "Slug", "Estado", "Acciones"].map((h) => (
+                        <th
+                          key={h}
                           style={{
-                            padding: "0.9rem 1rem",
+                            padding: "0.85rem 1rem",
+                            textAlign: "left",
+                            fontSize: "0.8rem",
                             fontWeight: 600,
-                            color: "#1a1a1a",
-                            fontSize: "0.9rem",
+                            color: "#888",
+                            textTransform: "uppercase",
+                            letterSpacing: "0.05em",
+                            whiteSpace: "nowrap",
                           }}
                         >
-                          {c.name}
-                        </td>
+                          {h}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
 
-                        <td style={{ padding: "0.9rem 1rem" }}>
-                          <span
-                            style={{
-                              background: "#f5f5f5",
-                              color: "#888",
-                              padding: "3px 10px",
-                              borderRadius: "6px",
-                              fontSize: "0.8rem",
-                              fontFamily: "monospace",
-                            }}
-                          >
-                            {c.slug}
-                          </span>
-                        </td>
-
-                        <td style={{ padding: "0.9rem 1rem" }}>
-                          <button
-                            onClick={() => toggleActivo(c)}
-                            title="Click para cambiar estado"
-                            style={{
-                              display: "inline-flex",
-                              alignItems: "center",
-                              gap: "5px",
-                              padding: "3px 12px",
-                              borderRadius: "999px",
-                              fontSize: "0.78rem",
-                              fontWeight: 600,
-                              border: "none",
-                              cursor: "pointer",
-                              background: c.activo
-                                ? "rgba(34,197,94,0.1)"
-                                : "rgba(239,68,68,0.1)",
-                              color: c.activo ? "#16a34a" : "#dc2626",
-                              transition: "opacity 0.2s",
-                            }}
-                            onMouseEnter={(e) =>
-                              (e.currentTarget.style.opacity = "0.8")
-                            }
-                            onMouseLeave={(e) =>
-                              (e.currentTarget.style.opacity = "1")
-                            }
-                          >
-                            {c.activo ? "Activo" : "Inactivo"}
-                          </button>
-                        </td>
-
-                        <td style={{ padding: "0.9rem 1rem" }}>
-                          <div style={{ display: "flex", gap: "6px" }}>
-                            <button
-                              onClick={() => onEdit(c)}
-                              style={{
-                                background: "rgba(0,123,255,0.08)",
-                                color: "#007bff",
-                                border: "1px solid rgba(0,123,255,0.2)",
-                                padding: "5px 12px",
-                                borderRadius: "6px",
-                                cursor: "pointer",
-                                fontSize: "0.8rem",
-                                fontWeight: 600,
-                                transition: "all 0.2s",
-                              }}
-                              onMouseEnter={(e) => {
-                                e.currentTarget.style.background =
-                                  "rgba(0,123,255,0.1)";
-                                e.currentTarget.style.color = "#0056b3";
-                              }}
-                              onMouseLeave={(e) => {
-                                e.currentTarget.style.background =
-                                  "rgba(0,123,255,0.08)";
-                                e.currentTarget.style.color = "#007bff";
-                              }}
-                            >
-                              Editar
-                            </button>
-
-                            <button
-                              onClick={() => onDelete(c.id)}
-                              style={{
-                                background: "rgba(220,53,69,0.08)",
-                                color: "#dc3545",
-                                border: "1px solid rgba(220,53,69,0.2)",
-                                padding: "5px 12px",
-                                borderRadius: "6px",
-                                cursor: "pointer",
-                                fontSize: "0.8rem",
-                                fontWeight: 600,
-                                transition: "all 0.2s",
-                              }}
-                              onMouseEnter={(e) => {
-                                e.currentTarget.style.background =
-                                  "rgba(220,53,69,0.1)";
-                                e.currentTarget.style.color = "#a71d2a";
-                              }}
-                              onMouseLeave={(e) => {
-                                e.currentTarget.style.background =
-                                  "rgba(220,53,69,0.08)";
-                                e.currentTarget.style.color = "#dc3545";
-                              }}
-                            >
-                              Eliminar
-                            </button>
-                          </div>
+                  <tbody>
+                    {filtered.length === 0 ? (
+                      <tr>
+                        <td
+                          colSpan={4}
+                          style={{
+                            padding: "3rem",
+                            textAlign: "center",
+                            color: "#aaa",
+                          }}
+                        >
+                          {search ? "Sin resultados" : "No hay categorías aún"}
                         </td>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+                    ) : (
+                      filtered.map((c, i) => (
+                        <tr
+                          key={c.id}
+                          style={{
+                            borderBottom:
+                              i < filtered.length - 1
+                                ? "1px solid #f0f0f0"
+                                : "none",
+                          }}
+                        >
+                          <td
+                            style={{
+                              padding: "0.9rem 1rem",
+                              fontWeight: 600,
+                              color: "#1a1a1a",
+                              fontSize: "0.9rem",
+                              minWidth: 180,
+                            }}
+                          >
+                            {c.name}
+                          </td>
+
+                          <td
+                            style={{
+                              padding: "0.9rem 1rem",
+                              minWidth: 180,
+                            }}
+                          >
+                            <span
+                              style={{
+                                background: "#f5f5f5",
+                                color: "#888",
+                                padding: "3px 10px",
+                                borderRadius: "6px",
+                                fontSize: "0.8rem",
+                                fontFamily: "monospace",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              {c.slug}
+                            </span>
+                          </td>
+
+                          <td
+                            style={{
+                              padding: "0.9rem 1rem",
+                              minWidth: 130,
+                            }}
+                          >
+                            <button
+                              onClick={() => toggleActivo(c)}
+                              title="Click para cambiar estado"
+                              style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "5px",
+                                padding: "3px 12px",
+                                borderRadius: "999px",
+                                fontSize: "0.78rem",
+                                fontWeight: 600,
+                                border: "none",
+                                cursor: "pointer",
+                                whiteSpace: "nowrap",
+                                background: c.activo
+                                  ? "rgba(34,197,94,0.1)"
+                                  : "rgba(239,68,68,0.1)",
+                                color: c.activo ? "#16a34a" : "#dc2626",
+                                transition: "opacity 0.2s",
+                              }}
+                              onMouseEnter={(e) =>
+                                (e.currentTarget.style.opacity = "0.8")
+                              }
+                              onMouseLeave={(e) =>
+                                (e.currentTarget.style.opacity = "1")
+                              }
+                            >
+                              {c.activo ? "Activo" : "Inactivo"}
+                            </button>
+                          </td>
+
+                          <td
+                            style={{
+                              padding: "0.9rem 1rem",
+                              minWidth: 180,
+                            }}
+                          >
+                            <div
+                              style={{
+                                display: "flex",
+                                gap: "6px",
+                                flexWrap: "wrap",
+                              }}
+                            >
+                              <button
+                                onClick={() => onEdit(c)}
+                                style={{
+                                  background: "rgba(0,123,255,0.08)",
+                                  color: "#007bff",
+                                  border: "1px solid rgba(0,123,255,0.2)",
+                                  padding: "5px 12px",
+                                  borderRadius: "6px",
+                                  cursor: "pointer",
+                                  fontSize: "0.8rem",
+                                  fontWeight: 600,
+                                  transition: "all 0.2s",
+                                  whiteSpace: "nowrap",
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.background =
+                                    "rgba(0,123,255,0.1)";
+                                  e.currentTarget.style.color = "#0056b3";
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.background =
+                                    "rgba(0,123,255,0.08)";
+                                  e.currentTarget.style.color = "#007bff";
+                                }}
+                              >
+                                Editar
+                              </button>
+
+                              <button
+                                onClick={() => onDelete(c.id)}
+                                style={{
+                                  background: "rgba(220,53,69,0.08)",
+                                  color: "#dc3545",
+                                  border: "1px solid rgba(220,53,69,0.2)",
+                                  padding: "5px 12px",
+                                  borderRadius: "6px",
+                                  cursor: "pointer",
+                                  fontSize: "0.8rem",
+                                  fontWeight: 600,
+                                  transition: "all 0.2s",
+                                  whiteSpace: "nowrap",
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.background =
+                                    "rgba(220,53,69,0.1)";
+                                  e.currentTarget.style.color = "#a71d2a";
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.background =
+                                    "rgba(220,53,69,0.08)";
+                                  e.currentTarget.style.color = "#dc3545";
+                                }}
+                              >
+                                Eliminar
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
 
               <div
                 style={{

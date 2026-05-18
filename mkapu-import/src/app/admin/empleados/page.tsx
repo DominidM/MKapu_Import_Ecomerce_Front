@@ -71,6 +71,7 @@ export default function EmpleadosPage() {
       .from("empleados")
       .select("id, nombre, apellido, email, activo, created_at")
       .order("created_at", { ascending: false });
+
     setEmpleados(data ?? []);
     setLoading(false);
   }
@@ -136,6 +137,7 @@ export default function EmpleadosPage() {
         if (err) throw err;
       } else {
         const hash = await bcrypt.hash(form.password, 10);
+
         const { error: err } = await supabase.from("empleados").insert({
           nombre: form.nombre,
           apellido: form.apellido,
@@ -158,8 +160,12 @@ export default function EmpleadosPage() {
   }
 
   async function eliminar(id: number) {
-    if (!confirm("¿Eliminar este empleado? Esta acción no se puede deshacer."))
+    if (
+      !confirm("¿Eliminar este empleado? Esta acción no se puede deshacer.")
+    ) {
       return;
+    }
+
     await supabase.from("empleados").delete().eq("id", id);
     await fetchEmpleados();
   }
@@ -169,6 +175,7 @@ export default function EmpleadosPage() {
       .from("empleados")
       .update({ activo: !emp.activo })
       .eq("id", emp.id);
+
     await fetchEmpleados();
   }
 
@@ -236,8 +243,11 @@ export default function EmpleadosPage() {
 
         <button
           onClick={() => {
-            setShowForm(!showForm);
-            if (showForm) cancelForm();
+            if (showForm) {
+              cancelForm();
+            } else {
+              abrirCrear();
+            }
           }}
           style={{
             display: "flex",
@@ -302,7 +312,8 @@ export default function EmpleadosPage() {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "1fr 1fr",
+                gridTemplateColumns:
+                  "repeat(auto-fit, minmax(min(100%, 260px), 1fr))",
                 gap: "1rem",
                 marginBottom: "1rem",
               }}
@@ -353,6 +364,7 @@ export default function EmpleadosPage() {
               <label style={lbl}>
                 Contraseña {editando ? "(dejar vacío para no cambiar)" : "*"}
               </label>
+
               <div style={{ position: "relative" }}>
                 <input
                   type={showPassword ? "text" : "password"}
@@ -366,6 +378,7 @@ export default function EmpleadosPage() {
                   onBlur={onBlurInput}
                   required={!editando}
                 />
+
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
@@ -396,6 +409,7 @@ export default function EmpleadosPage() {
                   cursor: "pointer",
                   fontSize: "0.875rem",
                   color: "#444",
+                  flexWrap: "wrap",
                 }}
               >
                 <input
@@ -415,7 +429,13 @@ export default function EmpleadosPage() {
               </label>
             </div>
 
-            <div style={{ display: "flex", gap: "10px" }}>
+            <div
+              style={{
+                display: "flex",
+                gap: "10px",
+                flexWrap: "wrap",
+              }}
+            >
               <button
                 type="submit"
                 disabled={guardando}
@@ -496,160 +516,191 @@ export default function EmpleadosPage() {
               No hay empleados registrados.
             </div>
           ) : (
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead>
-                <tr
-                  style={{
-                    background: "#fafafa",
-                    borderBottom: "1px solid #e8e8e8",
-                  }}
-                >
-                  {["Nombre", "Email", "Estado", "Creado", "Acciones"].map(
-                    (h) => (
-                      <th
-                        key={h}
-                        style={{
-                          padding: "0.85rem 1rem",
-                          textAlign: "left",
-                          fontSize: "0.8rem",
-                          fontWeight: 600,
-                          color: "#888",
-                          textTransform: "uppercase",
-                          letterSpacing: "0.05em",
-                        }}
-                      >
-                        {h}
-                      </th>
-                    ),
-                  )}
-                </tr>
-              </thead>
-
-              <tbody>
-                {empleados.map((emp, i) => (
+            <div
+              style={{
+                width: "100%",
+                overflowX: "auto",
+                overflowY: "hidden",
+                WebkitOverflowScrolling: "touch",
+              }}
+            >
+              <table
+                style={{
+                  width: "100%",
+                  minWidth: "760px",
+                  borderCollapse: "collapse",
+                }}
+              >
+                <thead>
                   <tr
-                    key={emp.id}
                     style={{
-                      borderBottom:
-                        i < empleados.length - 1 ? "1px solid #f0f0f0" : "none",
+                      background: "#fafafa",
+                      borderBottom: "1px solid #e8e8e8",
                     }}
                   >
-                    <td
+                    {["Nombre", "Email", "Estado", "Creado", "Acciones"].map(
+                      (h) => (
+                        <th
+                          key={h}
+                          style={{
+                            padding: "0.85rem 1rem",
+                            textAlign: "left",
+                            fontSize: "0.8rem",
+                            fontWeight: 600,
+                            color: "#888",
+                            textTransform: "uppercase",
+                            letterSpacing: "0.05em",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {h}
+                        </th>
+                      ),
+                    )}
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {empleados.map((emp, i) => (
+                    <tr
+                      key={emp.id}
                       style={{
-                        padding: "0.9rem 1rem",
-                        fontWeight: 600,
-                        color: "#1a1a1a",
-                        fontSize: "0.9rem",
+                        borderBottom:
+                          i < empleados.length - 1
+                            ? "1px solid #f0f0f0"
+                            : "none",
                       }}
                     >
-                      {emp.nombre} {emp.apellido}
-                    </td>
-
-                    <td
-                      style={{
-                        padding: "0.9rem 1rem",
-                        color: "#555",
-                        fontSize: "0.875rem",
-                      }}
-                    >
-                      {emp.email}
-                    </td>
-
-                    <td style={{ padding: "0.9rem 1rem" }}>
-                      <button
-                        onClick={() => toggleActivo(emp)}
+                      <td
                         style={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          gap: "5px",
-                          padding: "3px 10px",
-                          borderRadius: "999px",
-                          border: "none",
-                          cursor: "pointer",
-                          fontSize: "0.78rem",
+                          padding: "0.9rem 1rem",
                           fontWeight: 600,
-                          background: emp.activo
-                            ? "rgba(34,197,94,0.1)"
-                            : "rgba(239,68,68,0.1)",
-                          color: emp.activo ? "#16a34a" : "#dc2626",
-                          transition: "all 0.2s",
+                          color: "#1a1a1a",
+                          fontSize: "0.9rem",
+                          minWidth: 220,
                         }}
                       >
-                        {emp.activo ? "Activo" : "Inactivo"}
-                      </button>
-                    </td>
+                        {emp.nombre} {emp.apellido}
+                      </td>
 
-                    <td
-                      style={{
-                        padding: "0.9rem 1rem",
-                        color: "#aaa",
-                        fontSize: "0.8rem",
-                      }}
-                    >
-                      {new Date(emp.created_at).toLocaleDateString("es-PE", {
-                        day: "2-digit",
-                        month: "short",
-                        year: "numeric",
-                      })}
-                    </td>
+                      <td
+                        style={{
+                          padding: "0.9rem 1rem",
+                          color: "#555",
+                          fontSize: "0.875rem",
+                          minWidth: 240,
+                        }}
+                      >
+                        {emp.email}
+                      </td>
 
-                    <td style={{ padding: "0.9rem 1rem" }}>
-                      <div style={{ display: "flex", gap: "6px" }}>
+                      <td
+                        style={{
+                          padding: "0.9rem 1rem",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
                         <button
-                          onClick={() => abrirEditar(emp)}
-                          title="Editar"
+                          onClick={() => toggleActivo(emp)}
                           style={{
-                            background: "rgba(245,166,35,0.1)",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "5px",
+                            padding: "3px 10px",
+                            borderRadius: "999px",
                             border: "none",
-                            borderRadius: "6px",
-                            padding: "6px",
                             cursor: "pointer",
-                            color: "#f5a623",
-                            display: "flex",
-                            transition: "background 0.2s",
+                            fontSize: "0.78rem",
+                            fontWeight: 600,
+                            background: emp.activo
+                              ? "rgba(34,197,94,0.1)"
+                              : "rgba(239,68,68,0.1)",
+                            color: emp.activo ? "#16a34a" : "#dc2626",
+                            transition: "all 0.2s",
                           }}
-                          onMouseEnter={(e) =>
-                            (e.currentTarget.style.background =
-                              "rgba(245,166,35,0.2)")
-                          }
-                          onMouseLeave={(e) =>
-                            (e.currentTarget.style.background =
-                              "rgba(245,166,35,0.1)")
-                          }
                         >
-                          <Pencil size={15} />
+                          {emp.activo ? "Activo" : "Inactivo"}
                         </button>
+                      </td>
 
-                        <button
-                          onClick={() => eliminar(emp.id)}
-                          title="Eliminar"
-                          style={{
-                            background: "rgba(220,38,38,0.08)",
-                            border: "none",
-                            borderRadius: "6px",
-                            padding: "6px",
-                            cursor: "pointer",
-                            color: "#dc2626",
-                            display: "flex",
-                            transition: "background 0.2s",
-                          }}
-                          onMouseEnter={(e) =>
-                            (e.currentTarget.style.background =
-                              "rgba(220,38,38,0.18)")
-                          }
-                          onMouseLeave={(e) =>
-                            (e.currentTarget.style.background =
-                              "rgba(220,38,38,0.08)")
-                          }
-                        >
-                          <Trash2 size={15} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                      <td
+                        style={{
+                          padding: "0.9rem 1rem",
+                          color: "#aaa",
+                          fontSize: "0.8rem",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {new Date(emp.created_at).toLocaleDateString("es-PE", {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </td>
+
+                      <td
+                        style={{
+                          padding: "0.9rem 1rem",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        <div style={{ display: "flex", gap: "6px" }}>
+                          <button
+                            onClick={() => abrirEditar(emp)}
+                            title="Editar"
+                            style={{
+                              background: "rgba(245,166,35,0.1)",
+                              border: "none",
+                              borderRadius: "6px",
+                              padding: "6px",
+                              cursor: "pointer",
+                              color: "#f5a623",
+                              display: "flex",
+                              transition: "background 0.2s",
+                            }}
+                            onMouseEnter={(e) =>
+                              (e.currentTarget.style.background =
+                                "rgba(245,166,35,0.2)")
+                            }
+                            onMouseLeave={(e) =>
+                              (e.currentTarget.style.background =
+                                "rgba(245,166,35,0.1)")
+                            }
+                          >
+                            <Pencil size={15} />
+                          </button>
+
+                          <button
+                            onClick={() => eliminar(emp.id)}
+                            title="Eliminar"
+                            style={{
+                              background: "rgba(220,38,38,0.08)",
+                              border: "none",
+                              borderRadius: "6px",
+                              padding: "6px",
+                              cursor: "pointer",
+                              color: "#dc2626",
+                              display: "flex",
+                              transition: "background 0.2s",
+                            }}
+                            onMouseEnter={(e) =>
+                              (e.currentTarget.style.background =
+                                "rgba(220,38,38,0.18)")
+                            }
+                            onMouseLeave={(e) =>
+                              (e.currentTarget.style.background =
+                                "rgba(220,38,38,0.08)")
+                            }
+                          >
+                            <Trash2 size={15} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       )}

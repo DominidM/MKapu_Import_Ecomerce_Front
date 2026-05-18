@@ -487,7 +487,7 @@ export default function AdminMarcasPage() {
               />
             </div>
 
-            <div style={{ display: "flex", gap: "10px" }}>
+            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
               <button
                 type="submit"
                 disabled={uploading}
@@ -501,6 +501,9 @@ export default function AdminMarcasPage() {
                   fontSize: "0.875rem",
                   cursor: uploading ? "not-allowed" : "pointer",
                   opacity: uploading ? 0.7 : 1,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "8px",
                 }}
               >
                 {editId ? (
@@ -526,6 +529,9 @@ export default function AdminMarcasPage() {
                   fontWeight: 600,
                   fontSize: "0.875rem",
                   cursor: "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "8px",
                 }}
               >
                 <X size={15} /> Cancelar
@@ -586,135 +592,131 @@ export default function AdminMarcasPage() {
                 <span style={{ fontSize: "0.9rem" }}>No hay marcas aún</span>
               </div>
             ) : (
-              <table
+              <div
                 style={{
                   width: "100%",
-                  borderCollapse: "collapse",
-                  fontSize: "0.875rem",
-                  tableLayout: "fixed",
+                  overflowX: "auto",
+                  overflowY: "hidden",
+                  WebkitOverflowScrolling: "touch",
                 }}
               >
-                <thead>
-                  <tr
-                    style={{
-                      background: "#fafafa",
-                      borderBottom: "1px solid #e8e8e8",
-                    }}
-                  >
-                    {["Logo", "Nombre", "Orden", "Estado", "Acciones"].map(
-                      (h) => (
-                        <th
-                          key={h}
-                          style={{
-                            padding: "12px 16px",
-                            textAlign: "left",
-                            fontSize: "0.72rem",
-                            fontWeight: 700,
-                            color: "#aaa",
-                            textTransform: "uppercase",
-                            letterSpacing: "0.06em",
-                          }}
-                        >
-                          {h}
-                        </th>
-                      ),
-                    )}
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {rows.map((m, i) => (
+                <table
+                  style={{
+                    width: "100%",
+                    minWidth: "860px",
+                    borderCollapse: "collapse",
+                    fontSize: "0.875rem",
+                    tableLayout: "fixed",
+                  }}
+                >
+                  <thead>
                     <tr
-                      key={m.id}
                       style={{
-                        borderBottom:
-                          i < rows.length - 1 ? "1px solid #f0f0f0" : "none",
-                        background: "#fff",
+                        background: "#fafafa",
+                        borderBottom: "1px solid #e8e8e8",
                       }}
                     >
-                      <td
-                        style={{
-                          padding: "12px 16px",
-                          width: 120,
-                        }}
-                      >
-                        <div
-                          style={{
-                            width: 90,
-                            height: 52,
-                            borderRadius: "8px",
-                            border: "1px solid #e8e8e8",
-                            background: "#fafafa",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            overflow: "hidden",
-                          }}
-                        >
-                          {m.logo_url ? (
-                            <img
-                              src={m.logo_url}
-                              alt={m.name}
-                              style={{
-                                width: "100%",
-                                height: "100%",
-                                objectFit: "contain",
-                                display: "block",
-                              }}
-                            />
-                          ) : (
-                            <span
-                              style={{
-                                color: "#ddd",
-                                fontSize: "0.75rem",
-                              }}
-                            >
-                              Sin logo
-                            </span>
-                          )}
-                        </div>
-                      </td>
-
-                      <td
-                        style={{
-                          padding: "12px 16px",
-                          fontWeight: 600,
-                          color: "#1a1a1a",
-                        }}
-                      >
-                        {m.name}
-                      </td>
-
-                      <td
-                        style={{
-                          padding: "12px 16px",
-                        }}
-                      >
-                        <div
-                          style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: "8px",
-                            alignItems: "flex-start",
-                          }}
-                        >
-                          <span
+                      {["Logo", "Nombre", "Orden", "Estado", "Acciones"].map(
+                        (h) => (
+                          <th
+                            key={h}
                             style={{
-                              minWidth: 24,
-                              textAlign: "center",
-                              fontWeight: 700,
-                              color: "#666",
-                              fontSize: "0.9rem",
+                              padding: "0.85rem 1rem",
+                              textAlign: "left",
+                              fontSize: "0.8rem",
+                              fontWeight: 600,
+                              color: "#888",
+                              textTransform: "uppercase",
+                              letterSpacing: "0.05em",
+                              whiteSpace: "nowrap",
                             }}
                           >
-                            {m.orden}
-                          </span>
+                            {h}
+                          </th>
+                        ),
+                      )}
+                    </tr>
+                  </thead>
 
+                  <tbody>
+                    {rows.map((m, i) => (
+                      <tr
+                        key={m.id}
+                        style={{
+                          borderBottom:
+                            i < rows.length - 1 ? "1px solid #f0f0f0" : "none",
+                          background: "#fff",
+                        }}
+                      >
+                        <td
+                          style={{
+                            padding: "0.9rem 1rem",
+                            width: 120,
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: 90,
+                              height: 52,
+                              borderRadius: "8px",
+                              border: "1px solid #e8e8e8",
+                              background: "#fafafa",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              overflow: "hidden",
+                            }}
+                          >
+                            {m.logo_url ? (
+                              <img
+                                src={m.logo_url}
+                                alt={m.name}
+                                style={{
+                                  width: "100%",
+                                  height: "100%",
+                                  objectFit: "contain",
+                                  display: "block",
+                                }}
+                              />
+                            ) : (
+                              <span
+                                style={{
+                                  color: "#ddd",
+                                  fontSize: "0.75rem",
+                                }}
+                              >
+                                Sin logo
+                              </span>
+                            )}
+                          </div>
+                        </td>
+
+                        <td
+                          style={{
+                            padding: "0.9rem 1rem",
+                            fontWeight: 600,
+                            color: "#1a1a1a",
+                            minWidth: 240,
+                          }}
+                        >
+                          {m.name}
+                        </td>
+
+                        <td
+                          style={{
+                            padding: "0.9rem 1rem",
+                            minWidth: 150,
+                          }}
+                        >
                           <div
                             style={{
                               display: "flex",
                               alignItems: "center",
-                              gap: "8px",
+                              justifyContent: "space-between",
+                              gap: "10px",
+                              width: "100%",
+                              maxWidth: 130,
                             }}
                           >
                             <button
@@ -734,10 +736,27 @@ export default function AdminMarcasPage() {
                                 opacity: i === 0 || savingOrder ? 0.45 : 1,
                                 fontWeight: 700,
                                 color: "#666",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                flexShrink: 0,
                               }}
                             >
                               ↑
                             </button>
+
+                            <span
+                              style={{
+                                minWidth: 24,
+                                textAlign: "center",
+                                fontWeight: 700,
+                                color: "#666",
+                                fontSize: "0.9rem",
+                                flex: 1,
+                              }}
+                            >
+                              {m.orden}
+                            </span>
 
                             <button
                               type="button"
@@ -759,77 +778,117 @@ export default function AdminMarcasPage() {
                                     : 1,
                                 fontWeight: 700,
                                 color: "#666",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                flexShrink: 0,
                               }}
                             >
                               ↓
                             </button>
                           </div>
-                        </div>
-                      </td>
+                        </td>
 
-                      <td style={{ padding: "12px 16px" }}>
-                        <span
+                        <td
                           style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            padding: "2px 10px",
-                            borderRadius: "20px",
-                            fontSize: "0.75rem",
-                            fontWeight: 700,
-                            background: m.activo ? "#e8f7ee" : "#fde8e8",
-                            color: m.activo ? "#1a7a3c" : "#a71d2a",
+                            padding: "0.9rem 1rem",
+                            whiteSpace: "nowrap",
                           }}
                         >
-                          {m.activo ? "Activo" : "Inactivo"}
-                        </span>
-                      </td>
-
-                      <td style={{ padding: "12px 16px" }}>
-                        <div style={{ display: "flex", gap: "6px" }}>
-                          <button
-                            onClick={() => onEdit(m)}
-                            title="Editar"
+                          <span
                             style={{
-                              background: "rgba(245,166,35,0.1)",
-                              border: "none",
-                              borderRadius: "6px",
-                              padding: "6px",
-                              cursor: "pointer",
-                              color: "#f5a623",
-                              display: "flex",
+                              display: "inline-flex",
+                              alignItems: "center",
+                              padding: "3px 12px",
+                              borderRadius: "999px",
+                              fontSize: "0.78rem",
+                              fontWeight: 600,
+                              background: m.activo
+                                ? "rgba(34,197,94,0.1)"
+                                : "rgba(239,68,68,0.1)",
+                              color: m.activo ? "#16a34a" : "#dc2626",
                             }}
                           >
-                            <Pencil size={15} />
-                          </button>
+                            {m.activo ? "Activo" : "Inactivo"}
+                          </span>
+                        </td>
 
-                          <button
-                            onClick={() => onDelete(m.id)}
-                            title="Eliminar"
-                            style={{
-                              background: "rgba(220,38,38,0.08)",
-                              border: "none",
-                              borderRadius: "6px",
-                              padding: "6px",
-                              cursor: "pointer",
-                              color: "#dc2626",
-                              display: "flex",
-                            }}
-                          >
-                            <Trash2 size={15} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                        <td
+                          style={{
+                            padding: "0.9rem 1rem",
+                            minWidth: 120,
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          <div style={{ display: "flex", gap: "6px" }}>
+                            <button
+                              onClick={() => onEdit(m)}
+                              title="Editar"
+                              style={{
+                                background: "rgba(0,123,255,0.08)",
+                                color: "#007bff",
+                                border: "1px solid rgba(0,123,255,0.2)",
+                                padding: "6px 10px",
+                                borderRadius: "6px",
+                                cursor: "pointer",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                              }}
+                            >
+                              <Pencil size={15} />
+                            </button>
+
+                            <button
+                              onClick={() => onDelete(m.id)}
+                              title="Eliminar"
+                              style={{
+                                background: "rgba(220,53,69,0.08)",
+                                color: "#dc3545",
+                                border: "1px solid rgba(220,53,69,0.2)",
+                                padding: "6px 10px",
+                                borderRadius: "6px",
+                                cursor: "pointer",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                              }}
+                            >
+                              <Trash2 size={15} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
+
+            <div
+              style={{
+                padding: "12px 16px",
+                borderTop: "1px solid #e8e8e8",
+                background: "#fafafa",
+                fontSize: "0.8rem",
+                color: "#aaa",
+              }}
+            >
+              {rows.length} marca{rows.length !== 1 ? "s" : ""} registrada
+              {rows.length !== 1 ? "s" : ""}
+            </div>
           </div>
         ))}
 
       <style>{`
         @keyframes spin {
           to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+          form > div[style*="grid-template-columns: 3fr 1fr auto"] {
+            grid-template-columns: 1fr !important;
+          }
         }
       `}</style>
     </div>

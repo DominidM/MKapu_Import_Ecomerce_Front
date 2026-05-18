@@ -119,7 +119,7 @@ export default function AdminProductosPage() {
 
     const products = ((prodRes.data as Producto[]) ?? []).map((p) => ({
       ...p,
-      imgCount: (p as any).img_count ?? 0, // ← vienen de la vista
+      imgCount: (p as any).img_count ?? 0,
       vidCount: (p as any).vid_count ?? 0,
     }));
 

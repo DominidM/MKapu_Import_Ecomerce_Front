@@ -63,6 +63,7 @@ export default function AdminReclamacionesPage() {
         .select("*", { count: "exact", head: true })
         .eq("estado", "resuelto"),
     ]);
+
     setStats({
       todos: all.count || 0,
       pendiente: pend.count || 0,
@@ -81,18 +82,26 @@ export default function AdminReclamacionesPage() {
 
   const load = useCallback(async () => {
     setLoading(true);
+
     let query = supabase
       .from("reclamaciones")
       .select("*", { count: "exact" })
       .order("created_at", { ascending: false });
-    if (filterEstado !== "todos") query = query.eq("estado", filterEstado);
+
+    if (filterEstado !== "todos") {
+      query = query.eq("estado", filterEstado);
+    }
+
     const from = (currentPage - 1) * itemsPerPage;
     query = query.range(from, from + itemsPerPage - 1);
+
     const { data, count, error } = await query;
+
     if (!error) {
       setRows((data as Reclamacion[]) || []);
       setTotalItems(count || 0);
     }
+
     setLoading(false);
   }, [filterEstado, currentPage]);
 
@@ -105,11 +114,14 @@ export default function AdminReclamacionesPage() {
       .from("reclamaciones")
       .update({ estado: nuevoEstado })
       .eq("id", id);
+
     if (!error) {
       load();
       loadStats();
-      if (selected?.id === id)
-        setSelected((p) => (p ? { ...p, estado: nuevoEstado } : null));
+
+      if (selected?.id === id) {
+        setSelected((prev) => (prev ? { ...prev, estado: nuevoEstado } : null));
+      }
     }
   }
 
@@ -142,6 +154,7 @@ export default function AdminReclamacionesPage() {
               alignItems: "center",
               gap: "1rem",
               marginBottom: "1.5rem",
+              flexWrap: "wrap",
             }}
           >
             <button
@@ -158,15 +171,11 @@ export default function AdminReclamacionesPage() {
                 fontSize: "0.875rem",
                 cursor: "pointer",
                 color: "#555",
-                transition: "background 0.2s",
               }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.background = "#f5f5f5")
-              }
-              onMouseLeave={(e) => (e.currentTarget.style.background = "#fff")}
             >
               <ChevronLeft size={16} /> Volver
             </button>
+
             <div>
               <h1
                 style={{
@@ -180,6 +189,8 @@ export default function AdminReclamacionesPage() {
               </h1>
               <code
                 style={{
+                  display: "inline-block",
+                  marginTop: "6px",
                   background: "#fff8e6",
                   color: "#b07800",
                   padding: "2px 10px",
@@ -234,6 +245,7 @@ export default function AdminReclamacionesPage() {
                   {selected.email}
                 </p>
               </div>
+
               <div
                 style={{
                   display: "flex",
@@ -252,6 +264,7 @@ export default function AdminReclamacionesPage() {
                 >
                   Cambiar estado
                 </label>
+
                 <select
                   value={selected.estado}
                   onChange={(e) => updateEstado(selected.id, e.target.value)}
@@ -277,7 +290,8 @@ export default function AdminReclamacionesPage() {
               <div
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "repeat(3, 1fr)",
+                  gridTemplateColumns:
+                    "repeat(auto-fit, minmax(min(100%, 220px), 1fr))",
                   gap: "1rem",
                   marginBottom: "1rem",
                 }}
@@ -349,6 +363,7 @@ export default function AdminReclamacionesPage() {
                 >
                   Descripción
                 </p>
+
                 <div
                   style={{
                     background: "#f7f7f5",
@@ -393,7 +408,8 @@ export default function AdminReclamacionesPage() {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(4, 1fr)",
+              gridTemplateColumns:
+                "repeat(auto-fit, minmax(min(100%, 220px), 1fr))",
               gap: "1rem",
               marginBottom: "1.5rem",
             }}
@@ -435,6 +451,7 @@ export default function AdminReclamacionesPage() {
                   border: s.border,
                   borderRadius: "10px",
                   padding: "1rem 1.25rem",
+                  minWidth: 0,
                 }}
               >
                 <p
@@ -492,7 +509,6 @@ export default function AdminReclamacionesPage() {
                   fontSize: "0.8rem",
                   fontWeight: 600,
                   cursor: "pointer",
-                  transition: "all 0.15s",
                 }}
               >
                 {f.label}
@@ -522,188 +538,222 @@ export default function AdminReclamacionesPage() {
               </div>
             ) : (
               <>
-                <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                  <thead>
-                    <tr
-                      style={{
-                        background: "#fafafa",
-                        borderBottom: "1px solid #e8e8e8",
-                      }}
-                    >
-                      {[
-                        "Ticket",
-                        "Cliente",
-                        "Email",
-                        "Tipo",
-                        "Estado",
-                        "Fecha",
-                        "",
-                      ].map((h) => (
-                        <th
-                          key={h}
-                          style={{
-                            padding: "0.85rem 1rem",
-                            textAlign: "left",
-                            fontSize: "0.8rem",
-                            fontWeight: 600,
-                            color: "#888",
-                            textTransform: "uppercase",
-                            letterSpacing: "0.05em",
-                          }}
-                        >
-                          {h}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {rows.map((r, i) => {
-                      const es = estadoInfo(r.estado);
-                      return (
-                        <tr
-                          key={r.id}
-                          style={{
-                            borderBottom:
-                              i < rows.length - 1
-                                ? "1px solid #f0f0f0"
-                                : "none",
-                            cursor: "pointer",
-                            transition: "background 0.1s",
-                          }}
-                          onMouseEnter={(e) =>
-                            (e.currentTarget.style.background = "#fafafa")
-                          }
-                          onMouseLeave={(e) =>
-                            (e.currentTarget.style.background = "#fff")
-                          }
-                          onClick={() => onVer(r)}
-                        >
-                          <td style={{ padding: "0.9rem 1rem" }}>
-                            <code
-                              style={{
-                                background: "#fff8e6",
-                                color: "#b07800",
-                                padding: "2px 8px",
-                                borderRadius: "4px",
-                                fontSize: "0.78rem",
-                                fontWeight: 600,
-                              }}
-                            >
-                              {r.ticket}
-                            </code>
-                          </td>
-                          <td
+                <div
+                  style={{
+                    width: "100%",
+                    overflowX: "auto",
+                    overflowY: "hidden",
+                    WebkitOverflowScrolling: "touch",
+                  }}
+                >
+                  <table
+                    style={{
+                      width: "100%",
+                      minWidth: "980px",
+                      borderCollapse: "collapse",
+                    }}
+                  >
+                    <thead>
+                      <tr
+                        style={{
+                          background: "#fafafa",
+                          borderBottom: "1px solid #e8e8e8",
+                        }}
+                      >
+                        {[
+                          "Ticket",
+                          "Cliente",
+                          "Email",
+                          "Tipo",
+                          "Estado",
+                          "Fecha",
+                          "",
+                        ].map((h) => (
+                          <th
+                            key={h}
                             style={{
-                              padding: "0.9rem 1rem",
-                              fontWeight: 600,
-                              color: "#1a1a1a",
-                              fontSize: "0.9rem",
-                            }}
-                          >
-                            {r.nombres} {r.apellidos}
-                          </td>
-                          <td
-                            style={{
-                              padding: "0.9rem 1rem",
-                              color: "#666",
-                              fontSize: "0.875rem",
-                            }}
-                          >
-                            {r.email}
-                          </td>
-                          <td style={{ padding: "0.9rem 1rem" }}>
-                            <span
-                              style={{
-                                display: "inline-flex",
-                                padding: "2px 10px",
-                                borderRadius: "20px",
-                                fontSize: "0.75rem",
-                                fontWeight: 700,
-                                background: "#f0f0f0",
-                                color: "#555",
-                              }}
-                            >
-                              {r.tipo}
-                            </span>
-                          </td>
-                          <td
-                            style={{ padding: "0.9rem 1rem" }}
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <select
-                              value={r.estado || "pendiente"}
-                              onChange={(e) =>
-                                updateEstado(r.id, e.target.value)
-                              }
-                              style={{
-                                padding: "5px 12px",
-                                borderRadius: "20px",
-                                border: "none",
-                                fontSize: "0.78rem",
-                                fontWeight: 700,
-                                cursor: "pointer",
-                                background: es.bg,
-                                color: es.color,
-                              }}
-                            >
-                              <option value="pendiente">Pendiente</option>
-                              <option value="en_proceso">En proceso</option>
-                              <option value="resuelto">Resuelto</option>
-                            </select>
-                          </td>
-                          <td
-                            style={{
-                              padding: "0.9rem 1rem",
-                              color: "#aaa",
+                              padding: "0.85rem 1rem",
+                              textAlign: "left",
                               fontSize: "0.8rem",
+                              fontWeight: 600,
+                              color: "#888",
+                              textTransform: "uppercase",
+                              letterSpacing: "0.05em",
+                              whiteSpace: "nowrap",
                             }}
                           >
-                            {new Date(r.created_at).toLocaleDateString(
-                              "es-PE",
-                              {
-                                day: "2-digit",
-                                month: "short",
-                                year: "numeric",
-                              },
-                            )}
-                          </td>
-                          <td
-                            style={{ padding: "0.9rem 1rem" }}
-                            onClick={(e) => e.stopPropagation()}
+                            {h}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {rows.map((r, i) => {
+                        const es = estadoInfo(r.estado);
+
+                        return (
+                          <tr
+                            key={r.id}
+                            style={{
+                              borderBottom:
+                                i < rows.length - 1
+                                  ? "1px solid #f0f0f0"
+                                  : "none",
+                              cursor: "pointer",
+                              transition: "background 0.1s",
+                            }}
+                            onMouseEnter={(e) =>
+                              (e.currentTarget.style.background = "#fafafa")
+                            }
+                            onMouseLeave={(e) =>
+                              (e.currentTarget.style.background = "#fff")
+                            }
+                            onClick={() => onVer(r)}
                           >
-                            <button
-                              onClick={() => onVer(r)}
+                            <td
                               style={{
-                                display: "inline-flex",
-                                alignItems: "center",
-                                gap: "5px",
-                                background: "rgba(0,123,255,0.07)",
-                                color: "#007bff",
-                                border: "1px solid rgba(0,123,255,0.2)",
-                                padding: "5px 12px",
-                                borderRadius: "6px",
-                                fontSize: "0.8rem",
-                                fontWeight: 600,
-                                cursor: "pointer",
-                                transition: "background 0.15s",
+                                padding: "0.9rem 1rem",
+                                whiteSpace: "nowrap",
                               }}
-                              onMouseEnter={(e) =>
-                                (e.currentTarget.style.background =
-                                  "rgba(0,123,255,0.15)")
-                              }
-                              onMouseLeave={(e) =>
-                                (e.currentTarget.style.background =
-                                  "rgba(0,123,255,0.07)")
-                              }
                             >
-                              <Eye size={12} /> Ver
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                              <code
+                                style={{
+                                  background: "#fff8e6",
+                                  color: "#b07800",
+                                  padding: "2px 8px",
+                                  borderRadius: "4px",
+                                  fontSize: "0.78rem",
+                                  fontWeight: 600,
+                                }}
+                              >
+                                {r.ticket}
+                              </code>
+                            </td>
+
+                            <td
+                              style={{
+                                padding: "0.9rem 1rem",
+                                fontWeight: 600,
+                                color: "#1a1a1a",
+                                fontSize: "0.9rem",
+                                minWidth: 220,
+                              }}
+                            >
+                              {r.nombres} {r.apellidos}
+                            </td>
+
+                            <td
+                              style={{
+                                padding: "0.9rem 1rem",
+                                color: "#666",
+                                fontSize: "0.875rem",
+                                minWidth: 240,
+                              }}
+                            >
+                              {r.email}
+                            </td>
+
+                            <td
+                              style={{
+                                padding: "0.9rem 1rem",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              <span
+                                style={{
+                                  display: "inline-flex",
+                                  padding: "2px 10px",
+                                  borderRadius: "20px",
+                                  fontSize: "0.75rem",
+                                  fontWeight: 700,
+                                  background: "#f0f0f0",
+                                  color: "#555",
+                                }}
+                              >
+                                {r.tipo}
+                              </span>
+                            </td>
+
+                            <td
+                              style={{
+                                padding: "0.9rem 1rem",
+                                whiteSpace: "nowrap",
+                              }}
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <select
+                                value={r.estado || "pendiente"}
+                                onChange={(e) =>
+                                  updateEstado(r.id, e.target.value)
+                                }
+                                style={{
+                                  padding: "5px 12px",
+                                  borderRadius: "20px",
+                                  border: "none",
+                                  fontSize: "0.78rem",
+                                  fontWeight: 700,
+                                  cursor: "pointer",
+                                  background: es.bg,
+                                  color: es.color,
+                                }}
+                              >
+                                <option value="pendiente">Pendiente</option>
+                                <option value="en_proceso">En proceso</option>
+                                <option value="resuelto">Resuelto</option>
+                              </select>
+                            </td>
+
+                            <td
+                              style={{
+                                padding: "0.9rem 1rem",
+                                color: "#aaa",
+                                fontSize: "0.8rem",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              {new Date(r.created_at).toLocaleDateString(
+                                "es-PE",
+                                {
+                                  day: "2-digit",
+                                  month: "short",
+                                  year: "numeric",
+                                },
+                              )}
+                            </td>
+
+                            <td
+                              style={{
+                                padding: "0.9rem 1rem",
+                                whiteSpace: "nowrap",
+                              }}
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <button
+                                onClick={() => onVer(r)}
+                                style={{
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  gap: "5px",
+                                  background: "rgba(0,123,255,0.07)",
+                                  color: "#007bff",
+                                  border: "1px solid rgba(0,123,255,0.2)",
+                                  padding: "5px 12px",
+                                  borderRadius: "6px",
+                                  fontSize: "0.8rem",
+                                  fontWeight: 600,
+                                  cursor: "pointer",
+                                }}
+                              >
+                                <Eye size={12} /> Ver
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
 
                 <div
                   style={{
@@ -724,6 +774,7 @@ export default function AdminReclamacionesPage() {
                     {Math.min(startIndex + itemsPerPage, totalItems)} de{" "}
                     {totalItems}
                   </span>
+
                   <div
                     style={{
                       display: "flex",
@@ -749,6 +800,7 @@ export default function AdminReclamacionesPage() {
                     >
                       ← Anterior
                     </button>
+
                     {Array.from({ length: totalPages }, (_, i) => i + 1).map(
                       (page) => (
                         <button
@@ -773,6 +825,7 @@ export default function AdminReclamacionesPage() {
                         </button>
                       ),
                     )}
+
                     <button
                       disabled={currentPage === totalPages}
                       onClick={() =>
