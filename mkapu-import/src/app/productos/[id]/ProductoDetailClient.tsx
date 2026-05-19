@@ -15,10 +15,6 @@ import {
 import { useCart } from "@/app/context/CartContext";
 import { supabase } from "@/lib/supabase";
 import type { Producto } from "@/lib/supabase";
-import {
-  getPromocionByProducto,
-  calcularPrecioConDescuento,
-} from "@/lib/queries";
 
 interface Props {
   producto: Producto & { category_name?: string | null };
@@ -47,25 +43,19 @@ function formatPrice(value: number) {
 export default function ProductoDetailClient({ producto, sugeridos }: Props) {
   const { addItem, items, updateQty, removeItem } = useCart();
   const [imgError, setImgError] = useState(false);
-  const [promocion, setPromocion] = useState<any>(null);
   const [imagenes, setImagenes] = useState<ProductoImagen[]>([]);
   const [videos, setVideos] = useState<ProductoVideo[]>([]);
   const [activeMediaIdx, setActiveMediaIdx] = useState(0);
-  const [promosSugeridos, setPromosSugeridos] = useState<Record<number, any>>({});
 
-  const isAgotado = producto.agotado === true;
   const cartItem = items.find((item) => item.id === String(producto.id));
   const qty = cartItem?.qty ?? 0;
   const isConsult = producto.price === 0;
-
-  const descuentoInfo = calcularPrecioConDescuento(producto.price, promocion);
-  const precioFinal = descuentoInfo ? descuentoInfo.precioFinal : producto.price;
-  const tieneDescuento = !!descuentoInfo;
-  const categoryLabel = producto.category_name || `Categoría ${producto.category}`;
+  const categoryLabel =
+    producto.category_name || `Categoría ${producto.category}`;
 
   useEffect(() => {
     async function loadMedia() {
-      const [imgRes, vidRes, promoRes] = await Promise.all([
+      const [imgRes, vidRes] = await Promise.all([
         supabase
           .from("producto_imagenes")
           .select("*")
@@ -76,23 +66,12 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
           .select("*")
           .eq("producto_id", producto.id)
           .order("orden"),
-        getPromocionByProducto(producto.id),
       ]);
+
       setImagenes(imgRes.data ?? []);
       setVideos(vidRes.data ?? []);
-      setPromocion(promoRes);
-
-      if (sugeridos.length > 0) {
-        const promos = await Promise.all(
-          sugeridos.map((p) => getPromocionByProducto(p.id))
-        );
-        const promosMap: Record<number, any> = {};
-        sugeridos.forEach((p, i) => {
-          promosMap[p.id] = promos[i];
-        });
-        setPromosSugeridos(promosMap);
-      }
     }
+
     loadMedia();
   }, [producto.id]);
 
@@ -114,7 +93,7 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
 
   const currentMedia = allMedia[activeMediaIdx];
   const hasMultipleMedia = allMedia.length > 1;
-  const totalPrice = qty * precioFinal;
+  const totalPrice = qty * producto.price;
 
   function handleUpdateQty(newQty: number) {
     if (newQty <= 0) {
@@ -123,17 +102,18 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
     }
     updateQty(String(producto.id), newQty);
   }
-
   function handleAdd() {
     addItem({
       id: String(producto.id),
       code: producto.code ?? "",
       name: producto.name,
-      price: precioFinal,
-      itemTotal: precioFinal,
+      price: producto.price,
+      itemTotal: producto.price,
       imageUrl: producto.image_url ?? undefined,
       emoji: "📦",
-      product: { price: precioFinal },
+      product: {
+        price: producto.price,
+      },
     });
   }
 
@@ -147,93 +127,38 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
 
   return (
     <div className="detail-shell">
-      {/* ── Topbar ── */}
       <div className="detail-topbar">
-        <Link
-          href="/productos"
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "10px",
-            width: "fit-content",
-            padding: "10px 16px 10px 12px",
-            borderRadius: "14px",
-            border: "1.5px solid #e8ddd1",
-            background: "#ffffff",
-            color: "#5a4f46",
-            fontSize: "0.875rem",
-            fontWeight: 700,
-            textDecoration: "none",
-            boxShadow: "0 2px 8px rgba(78,52,24,0.07)",
-            transition:
-              "transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease",
-          }}
-          onMouseEnter={(e) => {
-            const el = e.currentTarget;
-            el.style.transform = "translateY(-2px)";
-            el.style.borderColor = "#e05c2a";
-            el.style.background = "#fff8f4";
-            el.style.color = "#e05c2a";
-            el.style.boxShadow = "0 6px 20px rgba(224,92,42,0.14)";
-          }}
-          onMouseLeave={(e) => {
-            const el = e.currentTarget;
-            el.style.transform = "translateY(0)";
-            el.style.borderColor = "#e8ddd1";
-            el.style.background = "#ffffff";
-            el.style.color = "#5a4f46";
-            el.style.boxShadow = "0 2px 8px rgba(78,52,24,0.07)";
-          }}
-        >
-          <span
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: 28,
-              height: 28,
-              borderRadius: 9,
-              background: "#f6efe7",
-              flexShrink: 0,
-              transition: "background 0.18s ease",
-            }}
-          >
-            <ArrowLeft size={16} />
+        <Link href="/productos" className="detail-back">
+          <span className="detail-back__icon" aria-hidden="true">
+            <ArrowLeft size={18} />
           </span>
           <span>Volver a productos</span>
-          <span
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              marginLeft: 2,
-              opacity: 0.4,
-              transition: "opacity 0.18s ease, transform 0.18s ease",
-            }}
-          >
-            <ChevronRight size={14} />
-          </span>
         </Link>
       </div>
 
       <section className="detail-hero">
-        {/* ── Visual rail ── */}
         <div className="detail-visual-rail">
           <div className="detail-visual-card">
             <div className="detail-visual-toolbar">
-              <span className="detail-chip detail-chip--soft">{categoryLabel}</span>
+              <span className="detail-chip detail-chip--soft">
+                {categoryLabel}
+              </span>
+
               {producto.is_new && (
                 <span className="detail-badge detail-badge--new">Nuevo</span>
               )}
+
               {producto.featured && (
-                <span className="detail-badge detail-badge--featured">Destacado</span>
+                <span className="detail-badge detail-badge--featured">
+                  Destacado
+                </span>
               )}
             </div>
 
             <div
-              className={`detail-image-stage${
-                currentMedia?.type === "video" ? " detail-image-stage--video" : ""
-              }`}
+              className={`detail-image-stage${currentMedia?.type === "video" ? " detail-image-stage--video" : ""}`}
             >
+              {" "}
               {currentMedia && currentMedia.url && !imgError ? (
                 currentMedia.type === "video" ? (
                   <video
@@ -256,7 +181,6 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
                   <span>Imagen no disponible</span>
                 </div>
               )}
-
               {hasMultipleMedia && (
                 <>
                   <button
@@ -296,7 +220,11 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
                           src={media.url || ""}
                           muted
                           preload="metadata"
-                          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                          }}
                         />
                         <div className="detail-thumb-video-overlay">
                           <Play size={24} color="#fff" />
@@ -316,54 +244,16 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
           </div>
         </div>
 
-        {/* ── Main info ── */}
         <div className="detail-main">
           <div className="detail-heading">
             <div className="detail-kicker">Detalle del producto</div>
             <h1 className="detail-title">{producto.name}</h1>
             <p className="detail-summary">
-              {producto.description || "Este producto no tiene descripción por ahora."}
+              {producto.description ||
+                "Este producto no tiene descripción por ahora."}
             </p>
 
-            {/* Agotado */}
-            {isAgotado && (
-              <div
-                className="detail-stock-alert"
-                style={{
-                  background: "linear-gradient(135deg, #1a1a1a 0%, #333 100%)",
-                  border: "1.5px solid #555",
-                }}
-              >
-                <div
-                  className="detail-stock-alert__icon"
-                  style={{ background: "#333", border: "2px solid #666", color: "#fff" }}
-                >
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <circle cx="12" cy="12" r="10" />
-                    <line x1="15" y1="9" x2="9" y2="15" />
-                    <line x1="9" y1="9" x2="15" y2="15" />
-                  </svg>
-                </div>
-                <div className="detail-stock-alert__body">
-                  <strong style={{ color: "#fff" }}>Producto agotado</strong>
-                  <span style={{ color: "#ccc" }}>
-                    Este producto no está disponible por el momento. Vuelve a consultar pronto.
-                  </span>
-                </div>
-              </div>
-            )}
-
-            {/* Low stock */}
-            {!isAgotado && producto.low_stock && (
+            {producto.low_stock && (
               <div className="detail-stock-alert">
                 <div className="detail-stock-alert__icon">
                   <svg
@@ -389,7 +279,6 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
             )}
           </div>
 
-          {/* Meta cards */}
           <div className="detail-meta">
             {producto.code && (
               <div className="detail-meta-card">
@@ -397,69 +286,51 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
                 <strong>{producto.code}</strong>
               </div>
             )}
+
             <div className="detail-meta-card">
               <span className="detail-meta-label">Categoría</span>
               <strong>{categoryLabel}</strong>
             </div>
+
             <div className="detail-meta-card">
               <span className="detail-meta-label">Estado de compra</span>
-              <strong>{qty > 0 ? `${qty} en tu carrito` : "Listo para agregar"}</strong>
+              <strong>
+                {qty > 0 ? `${qty} en tu carrito` : "Listo para agregar"}
+              </strong>
             </div>
           </div>
 
-          {/* Precio */}
           <div className="detail-pricing-panel">
             <div className="detail-section-head">
               <h2>Precio</h2>
             </div>
+
             <div className="detail-price-single">
               <div className="detail-price-label">
                 <Tag size={16} />
                 Precio por unidad
               </div>
               <div className="detail-price-value">
-                {isConsult ? (
-                  "Consultar"
-                ) : tieneDescuento ? (
-                  <>
-                    <span className="detail-price-old">S/ {producto.price.toFixed(2)}</span>
-                    <span className="detail-price-final">S/ {precioFinal.toFixed(2)}</span>
-                    <span className="detail-price-badge">{descuentoInfo!.descuentoTexto}</span>
-                  </>
-                ) : (
-                  formatPrice(producto.price)
-                )}
+                {isConsult ? "Consultar" : formatPrice(producto.price)}
               </div>
             </div>
           </div>
 
-          {/* Compra */}
           <div className="detail-purchase-card">
             <div className="detail-section-head">
               <h2>Compra</h2>
               {qty > 0 && (
-                <span className="detail-total">Total: {formatPrice(totalPrice)}</span>
+                <span className="detail-total">
+                  Total: {formatPrice(totalPrice)}
+                </span>
               )}
             </div>
 
-            {isAgotado ? (
-              <div
-                style={{
-                  padding: "18px",
-                  borderRadius: "16px",
-                  background: "#f5f5f5",
-                  border: "1px solid #e0e0e0",
-                  textAlign: "center",
-                  color: "#888",
-                  fontSize: "0.9rem",
-                  fontWeight: 600,
-                }}
-              >
-                Producto agotado — no disponible para compra
-              </div>
-            ) : qty === 0 ? (
+            {qty === 0 ? (
               <button
-                className={`detail-cta${isConsult ? " detail-cta--consult" : ""}`}
+                className={`detail-cta${
+                  isConsult ? " detail-cta--consult" : ""
+                }`}
                 onClick={handleAdd}
                 type="button"
               >
@@ -471,9 +342,7 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
                 ) : (
                   <>
                     <ShoppingCart size={18} />
-                    {tieneDescuento
-                      ? `${formatPrice(precioFinal)} (antes ${formatPrice(producto.price)})`
-                      : `Agregar al carrito - ${formatPrice(producto.price)}`}
+                    Agregar al carrito - {formatPrice(producto.price)}
                   </>
                 )}
               </button>
@@ -487,12 +356,16 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
                 >
                   -
                 </button>
+
                 <div className="detail-stepper__body">
-                  <strong className="detail-stepper__qty">{qty} unidades</strong>
+                  <strong className="detail-stepper__qty">
+                    {qty} unidades
+                  </strong>
                   <span className="detail-stepper__tier">
-                    {tieneDescuento ? formatPrice(precioFinal) : formatPrice(producto.price)} c/u
+                    {formatPrice(producto.price)} c/u
                   </span>
                 </div>
+
                 <button
                   className="detail-stepper__btn"
                   onClick={() => handleUpdateQty(qty + 1)}
@@ -507,710 +380,37 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
         </div>
       </section>
 
-      {/* ── Sugeridos ── */}
       {sugeridos.length > 0 && (
         <section className="detail-sugeridos">
-          <h2 className="detail-sugeridos__title">También te puede interesar</h2>
+          <h2 className="detail-sugeridos__title">
+            También te puede interesar
+          </h2>
           <div className="detail-sugeridos__scroll">
-            {sugeridos.map((p) => {
-              const promo = promosSugeridos[p.id];
-              const descuento = calcularPrecioConDescuento(p.price, promo);
-              const precio = descuento ? descuento.precioFinal : p.price;
-              const tienePromo = !!descuento;
-
-              return (
-                <a key={p.id} href={`/productos/${p.id}`} className="detail-sug-card">
-                  <div className="detail-sug-img">
-                    {p.image_url ? (
-                      <img src={p.image_url} alt={p.name} loading="lazy" />
-                    ) : (
-                      <div className="detail-sug-noimg">Sin imagen</div>
-                    )}
-                    {tienePromo && (
-                      <span className="detail-sug-badge">
-                        {descuento!.descuentoTexto}
-                      </span>
-                    )}
-                  </div>
-                  <div className="detail-sug-body">
-                    {p.price === 0 ? (
-                      <p className="detail-sug-price">Consultar</p>
-                    ) : tienePromo ? (
-                      <div className="detail-sug-price-wrap">
-                        <span className="detail-sug-price detail-sug-price--final">
-                          S/ {precio.toFixed(2)}
-                        </span>
-                        <span className="detail-sug-price detail-sug-price--old">
-                          S/ {p.price.toFixed(2)}
-                        </span>
-                      </div>
-                    ) : (
-                      <p className="detail-sug-price">S/ {p.price.toFixed(2)}</p>
-                    )}
-                    <p className="detail-sug-name">{p.name}</p>
-                  </div>
-                </a>
-              );
-            })}
+            {sugeridos.map((p) => (
+              <a
+                key={p.id}
+                href={`/productos/${p.id}`}
+                className="detail-sug-card"
+              >
+                <div className="detail-sug-img">
+                  {p.image_url ? (
+                    <img src={p.image_url} alt={p.name} loading="lazy" />
+                  ) : (
+                    <div className="detail-sug-noimg">Sin imagen</div>
+                  )}
+                </div>
+                <div className="detail-sug-body">
+                  <p className="detail-sug-price">
+                    {p.price === 0 ? "Consultar" : `S/ ${p.price.toFixed(2)}`}
+                  </p>
+                  <p className="detail-sug-name">{p.name}</p>
+                </div>
+              </a>
+            ))}
           </div>
         </section>
       )}
 
-      <style jsx>{`
-        .detail-shell {
-          --bg-soft: linear-gradient(180deg, #fffaf3 0%, #ffffff 100%);
-          --card: rgba(255, 255, 255, 0.9);
-          --text: #1f1a17;
-          --muted: #72675f;
-          --orange: #e05c2a;
-          --card-line: rgba(234, 223, 206, 0.9);
-          max-width: 1240px;
-          margin: 0 auto;
-          padding: 24px 16px 56px;
-          color: var(--text);
-        }
-
-        .detail-topbar {
-          margin-bottom: 18px;
-        }
-
-        .detail-hero {
-          display: grid;
-          grid-template-columns: minmax(320px, 520px) minmax(0, 1fr);
-          gap: 28px;
-          align-items: start;
-        }
-
-        .detail-visual-rail {
-          position: relative;
-          align-self: start;
-        }
-
-        .detail-visual-card,
-        .detail-pricing-panel,
-        .detail-purchase-card {
-          background: var(--card);
-          border: 1px solid var(--card-line);
-          box-shadow: 0 16px 40px rgba(78, 52, 24, 0.08);
-          backdrop-filter: blur(10px);
-        }
-
-        .detail-visual-card {
-          position: sticky;
-          top: 98px;
-          padding: 18px;
-          border-radius: 28px;
-          background: var(--bg-soft);
-        }
-
-        .detail-visual-toolbar {
-          display: flex;
-          align-items: center;
-          justify-content: flex-start;
-          gap: 8px;
-          margin-bottom: 16px;
-          flex-wrap: wrap;
-        }
-
-        .detail-chip {
-          display: inline-flex;
-          align-items: center;
-          padding: 8px 12px;
-          border-radius: 999px;
-          font-size: 0.78rem;
-          font-weight: 700;
-          text-transform: uppercase;
-          letter-spacing: 0.06em;
-        }
-
-        .detail-chip--soft {
-          background: #fff;
-          border: 1px solid #ebdfcf;
-          color: #6b625b;
-        }
-
-        .detail-badge {
-          font-size: 0.7rem;
-          font-weight: 800;
-          padding: 6px 12px;
-          border-radius: 8px;
-          text-transform: uppercase;
-          letter-spacing: 0.04em;
-        }
-
-        .detail-badge--new {
-          background: #f59e0b;
-          color: #fff;
-        }
-
-        .detail-badge--featured {
-          background: #10b981;
-          color: #fff;
-        }
-
-        .detail-image-stage {
-          aspect-ratio: 1 / 1;
-          min-height: 0;
-          transition: aspect-ratio 0.2s;
-          border-radius: 22px;
-          overflow: hidden;
-          position: relative;
-          background: radial-gradient(
-            circle at top left,
-            #fff7ef 0%,
-            #f2ece5 55%,
-            #ebe4db 100%
-          );
-          border: 1px solid #ece3d7;
-        }
-
-        .detail-image-stage--video {
-          aspect-ratio: unset !important;
-          max-height: 500px;
-          height: 500px;
-        }
-
-        .detail-image,
-        .detail-video {
-          width: auto;
-          height: 100%;
-          max-width: 100%;
-          object-fit: contain;
-          display: block;
-          background: #000;
-          margin: 0 auto;
-          position: static;
-          transform: none;
-        }
-
-        .detail-image-empty {
-          width: 100%;
-          height: 100%;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          gap: 12px;
-          color: #b4aaa3;
-          font-size: 0.95rem;
-        }
-
-        .detail-media-arrow {
-          position: absolute;
-          top: 50%;
-          transform: translateY(-50%);
-          width: 40px;
-          height: 40px;
-          border-radius: 50%;
-          border: none;
-          background: rgba(255, 255, 255, 0.92);
-          color: #1a1a1a;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          z-index: 2;
-          backdrop-filter: blur(4px);
-          transition: background 0.15s, transform 0.15s;
-        }
-
-        .detail-media-arrow:hover {
-          background: #fff;
-          transform: translateY(-50%) scale(1.08);
-        }
-
-        .detail-media-arrow--left { left: 12px; }
-        .detail-media-arrow--right { right: 12px; }
-
-        .detail-thumbs {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-          gap: 8px;
-          margin-top: 12px;
-        }
-
-        .detail-thumb {
-          aspect-ratio: 1 / 1;
-          border-radius: 12px;
-          overflow: hidden;
-          border: 2px solid #e8dfd3;
-          background: #f9f6f2;
-          cursor: pointer;
-          padding: 0;
-          transition: border-color 0.15s, transform 0.15s;
-        }
-
-        .detail-thumb:hover {
-          transform: scale(1.04);
-          border-color: #d7c6b0;
-        }
-
-        .detail-thumb--active { border-color: var(--orange); }
-
-        .detail-thumb img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          display: block;
-        }
-
-        .detail-thumb-video {
-          width: 100%;
-          height: 100%;
-          position: relative;
-          overflow: hidden;
-        }
-
-        .detail-thumb-video video {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          display: block;
-        }
-
-        .detail-thumb-video-overlay {
-          position: absolute;
-          inset: 0;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: rgba(0, 0, 0, 0.3);
-          pointer-events: none;
-        }
-
-        .detail-thumb-empty {
-          width: 100%;
-          height: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: #b4aaa3;
-        }
-
-        .detail-main {
-          display: flex;
-          flex-direction: column;
-          gap: 20px;
-        }
-
-        .detail-heading {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-        }
-
-        .detail-kicker {
-          font-size: 0.78rem;
-          font-weight: 800;
-          text-transform: uppercase;
-          letter-spacing: 0.12em;
-          color: var(--orange);
-        }
-
-        .detail-title {
-          font-size: clamp(2rem, 4vw, 3.3rem);
-          line-height: 1.04;
-          letter-spacing: -0.03em;
-          margin: 0;
-        }
-
-        .detail-summary {
-          max-width: 70ch;
-          margin: 0;
-          color: var(--muted);
-          font-size: 1rem;
-          line-height: 1.7;
-        }
-
-        .detail-stock-alert {
-          display: flex;
-          align-items: flex-start;
-          gap: 14px;
-          padding: 16px 18px;
-          border-radius: 16px;
-          background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%);
-          border: 1.5px solid #fecdd3;
-          margin-top: 8px;
-          animation: stock-pulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-
-        @keyframes stock-pulse {
-          0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); border-color: #fecdd3; }
-          50% { box-shadow: 0 0 0 6px rgba(220, 38, 38, 0.12); border-color: #fca5a5; }
-        }
-
-        .detail-stock-alert__icon {
-          flex-shrink: 0;
-          width: 36px;
-          height: 36px;
-          border-radius: 50%;
-          background: #fef2f2;
-          border: 2px solid #fca5a5;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: #dc2626;
-          animation: icon-shake 3s ease-in-out infinite;
-        }
-
-        @keyframes icon-shake {
-          0%, 100% { transform: translateX(0) rotate(0deg); }
-          10%, 30%, 50%, 70% { transform: translateX(-2px) rotate(-2deg); }
-          20%, 40%, 60% { transform: translateX(2px) rotate(2deg); }
-          80% { transform: translateX(0) rotate(0deg); }
-        }
-
-        .detail-stock-alert__body {
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-          flex: 1;
-        }
-
-        .detail-stock-alert__body strong {
-          font-size: 0.94rem;
-          color: #991b1b;
-          font-weight: 800;
-          line-height: 1.3;
-        }
-
-        .detail-stock-alert__body span {
-          font-size: 0.84rem;
-          color: #b91c1c;
-          line-height: 1.5;
-        }
-
-        .detail-meta {
-          display: grid;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-          gap: 12px;
-        }
-
-        .detail-meta-card {
-          padding: 16px;
-          border-radius: 18px;
-          background: #fff;
-          border: 1px solid #ece3d6;
-          box-shadow: 0 10px 24px rgba(59, 41, 17, 0.05);
-          min-height: 94px;
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-          gap: 8px;
-        }
-
-        .detail-meta-label {
-          font-size: 0.76rem;
-          text-transform: uppercase;
-          letter-spacing: 0.08em;
-          color: #95877d;
-          font-weight: 700;
-        }
-
-        .detail-meta-card strong {
-          font-size: 0.98rem;
-          line-height: 1.35;
-        }
-
-        .detail-pricing-panel,
-        .detail-purchase-card {
-          border-radius: 24px;
-          padding: 22px;
-          background: #fff;
-        }
-
-        .detail-section-head {
-          display: flex;
-          align-items: flex-start;
-          justify-content: space-between;
-          gap: 12px;
-          margin-bottom: 16px;
-        }
-
-        .detail-section-head h2 {
-          margin: 0;
-          font-size: 1.08rem;
-        }
-
-        .detail-price-single {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 18px;
-          border-radius: 16px;
-          background: linear-gradient(180deg, #ffffff 0%, #fcfaf7 100%);
-          border: 1px solid #ece2d6;
-        }
-
-        .detail-price-label {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          font-size: 0.92rem;
-          font-weight: 600;
-          color: var(--text);
-        }
-
-        .detail-price-value {
-          font-size: 1.5rem;
-          font-weight: 900;
-          color: var(--orange);
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          flex-wrap: wrap;
-        }
-
-        .detail-price-old {
-          font-size: 1rem;
-          color: #999;
-          text-decoration: line-through;
-          font-weight: 500;
-        }
-
-        .detail-price-final { color: #dc2626; }
-
-        .detail-price-badge {
-          font-size: 0.72rem;
-          font-weight: 800;
-          background: #dc2626;
-          color: #fff;
-          padding: 3px 8px;
-          border-radius: 4px;
-          text-transform: uppercase;
-          letter-spacing: 0.04em;
-        }
-
-        .detail-total {
-          font-size: 0.92rem;
-          color: #4d5b67;
-          font-weight: 700;
-        }
-
-        .detail-cta {
-          width: 100%;
-          min-height: 54px;
-          border: none;
-          border-radius: 16px;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          gap: 10px;
-          padding: 14px 18px;
-          background: linear-gradient(135deg, var(--orange) 0%, #f07a4c 100%);
-          color: #fff;
-          font-size: 0.98rem;
-          font-weight: 700;
-          cursor: pointer;
-          box-shadow: 0 14px 28px rgba(224, 92, 42, 0.22);
-          transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
-        }
-
-        .detail-cta:hover {
-          transform: translateY(-2px);
-          filter: saturate(1.05);
-          box-shadow: 0 18px 32px rgba(224, 92, 42, 0.28);
-        }
-
-        .detail-cta--consult {
-          background: linear-gradient(135deg, #25d366 0%, #18b957 100%);
-          box-shadow: 0 14px 28px rgba(37, 211, 102, 0.22);
-        }
-
-        .detail-stepper {
-          display: grid;
-          grid-template-columns: 56px 1fr 56px;
-          gap: 12px;
-          align-items: center;
-          padding: 10px;
-          border-radius: 18px;
-          background: #f8f5f1;
-          border: 1px solid #ece2d6;
-        }
-
-        .detail-stepper__btn {
-          min-height: 56px;
-          border: 1px solid #e6dbcf;
-          border-radius: 14px;
-          background: #fff;
-          color: var(--text);
-          font-size: 1.5rem;
-          font-weight: 700;
-          cursor: pointer;
-          transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
-        }
-
-        .detail-stepper__btn:hover {
-          background: var(--orange);
-          color: #fff;
-          border-color: var(--orange);
-        }
-
-        .detail-stepper__body {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          gap: 5px;
-          text-align: center;
-          min-height: 56px;
-        }
-
-        .detail-stepper__qty { font-size: 1rem; }
-
-        .detail-stepper__tier {
-          font-size: 0.8rem;
-          font-weight: 700;
-          color: var(--orange);
-        }
-
-        @media (max-width: 1080px) {
-          .detail-hero { grid-template-columns: 1fr; }
-          .detail-visual-rail { position: static; }
-          .detail-visual-card { position: static; top: auto; }
-          .detail-meta { grid-template-columns: 1fr 1fr; }
-        }
-
-        @media (max-width: 720px) {
-          .detail-shell { padding: 18px 14px 42px; }
-          .detail-title { font-size: 1.9rem; }
-          .detail-meta { grid-template-columns: 1fr; }
-          .detail-pricing-panel,
-          .detail-purchase-card,
-          .detail-visual-card { border-radius: 22px; }
-          .detail-section-head { flex-direction: column; align-items: stretch; }
-          .detail-stock-alert { padding: 14px 16px; gap: 12px; }
-          .detail-stock-alert__icon { width: 32px; height: 32px; }
-          .detail-stock-alert__body strong { font-size: 0.88rem; }
-          .detail-stock-alert__body span { font-size: 0.8rem; }
-        }
-
-        @media (max-width: 520px) {
-          .detail-stepper { grid-template-columns: 48px 1fr 48px; }
-          .detail-stepper__btn { min-height: 48px; }
-        }
-
-        /* ── Sugeridos ── */
-        .detail-sugeridos {
-          margin-top: 48px;
-          padding-top: 32px;
-          border-top: 1px solid #ece3d6;
-        }
-
-        .detail-sugeridos__title {
-          font-size: 1.1rem;
-          font-weight: 800;
-          color: #1a1a1a;
-          margin: 0 0 20px;
-        }
-
-        .detail-sugeridos__scroll {
-          display: flex;
-          gap: 16px;
-          overflow-x: auto;
-          scroll-snap-type: x mandatory;
-          -webkit-overflow-scrolling: touch;
-          padding-bottom: 12px;
-          scrollbar-width: none;
-        }
-
-        .detail-sugeridos__scroll::-webkit-scrollbar { display: none; }
-
-        .detail-sug-card {
-          flex: 0 0 180px;
-          scroll-snap-align: start;
-          text-decoration: none;
-          color: inherit;
-          cursor: pointer;
-        }
-
-        .detail-sug-img {
-          aspect-ratio: 1/1;
-          background: #f5f2ee;
-          border-radius: 12px;
-          overflow: hidden;
-          margin-bottom: 8px;
-          position: relative;
-        }
-
-        .detail-sug-img img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          display: block;
-          transition: transform 0.3s;
-        }
-
-        .detail-sug-card:hover .detail-sug-img img { transform: scale(1.04); }
-
-        .detail-sug-badge {
-          position: absolute;
-          top: 6px;
-          left: 6px;
-          font-size: 0.62rem;
-          font-weight: 800;
-          background: #dc2626;
-          color: #fff;
-          padding: 3px 7px;
-          border-radius: 5px;
-          text-transform: uppercase;
-          letter-spacing: 0.04em;
-          z-index: 1;
-        }
-
-        .detail-sug-noimg {
-          width: 100%;
-          height: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 0.7rem;
-          color: #bbb;
-        }
-
-        .detail-sug-body { padding: 0 2px; }
-
-        .detail-sug-price {
-          font-size: 0.88rem;
-          font-weight: 700;
-          color: #1a1a1a;
-          margin: 0 0 3px;
-        }
-
-        .detail-sug-price-wrap {
-          display: flex;
-          align-items: center;
-          gap: 5px;
-          flex-wrap: wrap;
-          margin: 0 0 3px;
-        }
-
-        .detail-sug-price--final {
-          font-size: 0.88rem;
-          font-weight: 800;
-          color: #dc2626;
-          margin: 0;
-        }
-
-        .detail-sug-price--old {
-          font-size: 0.75rem;
-          font-weight: 500;
-          color: #aaa;
-          text-decoration: line-through;
-          margin: 0;
-        }
-
-        .detail-sug-name {
-          font-size: 0.78rem;
-          color: #555;
-          margin: 0;
-          line-height: 1.3;
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-        }
-      `}</style>
     </div>
   );
 }
