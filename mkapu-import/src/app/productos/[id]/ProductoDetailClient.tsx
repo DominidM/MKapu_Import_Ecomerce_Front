@@ -15,7 +15,10 @@ import {
 import { useCart } from "@/app/context/CartContext";
 import { supabase } from "@/lib/supabase";
 import type { Producto } from "@/lib/supabase";
-import { getPromocionByProducto, calcularPrecioConDescuento } from "@/lib/queries";
+import {
+  getPromocionByProducto,
+  calcularPrecioConDescuento,
+} from "@/lib/queries";
 
 interface Props {
   producto: Producto & { category_name?: string | null };
@@ -48,6 +51,7 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
   const [imagenes, setImagenes] = useState<ProductoImagen[]>([]);
   const [videos, setVideos] = useState<ProductoVideo[]>([]);
   const [activeMediaIdx, setActiveMediaIdx] = useState(0);
+  const [promosSugeridos, setPromosSugeridos] = useState<Record<number, any>>({});
 
   const isAgotado = producto.agotado === true;
   const cartItem = items.find((item) => item.id === String(producto.id));
@@ -57,8 +61,7 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
   const descuentoInfo = calcularPrecioConDescuento(producto.price, promocion);
   const precioFinal = descuentoInfo ? descuentoInfo.precioFinal : producto.price;
   const tieneDescuento = !!descuentoInfo;
-  const categoryLabel =
-    producto.category_name || `Categoría ${producto.category}`;
+  const categoryLabel = producto.category_name || `Categoría ${producto.category}`;
 
   useEffect(() => {
     async function loadMedia() {
@@ -75,12 +78,21 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
           .order("orden"),
         getPromocionByProducto(producto.id),
       ]);
-
       setImagenes(imgRes.data ?? []);
       setVideos(vidRes.data ?? []);
       setPromocion(promoRes);
-    }
 
+      if (sugeridos.length > 0) {
+        const promos = await Promise.all(
+          sugeridos.map((p) => getPromocionByProducto(p.id))
+        );
+        const promosMap: Record<number, any> = {};
+        sugeridos.forEach((p, i) => {
+          promosMap[p.id] = promos[i];
+        });
+        setPromosSugeridos(promosMap);
+      }
+    }
     loadMedia();
   }, [producto.id]);
 
@@ -111,6 +123,7 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
     }
     updateQty(String(producto.id), newQty);
   }
+
   function handleAdd() {
     addItem({
       id: String(producto.id),
@@ -120,9 +133,7 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
       itemTotal: precioFinal,
       imageUrl: producto.image_url ?? undefined,
       emoji: "📦",
-      product: {
-        price: precioFinal,
-      },
+      product: { price: precioFinal },
     });
   }
 
@@ -136,38 +147,93 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
 
   return (
     <div className="detail-shell">
+      {/* ── Topbar ── */}
       <div className="detail-topbar">
-        <Link href="/productos" className="detail-back">
-          <span className="detail-back__icon" aria-hidden="true">
-            <ArrowLeft size={18} />
+        <Link
+          href="/productos"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "10px",
+            width: "fit-content",
+            padding: "10px 16px 10px 12px",
+            borderRadius: "14px",
+            border: "1.5px solid #e8ddd1",
+            background: "#ffffff",
+            color: "#5a4f46",
+            fontSize: "0.875rem",
+            fontWeight: 700,
+            textDecoration: "none",
+            boxShadow: "0 2px 8px rgba(78,52,24,0.07)",
+            transition:
+              "transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease",
+          }}
+          onMouseEnter={(e) => {
+            const el = e.currentTarget;
+            el.style.transform = "translateY(-2px)";
+            el.style.borderColor = "#e05c2a";
+            el.style.background = "#fff8f4";
+            el.style.color = "#e05c2a";
+            el.style.boxShadow = "0 6px 20px rgba(224,92,42,0.14)";
+          }}
+          onMouseLeave={(e) => {
+            const el = e.currentTarget;
+            el.style.transform = "translateY(0)";
+            el.style.borderColor = "#e8ddd1";
+            el.style.background = "#ffffff";
+            el.style.color = "#5a4f46";
+            el.style.boxShadow = "0 2px 8px rgba(78,52,24,0.07)";
+          }}
+        >
+          <span
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: 28,
+              height: 28,
+              borderRadius: 9,
+              background: "#f6efe7",
+              flexShrink: 0,
+              transition: "background 0.18s ease",
+            }}
+          >
+            <ArrowLeft size={16} />
           </span>
           <span>Volver a productos</span>
+          <span
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              marginLeft: 2,
+              opacity: 0.4,
+              transition: "opacity 0.18s ease, transform 0.18s ease",
+            }}
+          >
+            <ChevronRight size={14} />
+          </span>
         </Link>
       </div>
 
       <section className="detail-hero">
+        {/* ── Visual rail ── */}
         <div className="detail-visual-rail">
           <div className="detail-visual-card">
             <div className="detail-visual-toolbar">
-              <span className="detail-chip detail-chip--soft">
-                {categoryLabel}
-              </span>
-
+              <span className="detail-chip detail-chip--soft">{categoryLabel}</span>
               {producto.is_new && (
                 <span className="detail-badge detail-badge--new">Nuevo</span>
               )}
-
               {producto.featured && (
-                <span className="detail-badge detail-badge--featured">
-                  Destacado
-                </span>
+                <span className="detail-badge detail-badge--featured">Destacado</span>
               )}
             </div>
 
             <div
-              className={`detail-image-stage${currentMedia?.type === "video" ? " detail-image-stage--video" : ""}`}
+              className={`detail-image-stage${
+                currentMedia?.type === "video" ? " detail-image-stage--video" : ""
+              }`}
             >
-              {" "}
               {currentMedia && currentMedia.url && !imgError ? (
                 currentMedia.type === "video" ? (
                   <video
@@ -190,6 +256,7 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
                   <span>Imagen no disponible</span>
                 </div>
               )}
+
               {hasMultipleMedia && (
                 <>
                   <button
@@ -229,11 +296,7 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
                           src={media.url || ""}
                           muted
                           preload="metadata"
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "cover",
-                          }}
+                          style={{ width: "100%", height: "100%", objectFit: "cover" }}
                         />
                         <div className="detail-thumb-video-overlay">
                           <Play size={24} color="#fff" />
@@ -253,32 +316,54 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
           </div>
         </div>
 
+        {/* ── Main info ── */}
         <div className="detail-main">
           <div className="detail-heading">
             <div className="detail-kicker">Detalle del producto</div>
             <h1 className="detail-title">{producto.name}</h1>
             <p className="detail-summary">
-              {producto.description ||
-                "Este producto no tiene descripción por ahora."}
+              {producto.description || "Este producto no tiene descripción por ahora."}
             </p>
 
-              {isAgotado && (
-                <div className="detail-stock-alert" style={{ background: "linear-gradient(135deg, #1a1a1a 0%, #333 100%)", border: "1.5px solid #555" }}>
-                  <div className="detail-stock-alert__icon" style={{ background: "#333", border: "2px solid #666", color: "#fff" }}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="12" r="10" />
-                      <line x1="15" y1="9" x2="9" y2="15" />
-                      <line x1="9" y1="9" x2="15" y2="15" />
-                    </svg>
-                  </div>
-                  <div className="detail-stock-alert__body">
-                    <strong style={{ color: "#fff" }}>Producto agotado</strong>
-                    <span style={{ color: "#ccc" }}>Este producto no está disponible por el momento. Vuelve a consultar pronto.</span>
-                  </div>
+            {/* Agotado */}
+            {isAgotado && (
+              <div
+                className="detail-stock-alert"
+                style={{
+                  background: "linear-gradient(135deg, #1a1a1a 0%, #333 100%)",
+                  border: "1.5px solid #555",
+                }}
+              >
+                <div
+                  className="detail-stock-alert__icon"
+                  style={{ background: "#333", border: "2px solid #666", color: "#fff" }}
+                >
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="15" y1="9" x2="9" y2="15" />
+                    <line x1="9" y1="9" x2="15" y2="15" />
+                  </svg>
                 </div>
-              )}
+                <div className="detail-stock-alert__body">
+                  <strong style={{ color: "#fff" }}>Producto agotado</strong>
+                  <span style={{ color: "#ccc" }}>
+                    Este producto no está disponible por el momento. Vuelve a consultar pronto.
+                  </span>
+                </div>
+              </div>
+            )}
 
-              {!isAgotado && producto.low_stock && (
+            {/* Low stock */}
+            {!isAgotado && producto.low_stock && (
               <div className="detail-stock-alert">
                 <div className="detail-stock-alert__icon">
                   <svg
@@ -304,6 +389,7 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
             )}
           </div>
 
+          {/* Meta cards */}
           <div className="detail-meta">
             {producto.code && (
               <div className="detail-meta-card">
@@ -311,49 +397,48 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
                 <strong>{producto.code}</strong>
               </div>
             )}
-
             <div className="detail-meta-card">
               <span className="detail-meta-label">Categoría</span>
               <strong>{categoryLabel}</strong>
             </div>
-
             <div className="detail-meta-card">
               <span className="detail-meta-label">Estado de compra</span>
-              <strong>
-                {qty > 0 ? `${qty} en tu carrito` : "Listo para agregar"}
-              </strong>
+              <strong>{qty > 0 ? `${qty} en tu carrito` : "Listo para agregar"}</strong>
             </div>
           </div>
 
+          {/* Precio */}
           <div className="detail-pricing-panel">
             <div className="detail-section-head">
               <h2>Precio</h2>
             </div>
-
             <div className="detail-price-single">
               <div className="detail-price-label">
                 <Tag size={16} />
                 Precio por unidad
               </div>
               <div className="detail-price-value">
-                {isConsult ? "Consultar" : tieneDescuento ? (
+                {isConsult ? (
+                  "Consultar"
+                ) : tieneDescuento ? (
                   <>
                     <span className="detail-price-old">S/ {producto.price.toFixed(2)}</span>
                     <span className="detail-price-final">S/ {precioFinal.toFixed(2)}</span>
                     <span className="detail-price-badge">{descuentoInfo!.descuentoTexto}</span>
                   </>
-                ) : formatPrice(producto.price)}
+                ) : (
+                  formatPrice(producto.price)
+                )}
               </div>
             </div>
           </div>
 
+          {/* Compra */}
           <div className="detail-purchase-card">
             <div className="detail-section-head">
               <h2>Compra</h2>
               {qty > 0 && (
-                <span className="detail-total">
-                  Total: {formatPrice(totalPrice)}
-                </span>
+                <span className="detail-total">Total: {formatPrice(totalPrice)}</span>
               )}
             </div>
 
@@ -374,9 +459,7 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
               </div>
             ) : qty === 0 ? (
               <button
-                className={`detail-cta${
-                  isConsult ? " detail-cta--consult" : ""
-                }`}
+                className={`detail-cta${isConsult ? " detail-cta--consult" : ""}`}
                 onClick={handleAdd}
                 type="button"
               >
@@ -388,7 +471,9 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
                 ) : (
                   <>
                     <ShoppingCart size={18} />
-                    {tieneDescuento ? `${formatPrice(precioFinal)} (antes ${formatPrice(producto.price)})` : `Agregar al carrito - ${formatPrice(producto.price)}`}
+                    {tieneDescuento
+                      ? `${formatPrice(precioFinal)} (antes ${formatPrice(producto.price)})`
+                      : `Agregar al carrito - ${formatPrice(producto.price)}`}
                   </>
                 )}
               </button>
@@ -402,16 +487,12 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
                 >
                   -
                 </button>
-
                 <div className="detail-stepper__body">
-                  <strong className="detail-stepper__qty">
-                    {qty} unidades
-                  </strong>
+                  <strong className="detail-stepper__qty">{qty} unidades</strong>
                   <span className="detail-stepper__tier">
                     {tieneDescuento ? formatPrice(precioFinal) : formatPrice(producto.price)} c/u
                   </span>
                 </div>
-
                 <button
                   className="detail-stepper__btn"
                   onClick={() => handleUpdateQty(qty + 1)}
@@ -426,33 +507,51 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
         </div>
       </section>
 
+      {/* ── Sugeridos ── */}
       {sugeridos.length > 0 && (
         <section className="detail-sugeridos">
-          <h2 className="detail-sugeridos__title">
-            También te puede interesar
-          </h2>
+          <h2 className="detail-sugeridos__title">También te puede interesar</h2>
           <div className="detail-sugeridos__scroll">
-            {sugeridos.map((p) => (
-              <a
-                key={p.id}
-                href={`/productos/${p.id}`}
-                className="detail-sug-card"
-              >
-                <div className="detail-sug-img">
-                  {p.image_url ? (
-                    <img src={p.image_url} alt={p.name} loading="lazy" />
-                  ) : (
-                    <div className="detail-sug-noimg">Sin imagen</div>
-                  )}
-                </div>
-                <div className="detail-sug-body">
-                  <p className="detail-sug-price">
-                    {p.price === 0 ? "Consultar" : `S/ ${p.price.toFixed(2)}`}
-                  </p>
-                  <p className="detail-sug-name">{p.name}</p>
-                </div>
-              </a>
-            ))}
+            {sugeridos.map((p) => {
+              const promo = promosSugeridos[p.id];
+              const descuento = calcularPrecioConDescuento(p.price, promo);
+              const precio = descuento ? descuento.precioFinal : p.price;
+              const tienePromo = !!descuento;
+
+              return (
+                <a key={p.id} href={`/productos/${p.id}`} className="detail-sug-card">
+                  <div className="detail-sug-img">
+                    {p.image_url ? (
+                      <img src={p.image_url} alt={p.name} loading="lazy" />
+                    ) : (
+                      <div className="detail-sug-noimg">Sin imagen</div>
+                    )}
+                    {tienePromo && (
+                      <span className="detail-sug-badge">
+                        {descuento!.descuentoTexto}
+                      </span>
+                    )}
+                  </div>
+                  <div className="detail-sug-body">
+                    {p.price === 0 ? (
+                      <p className="detail-sug-price">Consultar</p>
+                    ) : tienePromo ? (
+                      <div className="detail-sug-price-wrap">
+                        <span className="detail-sug-price detail-sug-price--final">
+                          S/ {precio.toFixed(2)}
+                        </span>
+                        <span className="detail-sug-price detail-sug-price--old">
+                          S/ {p.price.toFixed(2)}
+                        </span>
+                      </div>
+                    ) : (
+                      <p className="detail-sug-price">S/ {p.price.toFixed(2)}</p>
+                    )}
+                    <p className="detail-sug-name">{p.name}</p>
+                  </div>
+                </a>
+              );
+            })}
           </div>
         </section>
       )}
@@ -473,44 +572,6 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
 
         .detail-topbar {
           margin-bottom: 18px;
-        }
-
-        .detail-back {
-          display: inline-flex;
-          align-items: center;
-          gap: 10px;
-          width: fit-content;
-          padding: 10px 14px;
-          border-radius: 999px;
-          border: 1px solid #e6dccf;
-          background: rgba(255, 255, 255, 0.86);
-          color: #4d5b67;
-          font-size: 0.92rem;
-          font-weight: 600;
-          text-decoration: none;
-          transition:
-            transform 0.18s ease,
-            border-color 0.18s ease,
-            background 0.18s ease,
-            color 0.18s ease;
-        }
-
-        .detail-back:hover {
-          transform: translateY(-1px);
-          border-color: #d7c6b0;
-          background: #ffffff;
-          color: var(--orange);
-        }
-
-        .detail-back__icon {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          width: 24px;
-          height: 24px;
-          border-radius: 999px;
-          background: #f6efe7;
-          flex-shrink: 0;
         }
 
         .detail-hero {
@@ -621,6 +682,7 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
           position: static;
           transform: none;
         }
+
         .detail-image-empty {
           width: 100%;
           height: 100%;
@@ -649,9 +711,7 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
           cursor: pointer;
           z-index: 2;
           backdrop-filter: blur(4px);
-          transition:
-            background 0.15s,
-            transform 0.15s;
+          transition: background 0.15s, transform 0.15s;
         }
 
         .detail-media-arrow:hover {
@@ -659,13 +719,8 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
           transform: translateY(-50%) scale(1.08);
         }
 
-        .detail-media-arrow--left {
-          left: 12px;
-        }
-
-        .detail-media-arrow--right {
-          right: 12px;
-        }
+        .detail-media-arrow--left { left: 12px; }
+        .detail-media-arrow--right { right: 12px; }
 
         .detail-thumbs {
           display: grid;
@@ -682,9 +737,7 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
           background: #f9f6f2;
           cursor: pointer;
           padding: 0;
-          transition:
-            border-color 0.15s,
-            transform 0.15s;
+          transition: border-color 0.15s, transform 0.15s;
         }
 
         .detail-thumb:hover {
@@ -692,9 +745,7 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
           border-color: #d7c6b0;
         }
 
-        .detail-thumb--active {
-          border-color: var(--orange);
-        }
+        .detail-thumb--active { border-color: var(--orange); }
 
         .detail-thumb img {
           width: 100%;
@@ -784,15 +835,8 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
         }
 
         @keyframes stock-pulse {
-          0%,
-          100% {
-            box-shadow: 0 0 0 0 rgba(220, 38, 38, 0);
-            border-color: #fecdd3;
-          }
-          50% {
-            box-shadow: 0 0 0 6px rgba(220, 38, 38, 0.12);
-            border-color: #fca5a5;
-          }
+          0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); border-color: #fecdd3; }
+          50% { box-shadow: 0 0 0 6px rgba(220, 38, 38, 0.12); border-color: #fca5a5; }
         }
 
         .detail-stock-alert__icon {
@@ -810,24 +854,10 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
         }
 
         @keyframes icon-shake {
-          0%,
-          100% {
-            transform: translateX(0) rotate(0deg);
-          }
-          10%,
-          30%,
-          50%,
-          70% {
-            transform: translateX(-2px) rotate(-2deg);
-          }
-          20%,
-          40%,
-          60% {
-            transform: translateX(2px) rotate(2deg);
-          }
-          80% {
-            transform: translateX(0) rotate(0deg);
-          }
+          0%, 100% { transform: translateX(0) rotate(0deg); }
+          10%, 30%, 50%, 70% { transform: translateX(-2px) rotate(-2deg); }
+          20%, 40%, 60% { transform: translateX(2px) rotate(2deg); }
+          80% { transform: translateX(0) rotate(0deg); }
         }
 
         .detail-stock-alert__body {
@@ -930,15 +960,16 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
           gap: 8px;
           flex-wrap: wrap;
         }
+
         .detail-price-old {
           font-size: 1rem;
           color: #999;
           text-decoration: line-through;
           font-weight: 500;
         }
-        .detail-price-final {
-          color: #dc2626;
-        }
+
+        .detail-price-final { color: #dc2626; }
+
         .detail-price-badge {
           font-size: 0.72rem;
           font-weight: 800;
@@ -972,10 +1003,7 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
           font-weight: 700;
           cursor: pointer;
           box-shadow: 0 14px 28px rgba(224, 92, 42, 0.22);
-          transition:
-            transform 0.18s ease,
-            box-shadow 0.18s ease,
-            filter 0.18s ease;
+          transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
         }
 
         .detail-cta:hover {
@@ -1009,10 +1037,7 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
           font-size: 1.5rem;
           font-weight: 700;
           cursor: pointer;
-          transition:
-            background 0.18s ease,
-            color 0.18s ease,
-            border-color 0.18s ease;
+          transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
         }
 
         .detail-stepper__btn:hover {
@@ -1031,9 +1056,7 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
           min-height: 56px;
         }
 
-        .detail-stepper__qty {
-          font-size: 1rem;
-        }
+        .detail-stepper__qty { font-size: 1rem; }
 
         .detail-stepper__tier {
           font-size: 0.8rem;
@@ -1042,91 +1065,45 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
         }
 
         @media (max-width: 1080px) {
-          .detail-hero {
-            grid-template-columns: 1fr;
-          }
-
-          .detail-visual-rail {
-            position: static;
-          }
-
-          .detail-visual-card {
-            position: static;
-            top: auto;
-          }
-
-          .detail-meta {
-            grid-template-columns: 1fr 1fr;
-          }
+          .detail-hero { grid-template-columns: 1fr; }
+          .detail-visual-rail { position: static; }
+          .detail-visual-card { position: static; top: auto; }
+          .detail-meta { grid-template-columns: 1fr 1fr; }
         }
 
         @media (max-width: 720px) {
-          .detail-shell {
-            padding: 18px 14px 42px;
-          }
-
-          .detail-title {
-            font-size: 1.9rem;
-          }
-
-          .detail-meta {
-            grid-template-columns: 1fr;
-          }
-
+          .detail-shell { padding: 18px 14px 42px; }
+          .detail-title { font-size: 1.9rem; }
+          .detail-meta { grid-template-columns: 1fr; }
           .detail-pricing-panel,
           .detail-purchase-card,
-          .detail-visual-card {
-            border-radius: 22px;
-          }
-
-          .detail-section-head {
-            flex-direction: column;
-            align-items: stretch;
-          }
-
-          .detail-stock-alert {
-            padding: 14px 16px;
-            gap: 12px;
-          }
-
-          .detail-stock-alert__icon {
-            width: 32px;
-            height: 32px;
-          }
-
-          .detail-stock-alert__body strong {
-            font-size: 0.88rem;
-          }
-
-          .detail-stock-alert__body span {
-            font-size: 0.8rem;
-          }
+          .detail-visual-card { border-radius: 22px; }
+          .detail-section-head { flex-direction: column; align-items: stretch; }
+          .detail-stock-alert { padding: 14px 16px; gap: 12px; }
+          .detail-stock-alert__icon { width: 32px; height: 32px; }
+          .detail-stock-alert__body strong { font-size: 0.88rem; }
+          .detail-stock-alert__body span { font-size: 0.8rem; }
         }
 
         @media (max-width: 520px) {
-          .detail-stepper {
-            grid-template-columns: 48px 1fr 48px;
-          }
-
-          .detail-stepper__btn {
-            min-height: 48px;
-          }
-
-          .detail-back {
-            font-size: 0.86rem;
-          }
+          .detail-stepper { grid-template-columns: 48px 1fr 48px; }
+          .detail-stepper__btn { min-height: 48px; }
         }
+
+        /* ── Sugeridos ── */
         .detail-sugeridos {
           margin-top: 48px;
           padding-top: 32px;
           border-top: 1px solid #ece3d6;
         }
+
         .detail-sugeridos__title {
           font-size: 1.1rem;
           font-weight: 800;
           color: #1a1a1a;
           margin: 0 0 20px;
         }
+
         .detail-sugeridos__scroll {
           display: flex;
           gap: 16px;
@@ -1136,9 +1113,9 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
           padding-bottom: 12px;
           scrollbar-width: none;
         }
-        .detail-sugeridos__scroll::-webkit-scrollbar {
-          display: none;
-        }
+
+        .detail-sugeridos__scroll::-webkit-scrollbar { display: none; }
+
         .detail-sug-card {
           flex: 0 0 180px;
           scroll-snap-align: start;
@@ -1146,13 +1123,16 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
           color: inherit;
           cursor: pointer;
         }
+
         .detail-sug-img {
           aspect-ratio: 1/1;
           background: #f5f2ee;
           border-radius: 12px;
           overflow: hidden;
           margin-bottom: 8px;
+          position: relative;
         }
+
         .detail-sug-img img {
           width: 100%;
           height: 100%;
@@ -1160,9 +1140,24 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
           display: block;
           transition: transform 0.3s;
         }
-        .detail-sug-card:hover .detail-sug-img img {
-          transform: scale(1.04);
+
+        .detail-sug-card:hover .detail-sug-img img { transform: scale(1.04); }
+
+        .detail-sug-badge {
+          position: absolute;
+          top: 6px;
+          left: 6px;
+          font-size: 0.62rem;
+          font-weight: 800;
+          background: #dc2626;
+          color: #fff;
+          padding: 3px 7px;
+          border-radius: 5px;
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+          z-index: 1;
         }
+
         .detail-sug-noimg {
           width: 100%;
           height: 100%;
@@ -1172,15 +1167,39 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
           font-size: 0.7rem;
           color: #bbb;
         }
-        .detail-sug-body {
-          padding: 0 2px;
-        }
+
+        .detail-sug-body { padding: 0 2px; }
+
         .detail-sug-price {
           font-size: 0.88rem;
           font-weight: 700;
           color: #1a1a1a;
           margin: 0 0 3px;
         }
+
+        .detail-sug-price-wrap {
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          flex-wrap: wrap;
+          margin: 0 0 3px;
+        }
+
+        .detail-sug-price--final {
+          font-size: 0.88rem;
+          font-weight: 800;
+          color: #dc2626;
+          margin: 0;
+        }
+
+        .detail-sug-price--old {
+          font-size: 0.75rem;
+          font-weight: 500;
+          color: #aaa;
+          text-decoration: line-through;
+          margin: 0;
+        }
+
         .detail-sug-name {
           font-size: 0.78rem;
           color: #555;

@@ -650,12 +650,14 @@ export default function EmpleadosPage() {
                             title="Editar"
                             style={{
                               background: "rgba(245,166,35,0.1)",
-                              border: "none",
-                              borderRadius: "6px",
-                              padding: "6px",
-                              cursor: "pointer",
                               color: "#f5a623",
+                              border: "1.5px solid rgba(230, 157, 40, 0.1)",
+                              padding: "6px 10px",
+                              borderRadius: "6px",
+                              cursor: "pointer",
                               display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
                               transition: "background 0.2s",
                             }}
                             onMouseEnter={(e) =>

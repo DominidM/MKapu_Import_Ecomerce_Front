@@ -55,6 +55,7 @@ export default function AdminSobreNosotrosPage() {
 
   async function load() {
     setLoading(true);
+
     const [{ data: secciones }, { data: imgs }] = await Promise.all([
       supabase.from("quienes_somos_secciones").select("*").order("orden"),
       supabase.from("quienes_somos_imagenes").select("seccion_id"),
@@ -66,6 +67,7 @@ export default function AdminSobreNosotrosPage() {
     for (const img of imgs ?? []) {
       mapa[img.seccion_id] = (mapa[img.seccion_id] ?? 0) + 1;
     }
+
     setImagenesMap(mapa);
     setLoading(false);
   }
@@ -270,7 +272,6 @@ export default function AdminSobreNosotrosPage() {
         minHeight: "100vh",
       }}
     >
-      {/* Header */}
       <div
         style={{
           display: "flex",
@@ -348,7 +349,6 @@ export default function AdminSobreNosotrosPage() {
         </div>
       </div>
 
-      {/* Formulario */}
       {showForm && (
         <div
           style={{
@@ -512,7 +512,7 @@ export default function AdminSobreNosotrosPage() {
                     <div key={img.id} style={{ position: "relative" }}>
                       <img
                         src={img.url_imagen}
-                        alt=""
+                        alt="Imagen de la sección"
                         style={{
                           width: 80,
                           height: 80,
@@ -524,6 +524,8 @@ export default function AdminSobreNosotrosPage() {
                       <button
                         type="button"
                         onClick={() => deleteImagen(img.id)}
+                        title="Eliminar imagen"
+                        aria-label={`Eliminar imagen ${img.id}`}
                         style={{
                           position: "absolute",
                           top: -6,
@@ -635,7 +637,6 @@ export default function AdminSobreNosotrosPage() {
         </div>
       )}
 
-      {/* Listado */}
       {!showForm &&
         (loading ? (
           <div style={{ textAlign: "center", padding: "3rem", color: "#aaa" }}>
@@ -727,7 +728,6 @@ export default function AdminSobreNosotrosPage() {
                                 : "none",
                           }}
                         >
-                          {/* Título */}
                           <td
                             style={{
                               padding: "0.9rem 1rem",
@@ -744,7 +744,6 @@ export default function AdminSobreNosotrosPage() {
                             )}
                           </td>
 
-                          {/* Descripción */}
                           <td
                             style={{
                               padding: "0.9rem 1rem",
@@ -773,7 +772,6 @@ export default function AdminSobreNosotrosPage() {
                             </span>
                           </td>
 
-                          {/* Orden + Mover (columna unificada) */}
                           <td
                             style={{
                               padding: "0.9rem 1rem",
@@ -792,12 +790,12 @@ export default function AdminSobreNosotrosPage() {
                                 background: "#fff",
                               }}
                             >
-                              {/* Botón ▲ */}
                               <button
                                 type="button"
                                 onClick={() => moveUp(i)}
                                 disabled={isFirst || savingOrder}
                                 title="Subir"
+                                aria-label={`Subir sección ${s.titulo ?? s.id}`}
                                 style={{
                                   width: 32,
                                   height: 24,
@@ -817,9 +815,10 @@ export default function AdminSobreNosotrosPage() {
                                   padding: 0,
                                 }}
                                 onMouseEnter={(e) => {
-                                  if (!isFirst && !savingOrder)
+                                  if (!isFirst && !savingOrder) {
                                     e.currentTarget.style.background =
                                       "#f3f4f6";
+                                  }
                                 }}
                                 onMouseLeave={(e) => {
                                   e.currentTarget.style.background = isFirst
@@ -830,7 +829,6 @@ export default function AdminSobreNosotrosPage() {
                                 ▲
                               </button>
 
-                              {/* Número de orden */}
                               <div
                                 style={{
                                   width: 32,
@@ -849,12 +847,12 @@ export default function AdminSobreNosotrosPage() {
                                 {s.orden}
                               </div>
 
-                              {/* Botón ▼ */}
                               <button
                                 type="button"
                                 onClick={() => moveDown(i)}
                                 disabled={isLast || savingOrder}
                                 title="Bajar"
+                                aria-label={`Bajar sección ${s.titulo ?? s.id}`}
                                 style={{
                                   width: 32,
                                   height: 24,
@@ -873,9 +871,10 @@ export default function AdminSobreNosotrosPage() {
                                   padding: 0,
                                 }}
                                 onMouseEnter={(e) => {
-                                  if (!isLast && !savingOrder)
+                                  if (!isLast && !savingOrder) {
                                     e.currentTarget.style.background =
                                       "#f3f4f6";
+                                  }
                                 }}
                                 onMouseLeave={(e) => {
                                   e.currentTarget.style.background = isLast
@@ -888,7 +887,6 @@ export default function AdminSobreNosotrosPage() {
                             </div>
                           </td>
 
-                          {/* Imágenes */}
                           <td
                             style={{
                               padding: "0.9rem 1rem",
@@ -933,7 +931,6 @@ export default function AdminSobreNosotrosPage() {
                             )}
                           </td>
 
-                          {/* Estado */}
                           <td
                             style={{
                               padding: "0.9rem 1rem",
@@ -960,7 +957,6 @@ export default function AdminSobreNosotrosPage() {
                             </span>
                           </td>
 
-                          {/* Acciones */}
                           <td
                             style={{
                               padding: "0.9rem 1rem",
@@ -970,15 +966,18 @@ export default function AdminSobreNosotrosPage() {
                             <div style={{ display: "flex", gap: "6px" }}>
                               <button
                                 onClick={() => onEdit(s)}
-                                title="Editar"
+                                title="Editar sección"
+                                aria-label={`Editar sección ${s.titulo ?? s.id}`}
                                 style={{
                                   background: "rgba(245,166,35,0.1)",
-                                  border: "none",
-                                  borderRadius: "6px",
-                                  padding: "6px",
-                                  cursor: "pointer",
                                   color: "#f5a623",
+                                  border: "1px solid rgba(245,166,35,0.18)",
+                                  padding: "7px",
+                                  borderRadius: "8px",
+                                  cursor: "pointer",
                                   display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
                                   transition: "background 0.2s",
                                 }}
                                 onMouseEnter={(e) =>
@@ -995,15 +994,18 @@ export default function AdminSobreNosotrosPage() {
 
                               <button
                                 onClick={() => onDelete(s.id)}
-                                title="Eliminar"
+                                title="Eliminar sección"
+                                aria-label={`Eliminar sección ${s.titulo ?? s.id}`}
                                 style={{
                                   background: "rgba(220,38,38,0.08)",
                                   border: "none",
-                                  borderRadius: "6px",
-                                  padding: "6px",
+                                  borderRadius: "8px",
+                                  padding: "7px",
                                   cursor: "pointer",
                                   color: "#dc2626",
                                   display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
                                   transition: "background 0.2s",
                                 }}
                                 onMouseEnter={(e) =>

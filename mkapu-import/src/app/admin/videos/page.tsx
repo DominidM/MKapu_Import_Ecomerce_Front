@@ -784,15 +784,16 @@ export default function AdminVideosPage() {
                             onClick={() => onEdit(v)}
                             title="Editar"
                             style={{
-                              background: "rgba(0,123,255,0.08)",
-                              color: "#007bff",
-                              border: "1px solid rgba(0,123,255,0.2)",
+                              background: "rgba(245,166,35,0.1)",
+                              color: "#f5a623",
+                              border: "1.5px solid rgba(230, 157, 40, 0.1)",
                               padding: "6px 10px",
                               borderRadius: "6px",
                               cursor: "pointer",
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
+                              transition: "background 0.2s",
                             }}
                           >
                             <Pencil size={15} />

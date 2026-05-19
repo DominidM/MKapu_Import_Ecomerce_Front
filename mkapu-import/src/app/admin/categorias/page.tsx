@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { Pencil, Trash2 } from "lucide-react";
 
 type Categoria = {
   id: number;
@@ -100,6 +101,7 @@ export default function AdminCategoriasPage() {
     ) {
       return;
     }
+
     const { error } = await supabase.from("categorias").delete().eq("id", id);
     if (error) return alert(error.message);
     load();
@@ -110,6 +112,7 @@ export default function AdminCategoriasPage() {
       .from("categorias")
       .update({ activo: !c.activo })
       .eq("id", c.id);
+
     load();
   }
 
@@ -533,64 +536,65 @@ export default function AdminCategoriasPage() {
                             <div
                               style={{
                                 display: "flex",
-                                gap: "6px",
+                                gap: "8px",
                                 flexWrap: "wrap",
+                                alignItems: "center",
                               }}
                             >
                               <button
                                 onClick={() => onEdit(c)}
+                                title="Editar categoría"
+                                aria-label={`Editar categoría ${c.name}`}
                                 style={{
-                                  background: "rgba(0,123,255,0.08)",
-                                  color: "#007bff",
-                                  border: "1px solid rgba(0,123,255,0.2)",
-                                  padding: "5px 12px",
-                                  borderRadius: "6px",
+                                  background: "rgba(245,166,35,0.1)",
+                                  color: "#f5a623",
+                                  border: "1px solid rgba(245,166,35,0.18)",
+                                  padding: "7px",
+                                  borderRadius: "8px",
                                   cursor: "pointer",
-                                  fontSize: "0.8rem",
-                                  fontWeight: 600,
-                                  transition: "all 0.2s",
-                                  whiteSpace: "nowrap",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  transition: "background 0.2s, transform 0.15s",
                                 }}
                                 onMouseEnter={(e) => {
                                   e.currentTarget.style.background =
-                                    "rgba(0,123,255,0.1)";
-                                  e.currentTarget.style.color = "#0056b3";
+                                    "rgba(245,166,35,0.18)";
                                 }}
                                 onMouseLeave={(e) => {
                                   e.currentTarget.style.background =
-                                    "rgba(0,123,255,0.08)";
-                                  e.currentTarget.style.color = "#007bff";
+                                    "rgba(245,166,35,0.1)";
                                 }}
                               >
-                                Editar
+                                <Pencil size={15} />
                               </button>
 
                               <button
                                 onClick={() => onDelete(c.id)}
+                                title="Eliminar categoría"
+                                aria-label={`Eliminar categoría ${c.name}`}
                                 style={{
                                   background: "rgba(220,53,69,0.08)",
                                   color: "#dc3545",
                                   border: "1px solid rgba(220,53,69,0.2)",
-                                  padding: "5px 12px",
-                                  borderRadius: "6px",
+                                  padding: "7px",
+                                  borderRadius: "8px",
                                   cursor: "pointer",
-                                  fontSize: "0.8rem",
-                                  fontWeight: 600,
-                                  transition: "all 0.2s",
-                                  whiteSpace: "nowrap",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  transition: "background 0.2s, transform 0.15s",
                                 }}
                                 onMouseEnter={(e) => {
                                   e.currentTarget.style.background =
-                                    "rgba(220,53,69,0.1)";
-                                  e.currentTarget.style.color = "#a71d2a";
+                                    "rgba(220,53,69,0.14)";
                                 }}
                                 onMouseLeave={(e) => {
                                   e.currentTarget.style.background =
                                     "rgba(220,53,69,0.08)";
-                                  e.currentTarget.style.color = "#dc3545";
                                 }}
                               >
-                                Eliminar
+                                <Trash2 size={15} />
                               </button>
                             </div>
                           </td>
