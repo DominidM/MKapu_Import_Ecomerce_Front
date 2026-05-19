@@ -7,11 +7,6 @@ import ProductCard from "@/components/productCard";
 import type { Producto } from "@/lib/supabase";
 import { supabase } from "@/lib/supabase";
 import { getPromocionesActivasMap } from "@/lib/queries";
-import {
-  SparklesIcon,
-  StarIcon,
-  ExclamationTriangleIcon,
-} from "@heroicons/react/24/solid";
 
 type BannerConfig = {
   titulo: string;
@@ -46,18 +41,41 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
   const [onlyFeatured, setOnlyFeatured] = useState(false);
   const [onlyNew, setOnlyNew] = useState(false);
   const [onlyLowStock, setOnlyLowStock] = useState(false);
-  const [hideAgotado, setHideAgotado] = useState(true);
+  const [hideAgotado, setHideAgotado] = useState(false);
+  const [onlyPromo, setOnlyPromo] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [promocionesMap, setPromocionesMap] = useState<Record<number, any>>({});
+  // ✅ promoIds se carga una vez al montar — no entra en deps de load
+  const promoIdsRef = useRef<number[]>([]);
 
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    getPromocionesActivasMap().then(setPromocionesMap);
+    getPromocionesActivasMap().then((map) => {
+      setPromocionesMap(map);
+      // Guardamos en ref para usarlos en la query SIN causar re-render/re-load
+      promoIdsRef.current = Object.keys(map).map(Number);
+    });
   }, []);
 
   const load = useCallback(async () => {
     setLoading(true);
+
+    // ✅ FIX CRÍTICO: si onlyPromo está activo pero no hay promos cargadas aún,
+    // esperamos a que promoIdsRef tenga datos. Si no hay ninguna promo, vaciamos.
+    if (onlyPromo && promoIdsRef.current.length === 0) {
+      // Intentamos cargar el mapa directo aquí para no depender del useEffect de arriba
+      const freshMap = await getPromocionesActivasMap();
+      promoIdsRef.current = Object.keys(freshMap).map(Number);
+      setPromocionesMap(freshMap);
+
+      if (promoIdsRef.current.length === 0) {
+        setProductos([]);
+        setTotalCount(0);
+        setLoading(false);
+        return;
+      }
+    }
 
     const from = (currentPage - 1) * ITEMS_PER_PAGE;
     const to = from + ITEMS_PER_PAGE - 1;
@@ -102,7 +120,12 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
     if (onlyFeatured) query = query.eq("featured", true);
     if (onlyNew) query = query.eq("is_new", true);
     if (onlyLowStock) query = query.eq("low_stock", true);
-    if (hideAgotado) query = query.eq("agotado", false);
+    if (hideAgotado) query = query.eq("agotado", true);
+
+    // ✅ FIX: filtro de promo directo en la query con los IDs reales
+    if (onlyPromo && promoIdsRef.current.length > 0) {
+      query = query.in("id", promoIdsRef.current);
+    }
 
     const { data, count, error } = await query;
 
@@ -144,6 +167,8 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
     onlyNew,
     onlyLowStock,
     hideAgotado,
+    onlyPromo,
+    // ✅ promoIdsRef NO entra en deps porque es un ref, no estado
   ]);
 
   useEffect(() => {
@@ -152,7 +177,16 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [search, cats, maxPrice, onlyFeatured, onlyNew, onlyLowStock]);
+  }, [
+    search,
+    cats,
+    maxPrice,
+    onlyFeatured,
+    onlyNew,
+    onlyLowStock,
+    onlyPromo,
+    hideAgotado,
+  ]);
 
   useEffect(() => {
     const q = searchParams.get("q") ?? "";
@@ -164,9 +198,7 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
 
   function handleSearchInput(value: string) {
     setSearchInput(value);
-
     if (searchTimer.current) clearTimeout(searchTimer.current);
-
     searchTimer.current = setTimeout(() => {
       setSearch(value);
       const params = new URLSearchParams(searchParams.toString());
@@ -190,6 +222,8 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
     setOnlyFeatured(false);
     setOnlyNew(false);
     setOnlyLowStock(false);
+    setOnlyPromo(false);
+    setHideAgotado(false);
     router.replace("/productos", { scroll: false });
   }
 
@@ -198,7 +232,9 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
     (onlyFeatured ? 1 : 0) +
     (onlyNew ? 1 : 0) +
     (onlyLowStock ? 1 : 0) +
-    (maxPrice < priceMax ? 1 : 0);
+    (onlyPromo ? 1 : 0) +
+    (maxPrice < priceMax ? 1 : 0) +
+    (hideAgotado ? 1 : 0);
 
   const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
   const heroTitulo = banner?.titulo || "Nuestros Productos";
@@ -208,6 +244,7 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
 
   return (
     <main style={{ background: "#f8f7f4", minHeight: "100vh" }}>
+      {/* ── Hero ── */}
       <section
         style={{
           position: "relative",
@@ -229,7 +266,6 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
             style={{ objectFit: "cover", objectPosition: "center" }}
           />
         )}
-
         <div
           style={{
             position: "absolute",
@@ -239,7 +275,6 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
             zIndex: 1,
           }}
         />
-
         <div
           style={{
             position: "relative",
@@ -261,7 +296,6 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
           >
             Catálogo
           </p>
-
           <h1
             style={{
               fontSize: "clamp(1.8rem, 4vw, 2.8rem)",
@@ -273,7 +307,6 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
           >
             {heroTitulo}
           </h1>
-
           <p
             style={{
               fontSize: "1rem",
@@ -314,6 +347,7 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
         </button>
 
         <div className="productos-layout">
+          {/* ── Sidebar ── */}
           <aside className={`sidebar${sidebarOpen ? " sidebar--open" : ""}`}>
             <div className="sidebar__header">
               <h2 className="sidebar__title">Filtros</h2>
@@ -333,6 +367,7 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
               </div>
             </div>
 
+            {/* Categorías */}
             <div className="sidebar__section">
               <label className="sidebar__label">Categoría</label>
               <div className="sidebar__cats">
@@ -350,6 +385,7 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
               </div>
             </div>
 
+            {/* Precio */}
             <div className="sidebar__section">
               <label className="sidebar__label">
                 Precio máximo
@@ -359,7 +395,6 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
                     : `S/ ${maxPrice.toLocaleString("es-PE")}`}
                 </span>
               </label>
-
               <input
                 type="range"
                 min={0}
@@ -369,34 +404,22 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
                 onChange={(e) => setMaxPrice(Number(e.target.value))}
                 className="sidebar__range"
               />
-
               <div className="sidebar__range-labels">
                 <span>S/ 0</span>
                 <span>S/ {priceMax.toLocaleString("es-PE")}</span>
               </div>
             </div>
 
+            {/* ✅ Checkboxes — 5 filtros exactos pedidos */}
             <div className="sidebar__section">
               <label className="sidebar__check-row">
-                <input
-                  type="checkbox"
-                  checked={onlyFeatured}
-                  onChange={(e) => setOnlyFeatured(e.target.checked)}
-                  className="sidebar__checkbox"
-                />
-                <span className="sidebar__check-label">Solo destacados</span>
-              </label>
-
-              <label className="sidebar__check-row" style={{ marginTop: 6 }}>
                 <input
                   type="checkbox"
                   checked={onlyNew}
                   onChange={(e) => setOnlyNew(e.target.checked)}
                   className="sidebar__checkbox"
                 />
-                <span className="sidebar__check-label">
-                  Solo productos nuevos
-                </span>
+                <span className="sidebar__check-label">Productos nuevos</span>
               </label>
 
               <label className="sidebar__check-row" style={{ marginTop: 6 }}>
@@ -406,21 +429,42 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
                   onChange={(e) => setOnlyLowStock(e.target.checked)}
                   className="sidebar__checkbox"
                 />
-                <span className="sidebar__check-label">
-                  Solo últimas unidades
-                </span>
+                <span className="sidebar__check-label">Últimas unidades</span>
               </label>
 
+              {/* ✅ Destacados: filtra en query pero SIN tag en ProductCard */}
               <label className="sidebar__check-row" style={{ marginTop: 6 }}>
                 <input
                   type="checkbox"
-                  checked={!hideAgotado}
-                  onChange={(e) => setHideAgotado(!e.target.checked)}
+                  checked={onlyFeatured}
+                  onChange={(e) => setOnlyFeatured(e.target.checked)}
                   className="sidebar__checkbox"
                 />
                 <span className="sidebar__check-label">
-                  Mostrar agotados
+                  Productos destacados
                 </span>
+              </label>
+
+              {/* ✅ Solo con promoción — ahora filtra por IDs en la query */}
+              <label className="sidebar__check-row" style={{ marginTop: 6 }}>
+                <input
+                  type="checkbox"
+                  checked={onlyPromo}
+                  onChange={(e) => setOnlyPromo(e.target.checked)}
+                  className="sidebar__checkbox"
+                />
+                <span className="sidebar__check-label">Con promociones</span>
+              </label>
+
+              {/* ✅ Renombrado: "Productos agotados" en vez de "Ocultar agotados" */}
+              <label className="sidebar__check-row" style={{ marginTop: 6 }}>
+                <input
+                  type="checkbox"
+                  checked={hideAgotado}
+                  onChange={(e) => setHideAgotado(e.target.checked)}
+                  className="sidebar__checkbox"
+                />
+                <span className="sidebar__check-label">Productos agotados</span>
               </label>
             </div>
           </aside>
@@ -433,6 +477,7 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
             />
           )}
 
+          {/* ── Main content ── */}
           <main className="productos-main">
             <div style={{ marginBottom: "1rem" }}>
               <div style={{ position: "relative", maxWidth: 480 }}>
@@ -457,7 +502,6 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
                   <circle cx="11" cy="11" r="8" />
                   <path d="m21 21-4.35-4.35" />
                 </svg>
-
                 <input
                   style={{
                     width: "100%",
@@ -488,7 +532,6 @@ export default function ProductosClient({ allCats: ALL_CATS, banner }: Props) {
                 {totalCount !== 1 ? "s" : ""}
                 {cats.length > 0 && ` en ${cats.join(", ")}`}
               </p>
-
               {activeFilters > 0 && (
                 <button
                   className="productos-main__clear"

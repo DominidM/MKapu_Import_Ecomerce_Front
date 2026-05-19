@@ -11,6 +11,8 @@ import {
   Users,
   Image,
   Video,
+  PlusCircle,
+  X,
 } from "lucide-react";
 
 type ColabMedia = {
@@ -71,6 +73,7 @@ export default function AdminColaboradoresPage() {
 
   async function load() {
     setLoading(true);
+
     const [{ data: colabs }, { data: allMedia }] = await Promise.all([
       supabase
         .from("colaboradores")
@@ -166,6 +169,7 @@ export default function AdminColaboradoresPage() {
     }
 
     await loadMedia(editId);
+    await load();
     setUploadingImg(false);
     if (imgRef.current) imgRef.current.value = "";
   }
@@ -192,6 +196,7 @@ export default function AdminColaboradoresPage() {
     }
 
     await loadMedia(editId);
+    await load();
     setUploadingVid(false);
     if (vidRef.current) vidRef.current.value = "";
   }
@@ -199,7 +204,10 @@ export default function AdminColaboradoresPage() {
   async function deleteMedia(id: number) {
     if (!confirm("¿Eliminar este archivo?")) return;
     await supabase.from("colaborador_media").delete().eq("id", id);
-    if (editId) loadMedia(editId);
+    if (editId) {
+      await loadMedia(editId);
+      await load();
+    }
   }
 
   async function save(e: React.FormEvent) {
@@ -384,12 +392,17 @@ export default function AdminColaboradoresPage() {
             fontWeight: 600,
             fontSize: "0.875rem",
             cursor: "pointer",
-            transition: "background 0.2s",
           }}
-          onMouseEnter={(e) => (e.currentTarget.style.background = "#d4891a")}
-          onMouseLeave={(e) => (e.currentTarget.style.background = "#f5a623")}
         >
-          {showForm ? "✕ Cancelar" : "+ Nuevo colaborador"}
+          {showForm ? (
+            <>
+              <X size={15} /> Cancelar
+            </>
+          ) : (
+            <>
+              <PlusCircle size={15} /> Nuevo colaborador
+            </>
+          )}
         </button>
       </div>
 
@@ -488,6 +501,7 @@ export default function AdminColaboradoresPage() {
 
             <div style={{ marginBottom: "1.25rem" }}>
               <label style={lbl}>Logo *</label>
+
               <div
                 onClick={() => !uploading && fileRef.current?.click()}
                 style={{
@@ -500,22 +514,6 @@ export default function AdminColaboradoresPage() {
                   cursor: uploading ? "not-allowed" : "pointer",
                   background: form.logo_url ? "#f0fdf4" : "#fafafa",
                   transition: "all 0.2s",
-                }}
-                onMouseEnter={(e) => {
-                  if (!uploading) {
-                    e.currentTarget.style.borderColor = "#f5a623";
-                    e.currentTarget.style.background = "#fff8ee";
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!uploading) {
-                    e.currentTarget.style.borderColor = form.logo_url
-                      ? "#22c55e"
-                      : "#e0e0e0";
-                    e.currentTarget.style.background = form.logo_url
-                      ? "#f0fdf4"
-                      : "#fafafa";
-                  }
                 }}
               >
                 {uploading ? (
@@ -648,6 +646,7 @@ export default function AdminColaboradoresPage() {
               style={{
                 display: "flex",
                 gap: "10px",
+                flexWrap: "wrap",
                 marginBottom: editId ? "1.75rem" : 0,
               }}
             >
@@ -663,17 +662,21 @@ export default function AdminColaboradoresPage() {
                   fontWeight: 600,
                   fontSize: "0.875rem",
                   cursor: uploading ? "not-allowed" : "pointer",
-                  transition: "background 0.2s",
                   opacity: uploading ? 0.7 : 1,
-                }}
-                onMouseEnter={(e) => {
-                  if (!uploading) e.currentTarget.style.background = "#d4891a";
-                }}
-                onMouseLeave={(e) => {
-                  if (!uploading) e.currentTarget.style.background = "#f5a623";
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "8px",
                 }}
               >
-                {editId ? "Guardar cambios" : "Crear y añadir media"}
+                {editId ? (
+                  <>
+                    <CheckCircle size={15} /> Guardar cambios
+                  </>
+                ) : (
+                  <>
+                    <PlusCircle size={15} /> Crear y añadir media
+                  </>
+                )}
               </button>
 
               <button
@@ -688,9 +691,12 @@ export default function AdminColaboradoresPage() {
                   fontWeight: 600,
                   fontSize: "0.875rem",
                   cursor: "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "8px",
                 }}
               >
-                Cancelar
+                <X size={15} /> Cancelar
               </button>
             </div>
           </form>
@@ -709,6 +715,8 @@ export default function AdminColaboradoresPage() {
                     alignItems: "center",
                     justifyContent: "space-between",
                     marginBottom: "0.75rem",
+                    gap: "12px",
+                    flexWrap: "wrap",
                   }}
                 >
                   <div
@@ -749,7 +757,6 @@ export default function AdminColaboradoresPage() {
                       fontSize: "0.8rem",
                       cursor: uploadingImg ? "not-allowed" : "pointer",
                       opacity: uploadingImg ? 0.5 : 1,
-                      transition: "background 0.15s",
                     }}
                   >
                     {uploadingImg ? "Subiendo..." : "Subir imágenes"}
@@ -840,6 +847,8 @@ export default function AdminColaboradoresPage() {
                     alignItems: "center",
                     justifyContent: "space-between",
                     marginBottom: "0.75rem",
+                    gap: "12px",
+                    flexWrap: "wrap",
                   }}
                 >
                   <div
@@ -880,7 +889,6 @@ export default function AdminColaboradoresPage() {
                       fontSize: "0.8rem",
                       cursor: uploadingVid ? "not-allowed" : "pointer",
                       opacity: uploadingVid ? 0.5 : 1,
-                      transition: "background 0.15s",
                     }}
                   >
                     {uploadingVid ? "Subiendo..." : "Subir videos"}
@@ -1022,131 +1030,144 @@ export default function AdminColaboradoresPage() {
                 </span>
               </div>
             ) : (
-              <table
+              <div
                 style={{
                   width: "100%",
-                  borderCollapse: "collapse",
-                  fontSize: "0.875rem",
-                  tableLayout: "fixed",
+                  overflowX: "auto",
+                  overflowY: "hidden",
+                  WebkitOverflowScrolling: "touch",
                 }}
               >
-                <thead>
-                  <tr
-                    style={{
-                      background: "#fafafa",
-                      borderBottom: "1px solid #e8e8e8",
-                    }}
-                  >
-                    {[
-                      "Logo",
-                      "Nombre",
-                      "Orden",
-                      "Imágenes",
-                      "Videos",
-                      "Estado",
-                      "Acciones",
-                    ].map((h) => (
-                      <th
-                        key={h}
-                        style={{
-                          padding: "0.85rem 1rem",
-                          textAlign: "left",
-                          fontSize: "0.8rem",
-                          fontWeight: 600,
-                          color: "#888",
-                          textTransform: "uppercase",
-                          letterSpacing: "0.05em",
-                        }}
-                      >
-                        {h}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {rows.map((c, i) => {
-                    const m = mediaMap[c.id] ?? { imgs: 0, vids: 0 };
-                    return (
-                      <tr
-                        key={c.id}
-                        style={{
-                          borderBottom:
-                            i < rows.length - 1 ? "1px solid #f0f0f0" : "none",
-                        }}
-                      >
-                        <td
+                <table
+                  style={{
+                    width: "100%",
+                    minWidth: "980px",
+                    borderCollapse: "collapse",
+                    fontSize: "0.875rem",
+                    tableLayout: "fixed",
+                  }}
+                >
+                  <thead>
+                    <tr
+                      style={{
+                        background: "#fafafa",
+                        borderBottom: "1px solid #e8e8e8",
+                      }}
+                    >
+                      {[
+                        "Logo",
+                        "Nombre",
+                        "Orden",
+                        "Imágenes",
+                        "Videos",
+                        "Estado",
+                        "Acciones",
+                      ].map((h) => (
+                        <th
+                          key={h}
                           style={{
-                            padding: "0.9rem 1rem",
-                            width: 120,
+                            padding: "0.85rem 1rem",
+                            textAlign: "left",
+                            fontSize: "0.8rem",
+                            fontWeight: 600,
+                            color: "#888",
+                            textTransform: "uppercase",
+                            letterSpacing: "0.05em",
+                            whiteSpace: "nowrap",
                           }}
                         >
-                          <div
+                          {h}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {rows.map((c, i) => {
+                      const m = mediaMap[c.id] ?? { imgs: 0, vids: 0 };
+
+                      return (
+                        <tr
+                          key={c.id}
+                          style={{
+                            borderBottom:
+                              i < rows.length - 1
+                                ? "1px solid #f0f0f0"
+                                : "none",
+                            background: "#fff",
+                          }}
+                        >
+                          <td
                             style={{
-                              width: 90,
-                              height: 52,
-                              borderRadius: "8px",
-                              border: "1px solid #e8e8e8",
-                              background: "#fafafa",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              overflow: "hidden",
+                              padding: "0.9rem 1rem",
+                              width: 120,
+                              whiteSpace: "nowrap",
                             }}
                           >
-                            {c.logo_url ? (
-                              <img
-                                src={c.logo_url}
-                                alt={c.name}
-                                style={{
-                                  width: "100%",
-                                  height: "100%",
-                                  objectFit: "contain",
-                                  display: "block",
-                                }}
-                              />
-                            ) : (
-                              <span
-                                style={{
-                                  color: "#ddd",
-                                  fontSize: "0.75rem",
-                                }}
-                              >
-                                Sin logo
-                              </span>
-                            )}
-                          </div>
-                        </td>
+                            <div
+                              style={{
+                                width: 90,
+                                height: 52,
+                                borderRadius: "8px",
+                                border: "1px solid #e8e8e8",
+                                background: "#fafafa",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                overflow: "hidden",
+                              }}
+                            >
+                              {c.logo_url ? (
+                                <img
+                                  src={c.logo_url}
+                                  alt={c.name}
+                                  style={{
+                                    width: "100%",
+                                    height: "100%",
+                                    objectFit: "contain",
+                                    display: "block",
+                                  }}
+                                />
+                              ) : (
+                                <span
+                                  style={{
+                                    color: "#ddd",
+                                    fontSize: "0.75rem",
+                                  }}
+                                >
+                                  Sin logo
+                                </span>
+                              )}
+                            </div>
+                          </td>
 
-                        <td
-                          style={{
-                            padding: "0.9rem 1rem",
-                            fontWeight: 600,
-                            color: "#1a1a1a",
-                            fontSize: "0.9rem",
-                          }}
-                        >
-                          {c.name}
-                        </td>
-
-                        <td
-                          style={{
-                            padding: "0.9rem 1rem",
-                            minWidth: 150,
-                          }}
-                        >
-                          <div
+                          <td
                             style={{
-                              display: "flex",
-                              flexDirection: "column",
-                              gap: "8px",
+                              padding: "0.9rem 1rem",
+                              fontWeight: 600,
+                              color: "#1a1a1a",
+                              fontSize: "0.9rem",
+                              minWidth: 240,
+                            }}
+                          >
+                            {c.name}
+                          </td>
+
+                          <td
+                            style={{
+                              padding: "0.9rem 1rem",
+                              minWidth: 170,
+                              whiteSpace: "nowrap",
                             }}
                           >
                             <div
                               style={{
                                 display: "flex",
                                 alignItems: "center",
-                                gap: "8px",
+                                justifyContent: "space-between",
+                                gap: "10px",
+                                width: "100%",
+                                maxWidth: 130,
                               }}
                             >
                               <button
@@ -1166,6 +1187,10 @@ export default function AdminColaboradoresPage() {
                                   opacity: i === 0 || savingOrder ? 0.45 : 1,
                                   fontWeight: 700,
                                   color: "#666",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  flexShrink: 0,
                                 }}
                               >
                                 ↑
@@ -1173,10 +1198,18 @@ export default function AdminColaboradoresPage() {
 
                               <span
                                 style={{
-                                  minWidth: 24,
-                                  textAlign: "center",
+                                  minWidth: 28,
+                                  height: 28,
+                                  borderRadius: "999px",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
                                   fontWeight: 700,
                                   color: "#666",
+                                  fontSize: "0.85rem",
+                                  background: "#fafafa",
+                                  border: "1px solid #e8e8e8",
+                                  flex: 1,
                                 }}
                               >
                                 {c.orden}
@@ -1202,155 +1235,176 @@ export default function AdminColaboradoresPage() {
                                       : 1,
                                   fontWeight: 700,
                                   color: "#666",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  flexShrink: 0,
                                 }}
                               >
                                 ↓
                               </button>
                             </div>
-                          </div>
-                        </td>
+                          </td>
 
-                        <td style={{ padding: "0.9rem 1rem" }}>
-                          {m.imgs > 0 ? (
-                            <span
-                              style={{
-                                display: "inline-flex",
-                                alignItems: "center",
-                                gap: "5px",
-                                padding: "2px 10px",
-                                borderRadius: "20px",
-                                fontSize: "0.75rem",
-                                fontWeight: 700,
-                                background: "#eef4ff",
-                                color: "#2563eb",
-                              }}
-                            >
-                              <Image size={11} /> {m.imgs}
-                            </span>
-                          ) : (
-                            <span
-                              style={{
-                                color: "#ddd",
-                                fontSize: "0.8rem",
-                              }}
-                            >
-                              —
-                            </span>
-                          )}
-                        </td>
+                          <td style={{ padding: "0.9rem 1rem" }}>
+                            {m.imgs > 0 ? (
+                              <span
+                                style={{
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  gap: "5px",
+                                  padding: "2px 10px",
+                                  borderRadius: "20px",
+                                  fontSize: "0.75rem",
+                                  fontWeight: 700,
+                                  background: "#eef4ff",
+                                  color: "#2563eb",
+                                }}
+                              >
+                                <Image size={11} /> {m.imgs}
+                              </span>
+                            ) : (
+                              <span
+                                style={{
+                                  color: "#ddd",
+                                  fontSize: "0.8rem",
+                                }}
+                              >
+                                —
+                              </span>
+                            )}
+                          </td>
 
-                        <td style={{ padding: "0.9rem 1rem" }}>
-                          {m.vids > 0 ? (
-                            <span
-                              style={{
-                                display: "inline-flex",
-                                alignItems: "center",
-                                gap: "5px",
-                                padding: "2px 10px",
-                                borderRadius: "20px",
-                                fontSize: "0.75rem",
-                                fontWeight: 700,
-                                background: "#f0fdf4",
-                                color: "#16a34a",
-                              }}
-                            >
-                              <Video size={11} /> {m.vids}
-                            </span>
-                          ) : (
-                            <span
-                              style={{
-                                color: "#ddd",
-                                fontSize: "0.8rem",
-                              }}
-                            >
-                              —
-                            </span>
-                          )}
-                        </td>
+                          <td style={{ padding: "0.9rem 1rem" }}>
+                            {m.vids > 0 ? (
+                              <span
+                                style={{
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  gap: "5px",
+                                  padding: "2px 10px",
+                                  borderRadius: "20px",
+                                  fontSize: "0.75rem",
+                                  fontWeight: 700,
+                                  background: "#f0fdf4",
+                                  color: "#16a34a",
+                                }}
+                              >
+                                <Video size={11} /> {m.vids}
+                              </span>
+                            ) : (
+                              <span
+                                style={{
+                                  color: "#ddd",
+                                  fontSize: "0.8rem",
+                                }}
+                              >
+                                —
+                              </span>
+                            )}
+                          </td>
 
-                        <td style={{ padding: "0.9rem 1rem" }}>
-                          <span
+                          <td
                             style={{
-                              display: "inline-flex",
-                              padding: "3px 10px",
-                              borderRadius: "999px",
-                              fontSize: "0.78rem",
-                              fontWeight: 600,
-                              background: c.activo
-                                ? "rgba(34,197,94,0.1)"
-                                : "rgba(239,68,68,0.1)",
-                              color: c.activo ? "#16a34a" : "#dc2626",
+                              padding: "0.9rem 1rem",
+                              whiteSpace: "nowrap",
                             }}
                           >
-                            {c.activo ? "Activo" : "Inactivo"}
-                          </span>
-                        </td>
-
-                        <td style={{ padding: "0.9rem 1rem" }}>
-                          <div style={{ display: "flex", gap: "6px" }}>
-                            <button
-                              onClick={() => onEdit(c)}
-                              title="Editar"
+                            <span
                               style={{
-                                background: "rgba(245,166,35,0.1)",
-                                border: "none",
-                                borderRadius: "6px",
-                                padding: "6px",
-                                cursor: "pointer",
-                                color: "#f5a623",
-                                display: "flex",
-                                transition: "background 0.2s",
+                                display: "inline-flex",
+                                padding: "3px 10px",
+                                borderRadius: "999px",
+                                fontSize: "0.78rem",
+                                fontWeight: 600,
+                                background: c.activo
+                                  ? "rgba(34,197,94,0.1)"
+                                  : "rgba(239,68,68,0.1)",
+                                color: c.activo ? "#16a34a" : "#dc2626",
                               }}
-                              onMouseEnter={(e) =>
-                                (e.currentTarget.style.background =
-                                  "rgba(245,166,35,0.2)")
-                              }
-                              onMouseLeave={(e) =>
-                                (e.currentTarget.style.background =
-                                  "rgba(245,166,35,0.1)")
-                              }
                             >
-                              <Pencil size={15} />
-                            </button>
+                              {c.activo ? "Activo" : "Inactivo"}
+                            </span>
+                          </td>
 
-                            <button
-                              onClick={() => onDelete(c.id)}
-                              title="Eliminar"
-                              style={{
-                                background: "rgba(220,38,38,0.08)",
-                                border: "none",
-                                borderRadius: "6px",
-                                padding: "6px",
-                                cursor: "pointer",
-                                color: "#dc2626",
-                                display: "flex",
-                                transition: "background 0.2s",
-                              }}
-                              onMouseEnter={(e) =>
-                                (e.currentTarget.style.background =
-                                  "rgba(220,38,38,0.18)")
-                              }
-                              onMouseLeave={(e) =>
-                                (e.currentTarget.style.background =
-                                  "rgba(220,38,38,0.08)")
-                              }
-                            >
-                              <Trash2 size={15} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                          <td
+                            style={{
+                              padding: "0.9rem 1rem",
+                              minWidth: 120,
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            <div style={{ display: "flex", gap: "6px" }}>
+                              <button
+                                onClick={() => onEdit(c)}
+                                title="Editar"
+                                style={{
+                                  background: "rgba(0,123,255,0.08)",
+                                  color: "#007bff",
+                                  border: "1px solid rgba(0,123,255,0.2)",
+                                  padding: "6px 10px",
+                                  borderRadius: "6px",
+                                  cursor: "pointer",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                }}
+                              >
+                                <Pencil size={15} />
+                              </button>
+
+                              <button
+                                onClick={() => onDelete(c.id)}
+                                title="Eliminar"
+                                style={{
+                                  background: "rgba(220,53,69,0.08)",
+                                  color: "#dc3545",
+                                  border: "1px solid rgba(220,53,69,0.2)",
+                                  padding: "6px 10px",
+                                  borderRadius: "6px",
+                                  cursor: "pointer",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                }}
+                              >
+                                <Trash2 size={15} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             )}
+
+            <div
+              style={{
+                padding: "12px 16px",
+                borderTop: "1px solid #e8e8e8",
+                background: "#fafafa",
+                fontSize: "0.8rem",
+                color: "#aaa",
+              }}
+            >
+              {rows.length} colaborador{rows.length !== 1 ? "es" : ""}{" "}
+              registrado
+              {rows.length !== 1 ? "s" : ""}
+            </div>
           </div>
         ))}
 
       <style>{`
         @keyframes spin {
           to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+          form > div[style*="grid-template-columns: 3fr 1fr auto"] {
+            grid-template-columns: 1fr !important;
+          }
         }
       `}</style>
     </div>

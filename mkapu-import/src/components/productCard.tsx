@@ -29,6 +29,7 @@ export default function ProductCard({ product }: Props) {
   const router = useRouter();
   const { addItem, items, removeItem } = useCart();
   const [imgError, setImgError] = useState(false);
+  const [hovered, setHovered] = useState(false);
 
   const cartItem = items.find((i) => i.id === String(product.id));
   const isAgotado = product.agotado === true;
@@ -48,7 +49,7 @@ export default function ProductCard({ product }: Props) {
       descuentoTexto = `-S/${descuento.valor_descuento.toFixed(2)}`;
     }
   }
-  const tieneDescuento = descuento && precioFinal < product.price;
+  const tieneDescuento = !!descuento && precioFinal < product.price;
 
   function handleHeartClick(e: React.MouseEvent) {
     e.stopPropagation();
@@ -69,186 +70,250 @@ export default function ProductCard({ product }: Props) {
     }
   }
 
-  function handleCardClick() {
-    router.push(`/productos/${product.id}`);
-  }
+  // Badge base compartido
+  const badgeBase: React.CSSProperties = {
+    fontSize: "0.65rem",
+    fontWeight: 700,
+    textTransform: "uppercase",
+    padding: "3px 8px",
+    borderRadius: "3px",
+    letterSpacing: "0.04em",
+    whiteSpace: "nowrap",
+    color: "#fff",
+    lineHeight: 1.4,
+  };
+
+  const topTags = [
+    product.is_new && {
+      key: "new",
+      label: "Nuevo",
+      style: { ...badgeBase, background: "#f59e0b" },
+    },
+    product.low_stock &&
+      !isAgotado && {
+        key: "low",
+        label: "Últimas unidades",
+        style: { ...badgeBase, background: "#b91c1c" },
+      },
+    isAgotado && {
+      key: "agotado",
+      label: "Agotado",
+      style: { ...badgeBase, background: "#1a1a1a" },
+    },
+  ].filter(Boolean) as {
+    key: string;
+    label: string;
+    style: React.CSSProperties;
+  }[];
 
   return (
-    <article className="pcard" onClick={handleCardClick}>
-      <div className="pcard__media">
+    <article
+      onClick={handleCardClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        cursor: "pointer",
+        display: "flex",
+        flexDirection: "column",
+        background: "#fff",
+        border: "none",
+        position: "relative",
+      }}
+    >
+      {/* ── Imagen ── */}
+      <div
+        style={{
+          position: "relative",
+          background: "#f5f5f5",
+          aspectRatio: "1/1",
+          overflow: "hidden",
+        }}
+      >
         {hasImage ? (
           <img
             src={product.image_url}
             alt={product.name}
-            className="pcard__img"
             loading="lazy"
             onError={() => setImgError(true)}
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              display: "block",
+              transition: "transform 0.4s ease",
+              transform: hovered ? "scale(1.04)" : "scale(1)",
+            }}
           />
         ) : (
-          <div className="pcard__no-img">
+          <div
+            style={{
+              width: "100%",
+              height: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#bbb",
+            }}
+          >
             <ImageOff size={28} strokeWidth={1.5} />
           </div>
         )}
 
+        {/* Corazón */}
         <button
-          className={`pcard__heart${inCart ? " pcard__heart--active" : ""}${isAgotado ? " pcard__heart--disabled" : ""}`}
           onClick={handleHeartClick}
           disabled={isAgotado}
           aria-label={inCart ? "Quitar del carrito" : "Agregar al carrito"}
+          style={{
+            position: "absolute",
+            top: 10,
+            right: 10,
+            width: 36,
+            height: 36,
+            borderRadius: "50%",
+            border: "none",
+            background: inCart ? "#fff1ec" : "#fff",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: isAgotado ? "not-allowed" : "pointer",
+            color: inCart ? "#e05c2a" : "#1a1a1a",
+            opacity: isAgotado ? 0.3 : 1,
+            zIndex: 2,
+            flexShrink: 0,
+          }}
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill={inCart ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.5">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill={inCart ? "currentColor" : "none"}
+            stroke="currentColor"
+            strokeWidth="1.5"
+          >
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
           </svg>
         </button>
 
-        {(product.is_new || product.featured || product.low_stock || isAgotado || tieneDescuento) && (
-          <div className="pcard__badges">
-            {tieneDescuento && <span className="pcard__badge pcard__badge--offer">{descuentoTexto}</span>}
-            {isAgotado && <span className="pcard__badge pcard__badge--agotado">Agotado</span>}
-            {product.is_new && <span className="pcard__badge pcard__badge--new">Nuevo</span>}
-            {product.featured && <span className="pcard__badge pcard__badge--feat">Destacado</span>}
-            {product.low_stock && !isAgotado && <span className="pcard__badge pcard__badge--low">Últimas unidades</span>}
+        {/* ✅ Tags arriba-izquierda — fila horizontal, se envuelven si no caben */}
+        {topTags.length > 0 && (
+          <div
+            style={{
+              position: "absolute",
+              top: 10,
+              left: 10,
+              // Deja espacio para el corazón (36px botón + 10px right + 6px gap = 52px)
+              maxWidth: "calc(100% - 62px)",
+              display: "flex",
+              flexDirection: "row",
+              flexWrap: "wrap",
+              gap: "4px",
+              zIndex: 2,
+            }}
+          >
+            {topTags.map(({ key, label, style }) => (
+              <span key={key} style={style}>
+                {label}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* ✅ Badge promoción — abajo izquierda, más visible */}
+        {tieneDescuento && (
+          <div
+            style={{
+              position: "absolute",
+              bottom: 10,
+              left: 10,
+              zIndex: 2,
+            }}
+          >
+            <span
+              style={{
+                ...badgeBase,
+                background: "#dc2626",
+                fontSize: "0.75rem",
+                padding: "4px 10px",
+                borderRadius: "4px",
+                boxShadow: "0 2px 8px rgba(220,38,38,0.5)",
+                letterSpacing: "0.06em",
+              }}
+            >
+              {descuentoTexto}
+            </span>
           </div>
         )}
       </div>
 
-      <div className="pcard__body">
-        <p className="pcard__price">
-          {isConsult ? "Consultar" : tieneDescuento ? (
+      {/* ── Body ── */}
+      <div style={{ padding: "0.75rem 0.5rem 0.5rem" }}>
+        <p
+          style={{
+            fontSize: "0.9rem",
+            fontWeight: 700,
+            color: "#1a1a1a",
+            margin: "0 0 4px",
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            flexWrap: "wrap",
+          }}
+        >
+          {isConsult ? (
+            "Consultar"
+          ) : tieneDescuento ? (
             <>
-              <span className="pcard__price-old">S/ {product.price.toFixed(2)}</span>
-              <span className="pcard__price-offer">S/ {precioFinal.toFixed(2)}</span>
+              <span
+                style={{
+                  fontSize: "0.78rem",
+                  color: "#999",
+                  textDecoration: "line-through",
+                  fontWeight: 500,
+                }}
+              >
+                S/ {product.price.toFixed(2)}
+              </span>
+              <span style={{ color: "#dc2626" }}>
+                S/ {precioFinal.toFixed(2)}
+              </span>
             </>
-          ) : `S/ ${product.price.toFixed(2)}`}
+          ) : (
+            `S/ ${product.price.toFixed(2)}`
+          )}
         </p>
-        <h3 className="pcard__name">{product.name}</h3>
-        <p className="pcard__cat">{product.category_name ?? ""}</p>
-      </div>
 
-      <style jsx>{`
-        .pcard {
-          cursor: pointer;
-          display: flex;
-          flex-direction: column;
-          background: #fff;
-          border: none;
-          position: relative;
-        }
-        .pcard__media {
-          position: relative;
-          background: #f5f5f5;
-          aspect-ratio: 1/1;
-          overflow: hidden;
-        }
-        .pcard__img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          display: block;
-          transition: transform 0.4s ease;
-        }
-        .pcard:hover .pcard__img {
-          transform: scale(1.04);
-        }
-        .pcard__no-img {
-          width: 100%;
-          height: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: #bbb;
-        }
-        .pcard__heart {
-          position: absolute;
-          top: 10px;
-          right: 10px;
-          width: 36px;
-          height: 36px;
-          border-radius: 50%;
-          border: none;
-          background: #fff;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          color: #1a1a1a;
-          transition: transform 0.15s, background 0.15s;
-          z-index: 2;
-        }
-        .pcard__heart:hover {
-          transform: scale(1.1);
-          background: #f5f5f5;
-        }
-        .pcard__heart--active {
-          color: #e05c2a;
-          background: #fff1ec;
-        }
-        .pcard__heart--disabled {
-          opacity: 0.3;
-          cursor: not-allowed;
-        }
-        .pcard__badges {
-          position: absolute;
-          top: 10px;
-          left: 10px;
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-          z-index: 2;
-        }
-        .pcard__badge {
-          font-size: 0.65rem;
-          font-weight: 700;
-          text-transform: uppercase;
-          padding: 3px 8px;
-          border-radius: 3px;
-          letter-spacing: 0.04em;
-        }
-        .pcard__badge--new { background: #f59e0b; color: #fff; }
-        .pcard__badge--feat { background: #10b981; color: #fff; }
-        .pcard__badge--low { background: #b91c1c; color: #fff; }
-        .pcard__badge--agotado { background: #1a1a1a; color: #fff; }
-        .pcard__badge--offer { background: #dc2626; color: #fff; }
-        .pcard__body {
-          padding: 0.75rem 0.5rem 0.5rem;
-        }
-        .pcard__price {
-          font-size: 0.9rem;
-          font-weight: 700;
-          color: #1a1a1a;
-          margin: 0 0 4px;
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          flex-wrap: wrap;
-        }
-        .pcard__price-old {
-          font-size: 0.78rem;
-          color: #999;
-          text-decoration: line-through;
-          font-weight: 500;
-        }
-        .pcard__price-offer {
-          color: #dc2626;
-        }
-        .pcard__name {
-          font-size: 0.82rem;
-          font-weight: 400;
-          color: #1a1a1a;
-          margin: 0 0 3px;
-          line-height: 1.3;
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-        }
-        .pcard__cat {
-          font-size: 0.75rem;
-          color: #767677;
-          margin: 0;
-          font-weight: 400;
-        }
-      `}</style>
+        <h3
+          style={{
+            fontSize: "0.82rem",
+            fontWeight: 400,
+            color: "#1a1a1a",
+            margin: "0 0 3px",
+            lineHeight: 1.3,
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
+            overflow: "hidden",
+          }}
+        >
+          {product.name}
+        </h3>
+
+        <p
+          style={{
+            fontSize: "0.75rem",
+            color: "#767677",
+            margin: 0,
+            fontWeight: 400,
+          }}
+        >
+          {product.category_name ?? ""}
+        </p>
+      </div>
     </article>
   );
+
+  function handleCardClick() {
+    router.push(`/productos/${product.id}`);
+  }
 }

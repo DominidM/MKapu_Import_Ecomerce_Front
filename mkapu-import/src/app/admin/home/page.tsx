@@ -49,7 +49,9 @@ export default function AdminHomePage() {
     if (añadidos.has(cat.id)) return;
     setSaving(true);
     const maxOrden =
-      secciones.length > 0 ? Math.max(...secciones.map((s) => s.orden)) + 1 : 0;
+      secciones.length > 0
+        ? Math.max(...secciones.map((s) => s.orden)) + 1
+        : 0;
     await supabase
       .from("home_secciones")
       .insert({ categoria_id: cat.id, orden: maxOrden, activo: true });
@@ -100,9 +102,7 @@ export default function AdminHomePage() {
   function moveUp(idx: number) {
     if (idx === 0) return;
     const copy = [...secciones];
-    const tmp = copy[idx - 1];
-    copy[idx - 1] = copy[idx];
-    copy[idx] = tmp;
+    [copy[idx - 1], copy[idx]] = [copy[idx], copy[idx - 1]];
     setSecciones(copy);
     void persistOrder(copy);
   }
@@ -110,9 +110,7 @@ export default function AdminHomePage() {
   function moveDown(idx: number) {
     if (idx === secciones.length - 1) return;
     const copy = [...secciones];
-    const tmp = copy[idx + 1];
-    copy[idx + 1] = copy[idx];
-    copy[idx] = tmp;
+    [copy[idx + 1], copy[idx]] = [copy[idx], copy[idx + 1]];
     setSecciones(copy);
     void persistOrder(copy);
   }
@@ -179,6 +177,7 @@ export default function AdminHomePage() {
               color: "#c47d00",
               fontSize: "0.8rem",
               fontWeight: 600,
+              whiteSpace: "nowrap",
             }}
           >
             <Loader2
@@ -367,6 +366,8 @@ export default function AdminHomePage() {
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
+            flexWrap: "wrap",
+            gap: "0.5rem",
           }}
         >
           <div>
@@ -385,7 +386,13 @@ export default function AdminHomePage() {
               ({secciones.length})
             </span>
           </div>
-          <span style={{ fontSize: "0.78rem", color: "#aaa" }}>
+          <span
+            style={{
+              fontSize: "0.78rem",
+              color: "#aaa",
+              whiteSpace: "nowrap",
+            }}
+          >
             Arrastra o usa las flechas para reordenar
           </span>
         </div>
@@ -420,288 +427,320 @@ export default function AdminHomePage() {
             Aún no has configurado secciones. Añade una categoría arriba.
           </div>
         ) : (
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
-            <thead>
-              <tr
-                style={{
-                  background: "#fafafa",
-                  borderBottom: "1px solid #e8e8e8",
-                }}
-              >
-                <th
+          <div
+            style={{
+              overflowX: "auto",
+              WebkitOverflowScrolling: "touch",
+            }}
+          >
+            <table
+              style={{
+                width: "100%",
+                minWidth: 580,
+                borderCollapse: "collapse",
+              }}
+            >
+              <thead>
+                <tr
                   style={{
-                    padding: "0.85rem 1rem",
-                    textAlign: "left",
-                    fontSize: "0.8rem",
-                    fontWeight: 600,
-                    color: "#888",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.05em",
-                    width: "50px",
+                    background: "#fafafa",
+                    borderBottom: "1px solid #e8e8e8",
                   }}
                 >
-                  #
-                </th>
-                <th
-                  style={{
-                    padding: "0.85rem 1rem",
-                    textAlign: "left",
-                    fontSize: "0.8rem",
-                    fontWeight: 600,
-                    color: "#888",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.05em",
-                  }}
-                >
-                  Categoría
-                </th>
-                <th
-                  style={{
-                    padding: "0.85rem 1rem",
-                    textAlign: "left",
-                    fontSize: "0.8rem",
-                    fontWeight: 600,
-                    color: "#888",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.05em",
-                    width: "120px",
-                  }}
-                >
-                  Estado
-                </th>
-                <th
-                  style={{
-                    padding: "0.85rem 1rem",
-                    textAlign: "center",
-                    fontSize: "0.8rem",
-                    fontWeight: 600,
-                    color: "#888",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.05em",
-                    width: "180px",
-                  }}
-                >
-                  Acciones
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {secciones.map((sec, idx) => {
-                const cat = catMap[sec.categoria_id];
-                return (
-                  <tr
-                    key={sec.id}
-                    draggable
-                    onDragStart={() => onDragStart(idx)}
-                    onDragOver={(e) => e.preventDefault()}
-                    onDrop={() => onDrop(idx)}
-                    style={{
-                      borderBottom:
-                        idx < secciones.length - 1
-                          ? "1px solid #f0f0f0"
-                          : "none",
-                      opacity: sec.activo ? 1 : 0.5,
-                      cursor: "grab",
-                      transition: "background 0.1s",
-                    }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.background = "#fafafa")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.background = "#fff")
-                    }
-                  >
-                    <td style={{ padding: "0.9rem 1rem" }}>
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 8,
-                        }}
-                      >
-                        <GripVertical size={16} color="#d1d5db" />
-                        <span
-                          style={{
-                            width: 26,
-                            height: 26,
-                            borderRadius: 999,
-                            background: "#f3f4f6",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontSize: "0.78rem",
-                            fontWeight: 700,
-                            color: "#6b7280",
-                          }}
-                        >
-                          {idx + 1}
-                        </span>
-                      </div>
-                    </td>
-                    <td style={{ padding: "0.9rem 1rem" }}>
-                      <div
-                        style={{
-                          fontWeight: 600,
-                          color: "#1a1a1a",
-                          fontSize: "0.9rem",
-                        }}
-                      >
-                        {cat?.name ?? "Categoría eliminada"}
-                      </div>
-                      <div
-                        style={{
-                          fontSize: "0.78rem",
-                          color: "#aaa",
-                          fontFamily: "ui-monospace, monospace",
-                          marginTop: 2,
-                        }}
-                      >
-                        /categoria/{cat?.slug}
-                      </div>
-                    </td>
-                    <td style={{ padding: "0.9rem 1rem" }}>
-                      <span
-                        style={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          gap: 5,
-                          padding: "3px 10px",
-                          borderRadius: 999,
-                          fontSize: "0.78rem",
-                          fontWeight: 700,
-                          background: sec.activo ? "#ecfdf3" : "#fef2f2",
-                          color: sec.activo ? "#166534" : "#b91c1c",
-                        }}
-                      >
-                        {sec.activo ? "Visible" : "Oculta"}
-                      </span>
-                    </td>
-                    <td style={{ padding: "0.9rem 1rem" }}>
-                      <div
-                        style={{
-                          display: "flex",
-                          gap: 6,
-                          justifyContent: "center",
-                          alignItems: "center",
-                        }}
-                      >
-                        <button
-                          onClick={() => toggleActivo(sec)}
-                          title={sec.activo ? "Ocultar" : "Mostrar"}
-                          style={{
-                            background: "rgba(245,166,35,0.1)",
-                            border: "none",
-                            borderRadius: 6,
-                            padding: 6,
-                            cursor: "pointer",
-                            color: "#f5a623",
-                            display: "flex",
-                            transition: "background 0.2s",
-                          }}
-                          onMouseEnter={(e) =>
-                            (e.currentTarget.style.background =
-                              "rgba(245,166,35,0.2)")
-                          }
-                          onMouseLeave={(e) =>
-                            (e.currentTarget.style.background =
-                              "rgba(245,166,35,0.1)")
-                          }
-                        >
-                          {sec.activo ? (
-                            <Eye size={15} />
-                          ) : (
-                            <EyeOff size={15} />
-                          )}
-                        </button>
+                  {["Orden", "Categoría", "Estado", "Acciones"].map((h) => (
+                    <th
+                      key={h}
+                      style={{
+                        padding: "0.85rem 1rem",
+                        textAlign: h === "Orden" || h === "Acciones" ? "center" : "left",
+                        fontSize: "0.8rem",
+                        fontWeight: 600,
+                        color: "#888",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.05em",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
 
+              <tbody>
+                {secciones.map((sec, idx) => {
+                  const cat = catMap[sec.categoria_id];
+                  const isFirst = idx === 0;
+                  const isLast = idx === secciones.length - 1;
+
+                  return (
+                    <tr
+                      key={sec.id}
+                      draggable
+                      onDragStart={() => onDragStart(idx)}
+                      onDragOver={(e) => e.preventDefault()}
+                      onDrop={() => onDrop(idx)}
+                      style={{
+                        borderBottom:
+                          idx < secciones.length - 1
+                            ? "1px solid #f0f0f0"
+                            : "none",
+                        opacity: sec.activo ? 1 : 0.5,
+                        cursor: "grab",
+                        transition: "background 0.1s",
+                      }}
+                      onMouseEnter={(e) =>
+                        (e.currentTarget.style.background = "#fafafa")
+                      }
+                      onMouseLeave={(e) =>
+                        (e.currentTarget.style.background = "#fff")
+                      }
+                    >
+                      {/* Columna Orden unificada: drag + ▲ número ▼ */}
+                      <td
+                        style={{
+                          padding: "0.9rem 1rem",
+                          textAlign: "center",
+                          minWidth: 90,
+                        }}
+                      >
                         <div
                           style={{
                             display: "flex",
-                            flexDirection: "column",
-                            gap: 2,
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: 8,
                           }}
                         >
-                          <button
-                            onClick={() => moveUp(idx)}
-                            disabled={idx === 0}
-                            title="Subir"
+                          <GripVertical size={16} color="#d1d5db" />
+
+                          {/* Control ▲ número ▼ */}
+                          <div
                             style={{
-                              width: 26,
-                              height: 18,
-                              borderRadius: 4,
-                              border: "1px solid #e5e7eb",
-                              background: idx === 0 ? "#f3f4f6" : "#fff",
-                              cursor: idx === 0 ? "not-allowed" : "pointer",
-                              display: "flex",
+                              display: "inline-flex",
+                              flexDirection: "column",
                               alignItems: "center",
-                              justifyContent: "center",
-                              fontSize: "0.65rem",
-                              color: "#666",
-                              opacity: idx === 0 ? 0.5 : 1,
+                              border: "1px solid #e5e7eb",
+                              borderRadius: "8px",
+                              overflow: "hidden",
+                              background: "#fff",
                             }}
                           >
-                            ↑
+                            {/* Botón ▲ */}
+                            <button
+                              type="button"
+                              onClick={() => moveUp(idx)}
+                              disabled={isFirst || saving}
+                              title="Subir"
+                              style={{
+                                width: 32,
+                                height: 24,
+                                border: "none",
+                                borderBottom: "1px solid #e5e7eb",
+                                background: isFirst ? "#f9fafb" : "#fff",
+                                cursor:
+                                  isFirst || saving ? "not-allowed" : "pointer",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                fontSize: "0.7rem",
+                                color: isFirst ? "#d1d5db" : "#6b7280",
+                                transition: "background 0.15s",
+                                padding: 0,
+                              }}
+                              onMouseEnter={(e) => {
+                                if (!isFirst && !saving)
+                                  e.currentTarget.style.background = "#f3f4f6";
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.background = isFirst
+                                  ? "#f9fafb"
+                                  : "#fff";
+                              }}
+                            >
+                              ▲
+                            </button>
+
+                            {/* Número */}
+                            <div
+                              style={{
+                                width: 32,
+                                height: 28,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                fontSize: "0.8rem",
+                                fontWeight: 700,
+                                color: "#374151",
+                                background: "#fafafa",
+                                borderBottom: "1px solid #e5e7eb",
+                                userSelect: "none",
+                              }}
+                            >
+                              {idx + 1}
+                            </div>
+
+                            {/* Botón ▼ */}
+                            <button
+                              type="button"
+                              onClick={() => moveDown(idx)}
+                              disabled={isLast || saving}
+                              title="Bajar"
+                              style={{
+                                width: 32,
+                                height: 24,
+                                border: "none",
+                                background: isLast ? "#f9fafb" : "#fff",
+                                cursor:
+                                  isLast || saving ? "not-allowed" : "pointer",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                fontSize: "0.7rem",
+                                color: isLast ? "#d1d5db" : "#6b7280",
+                                transition: "background 0.15s",
+                                padding: 0,
+                              }}
+                              onMouseEnter={(e) => {
+                                if (!isLast && !saving)
+                                  e.currentTarget.style.background = "#f3f4f6";
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.background = isLast
+                                  ? "#f9fafb"
+                                  : "#fff";
+                              }}
+                            >
+                              ▼
+                            </button>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Categoría */}
+                      <td style={{ padding: "0.9rem 1rem", minWidth: 200 }}>
+                        <div
+                          style={{
+                            fontWeight: 600,
+                            color: "#1a1a1a",
+                            fontSize: "0.9rem",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {cat?.name ?? "Categoría eliminada"}
+                        </div>
+                        <div
+                          style={{
+                            fontSize: "0.78rem",
+                            color: "#aaa",
+                            fontFamily: "ui-monospace, monospace",
+                            marginTop: 2,
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          /categoria/{cat?.slug}
+                        </div>
+                      </td>
+
+                      {/* Estado */}
+                      <td style={{ padding: "0.9rem 1rem", minWidth: 110 }}>
+                        <span
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 5,
+                            padding: "3px 10px",
+                            borderRadius: 999,
+                            fontSize: "0.78rem",
+                            fontWeight: 700,
+                            whiteSpace: "nowrap",
+                            background: sec.activo ? "#ecfdf3" : "#fef2f2",
+                            color: sec.activo ? "#166534" : "#b91c1c",
+                          }}
+                        >
+                          {sec.activo ? "Visible" : "Oculta"}
+                        </span>
+                      </td>
+
+                      {/* Acciones */}
+                      <td
+                        style={{
+                          padding: "0.9rem 1rem",
+                          textAlign: "center",
+                          minWidth: 110,
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: 6,
+                            justifyContent: "center",
+                            alignItems: "center",
+                          }}
+                        >
+                          {/* Toggle visibilidad */}
+                          <button
+                            onClick={() => toggleActivo(sec)}
+                            title={sec.activo ? "Ocultar" : "Mostrar"}
+                            style={{
+                              background: "rgba(245,166,35,0.1)",
+                              border: "none",
+                              borderRadius: 6,
+                              padding: 6,
+                              cursor: "pointer",
+                              color: "#f5a623",
+                              display: "flex",
+                              transition: "background 0.2s",
+                            }}
+                            onMouseEnter={(e) =>
+                              (e.currentTarget.style.background =
+                                "rgba(245,166,35,0.2)")
+                            }
+                            onMouseLeave={(e) =>
+                              (e.currentTarget.style.background =
+                                "rgba(245,166,35,0.1)")
+                            }
+                          >
+                            {sec.activo ? (
+                              <Eye size={15} />
+                            ) : (
+                              <EyeOff size={15} />
+                            )}
                           </button>
+
+                          {/* Eliminar */}
                           <button
-                            onClick={() => moveDown(idx)}
-                            disabled={idx === secciones.length - 1}
-                            title="Bajar"
+                            onClick={() => eliminar(sec)}
+                            title="Eliminar"
                             style={{
-                              width: 26,
-                              height: 18,
-                              borderRadius: 4,
-                              border: "1px solid #e5e7eb",
-                              background:
-                                idx === secciones.length - 1
-                                  ? "#f3f4f6"
-                                  : "#fff",
-                              cursor:
-                                idx === secciones.length - 1
-                                  ? "not-allowed"
-                                  : "pointer",
+                              background: "rgba(220,38,38,0.08)",
+                              border: "none",
+                              borderRadius: 6,
+                              padding: 6,
+                              cursor: "pointer",
+                              color: "#dc2626",
                               display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              fontSize: "0.65rem",
-                              color: "#666",
-                              opacity: idx === secciones.length - 1 ? 0.5 : 1,
+                              transition: "background 0.2s",
                             }}
+                            onMouseEnter={(e) =>
+                              (e.currentTarget.style.background =
+                                "rgba(220,38,38,0.18)")
+                            }
+                            onMouseLeave={(e) =>
+                              (e.currentTarget.style.background =
+                                "rgba(220,38,38,0.08)")
+                            }
                           >
-                            ↓
+                            <Trash2 size={15} />
                           </button>
                         </div>
-
-                        <button
-                          onClick={() => eliminar(sec)}
-                          title="Eliminar"
-                          style={{
-                            background: "rgba(220,38,38,0.08)",
-                            border: "none",
-                            borderRadius: 6,
-                            padding: 6,
-                            cursor: "pointer",
-                            color: "#dc2626",
-                            display: "flex",
-                            transition: "background 0.2s",
-                          }}
-                          onMouseEnter={(e) =>
-                            (e.currentTarget.style.background =
-                              "rgba(220,38,38,0.18)")
-                          }
-                          onMouseLeave={(e) =>
-                            (e.currentTarget.style.background =
-                              "rgba(220,38,38,0.08)")
-                          }
-                        >
-                          <Trash2 size={15} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         )}
       </section>
     </div>

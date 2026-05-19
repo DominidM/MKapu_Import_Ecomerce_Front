@@ -3,7 +3,15 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import type { Video } from "@/lib/queries";
-import { Upload, CheckCircle, Film, Pencil, Trash2 } from "lucide-react";
+import {
+  Upload,
+  CheckCircle,
+  Film,
+  Pencil,
+  Trash2,
+  PlusCircle,
+  X,
+} from "lucide-react";
 
 const initialForm = {
   title: "",
@@ -44,8 +52,8 @@ export default function AdminVideosPage() {
 
   const videoFileRef = useRef<HTMLInputElement>(null);
   const [uploadingVideo, setUploadingVideo] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState<string>("");
-  const [selectedFileName, setSelectedFileName] = useState<string>("");
+  const [uploadProgress, setUploadProgress] = useState("");
+  const [selectedFileName, setSelectedFileName] = useState("");
 
   async function uploadVideo(file: File): Promise<string | null> {
     const MAX_MB = 50;
@@ -77,16 +85,19 @@ export default function AdminVideosPage() {
 
     const url = supabase.storage.from("imagenes").getPublicUrl(path)
       .data.publicUrl;
+
     setUploadProgress("✓ Video subido correctamente");
     return url;
   }
 
   async function load() {
     setLoading(true);
+
     const { data } = await supabase
       .from("videos")
       .select("*")
       .order("created_at", { ascending: false });
+
     setRows(data ?? []);
     setLoading(false);
   }
@@ -234,12 +245,17 @@ export default function AdminVideosPage() {
             fontWeight: 600,
             fontSize: "0.875rem",
             cursor: "pointer",
-            transition: "background 0.2s",
           }}
-          onMouseEnter={(e) => (e.currentTarget.style.background = "#d4891a")}
-          onMouseLeave={(e) => (e.currentTarget.style.background = "#f5a623")}
         >
-          {showForm ? "✕ Cancelar" : "+ Nuevo video"}
+          {showForm ? (
+            <>
+              <X size={15} /> Cancelar
+            </>
+          ) : (
+            <>
+              <PlusCircle size={15} /> Nuevo video
+            </>
+          )}
         </button>
       </div>
 
@@ -282,7 +298,7 @@ export default function AdminVideosPage() {
             <div style={{ marginBottom: "1rem" }}>
               <label style={lbl}>Descripción</label>
               <textarea
-                style={{ ...inp, resize: "vertical" }}
+                style={{ ...inp, resize: "vertical", minHeight: "110px" }}
                 value={form.descripcion}
                 onChange={(e) =>
                   setForm({ ...form, descripcion: e.target.value })
@@ -392,20 +408,6 @@ export default function AdminVideosPage() {
                     : "#fafafa",
                   transition: "all 0.2s",
                 }}
-                onMouseEnter={(e) => {
-                  if (!uploadingVideo) {
-                    e.currentTarget.style.borderColor = "#f5a623";
-                    e.currentTarget.style.background = "#fff8ee";
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!uploadingVideo) {
-                    e.currentTarget.style.borderColor =
-                      uploadProgress.startsWith("✓") ? "#22c55e" : "#e0e0e0";
-                    e.currentTarget.style.background =
-                      uploadProgress.startsWith("✓") ? "#f0fdf4" : "#fafafa";
-                  }
-                }}
               >
                 <div
                   style={{
@@ -440,7 +442,7 @@ export default function AdminVideosPage() {
                   </div>
 
                   <div style={{ fontSize: "0.82rem", color: "#999" }}>
-                    MP4, WebM, MOV, AVI, MKV - máximo 50MB
+                    MP4, WebM, MOV, AVI, MKV · máximo 50MB
                   </div>
 
                   {uploadProgress && (
@@ -469,13 +471,14 @@ export default function AdminVideosPage() {
                       maxWidth: "360px",
                       borderRadius: "10px",
                       border: "1px solid #e8e8e8",
+                      background: "#000",
                     }}
                   />
                 </div>
               )}
             </div>
 
-            <div style={{ display: "flex", gap: "10px" }}>
+            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
               <button
                 type="submit"
                 disabled={uploadingVideo}
@@ -488,19 +491,21 @@ export default function AdminVideosPage() {
                   fontWeight: 600,
                   fontSize: "0.875rem",
                   cursor: uploadingVideo ? "not-allowed" : "pointer",
-                  transition: "background 0.2s",
                   opacity: uploadingVideo ? 0.7 : 1,
-                }}
-                onMouseEnter={(e) => {
-                  if (!uploadingVideo)
-                    e.currentTarget.style.background = "#d4891a";
-                }}
-                onMouseLeave={(e) => {
-                  if (!uploadingVideo)
-                    e.currentTarget.style.background = "#f5a623";
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "8px",
                 }}
               >
-                {editId ? "Guardar cambios" : "Crear video"}
+                {editId ? (
+                  <>
+                    <CheckCircle size={15} /> Guardar cambios
+                  </>
+                ) : (
+                  <>
+                    <PlusCircle size={15} /> Crear video
+                  </>
+                )}
               </button>
 
               <button
@@ -515,9 +520,12 @@ export default function AdminVideosPage() {
                   fontWeight: 600,
                   fontSize: "0.875rem",
                   cursor: "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "8px",
                 }}
               >
-                Cancelar
+                <X size={15} /> Cancelar
               </button>
             </div>
           </form>
@@ -546,7 +554,6 @@ export default function AdminVideosPage() {
                 fontSize: "0.8rem",
                 fontWeight: 600,
                 cursor: "pointer",
-                transition: "all 0.15s",
               }}
             >
               {t === "" ? "Todos" : t === "video" ? "Videos" : "Vlogs"}
@@ -590,209 +597,260 @@ export default function AdminVideosPage() {
               <span>No hay videos aún</span>
             </div>
           ) : (
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead>
-                <tr
-                  style={{
-                    background: "#fafafa",
-                    borderBottom: "1px solid #e8e8e8",
-                  }}
-                >
-                  {["Media", "Título", "Tipo", "Estado", "Acciones"].map(
-                    (h) => (
-                      <th
-                        key={h}
-                        style={{
-                          padding: "0.85rem 1rem",
-                          textAlign: "left",
-                          fontSize: "0.8rem",
-                          fontWeight: 600,
-                          color: "#888",
-                          textTransform: "uppercase",
-                          letterSpacing: "0.05em",
-                        }}
-                      >
-                        {h}
-                      </th>
-                    ),
-                  )}
-                </tr>
-              </thead>
-
-              <tbody>
-                {filtered.map((v, i) => (
+            <div
+              style={{
+                width: "100%",
+                overflowX: "auto",
+                overflowY: "hidden",
+                WebkitOverflowScrolling: "touch",
+              }}
+            >
+              <table
+                style={{
+                  width: "100%",
+                  minWidth: "860px",
+                  borderCollapse: "collapse",
+                  tableLayout: "fixed",
+                }}
+              >
+                <thead>
                   <tr
-                    key={v.id}
                     style={{
-                      borderBottom:
-                        i < filtered.length - 1 ? "1px solid #f0f0f0" : "none",
+                      background: "#fafafa",
+                      borderBottom: "1px solid #e8e8e8",
                     }}
                   >
-                    <td style={{ padding: "0.9rem 1rem", width: 110 }}>
-                      {v.video_url && isVideo(v.video_url) ? (
-                        <video
-                          src={v.video_url}
+                    {["Media", "Título", "Tipo", "Estado", "Acciones"].map(
+                      (h) => (
+                        <th
+                          key={h}
                           style={{
-                            width: 96,
-                            height: 54,
-                            borderRadius: "8px",
-                            border: "1px solid #e0e0e0",
-                            objectFit: "cover",
-                          }}
-                          muted
-                          playsInline
-                        />
-                      ) : (
-                        <div
-                          style={{
-                            width: 96,
-                            height: 54,
-                            borderRadius: "8px",
-                            border: "1px solid #f0f0f0",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            color: "#ddd",
+                            padding: "0.85rem 1rem",
+                            textAlign: "left",
+                            fontSize: "0.8rem",
+                            fontWeight: 600,
+                            color: "#888",
+                            textTransform: "uppercase",
+                            letterSpacing: "0.05em",
+                            whiteSpace: "nowrap",
                           }}
                         >
-                          <Film size={20} />
-                        </div>
-                      )}
-                    </td>
+                          {h}
+                        </th>
+                      ),
+                    )}
+                  </tr>
+                </thead>
 
-                    <td
+                <tbody>
+                  {filtered.map((v, i) => (
+                    <tr
+                      key={v.id}
                       style={{
-                        padding: "0.9rem 1rem",
-                        maxWidth: 320,
+                        borderBottom:
+                          i < filtered.length - 1
+                            ? "1px solid #f0f0f0"
+                            : "none",
+                        background: "#fff",
                       }}
                     >
-                      <span
+                      <td
                         style={{
-                          display: "block",
-                          fontWeight: 600,
-                          color: "#1a1a1a",
-                          fontSize: "0.9rem",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
+                          padding: "0.9rem 1rem",
+                          width: 120,
                           whiteSpace: "nowrap",
                         }}
                       >
-                        {v.title}
-                      </span>
-                      {v.descripcion && (
+                        {v.video_url && isVideo(v.video_url) ? (
+                          <video
+                            src={v.video_url}
+                            style={{
+                              width: 96,
+                              height: 54,
+                              borderRadius: "8px",
+                              border: "1px solid #e0e0e0",
+                              objectFit: "cover",
+                              background: "#000",
+                            }}
+                            muted
+                            playsInline
+                            preload="metadata"
+                          />
+                        ) : (
+                          <div
+                            style={{
+                              width: 96,
+                              height: 54,
+                              borderRadius: "8px",
+                              border: "1px solid #f0f0f0",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              color: "#ddd",
+                              background: "#fafafa",
+                            }}
+                          >
+                            <Film size={20} />
+                          </div>
+                        )}
+                      </td>
+
+                      <td
+                        style={{
+                          padding: "0.9rem 1rem",
+                          maxWidth: 320,
+                          minWidth: 260,
+                        }}
+                      >
                         <span
                           style={{
                             display: "block",
-                            fontSize: "0.78rem",
-                            color: "#aaa",
+                            fontWeight: 600,
+                            color: "#1a1a1a",
+                            fontSize: "0.9rem",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
                             whiteSpace: "nowrap",
                           }}
                         >
-                          {v.descripcion}
+                          {v.title}
                         </span>
-                      )}
-                    </td>
 
-                    <td style={{ padding: "0.9rem 1rem" }}>
-                      <span
+                        {v.descripcion && (
+                          <span
+                            style={{
+                              display: "block",
+                              fontSize: "0.78rem",
+                              color: "#aaa",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                              marginTop: "2px",
+                            }}
+                          >
+                            {v.descripcion}
+                          </span>
+                        )}
+                      </td>
+
+                      <td
+                        style={{ padding: "0.9rem 1rem", whiteSpace: "nowrap" }}
+                      >
+                        <span
+                          style={{
+                            display: "inline-flex",
+                            padding: "2px 10px",
+                            borderRadius: "20px",
+                            fontSize: "0.75rem",
+                            fontWeight: 700,
+                            background:
+                              v.tipo === "vlog" ? "#f0e8ff" : "#e8f0ff",
+                            color: v.tipo === "vlog" ? "#7c3aed" : "#2563eb",
+                          }}
+                        >
+                          {v.tipo}
+                        </span>
+                      </td>
+
+                      <td
+                        style={{ padding: "0.9rem 1rem", whiteSpace: "nowrap" }}
+                      >
+                        <span
+                          style={{
+                            display: "inline-flex",
+                            padding: "3px 10px",
+                            borderRadius: "999px",
+                            fontSize: "0.78rem",
+                            fontWeight: 600,
+                            background: v.activo
+                              ? "rgba(34,197,94,0.1)"
+                              : "rgba(239,68,68,0.1)",
+                            color: v.activo ? "#16a34a" : "#dc2626",
+                          }}
+                        >
+                          {v.activo ? "Activo" : "Inactivo"}
+                        </span>
+                      </td>
+
+                      <td
                         style={{
-                          display: "inline-flex",
-                          padding: "2px 10px",
-                          borderRadius: "20px",
-                          fontSize: "0.75rem",
-                          fontWeight: 700,
-                          background: v.tipo === "vlog" ? "#f0e8ff" : "#e8f0ff",
-                          color: v.tipo === "vlog" ? "#7c3aed" : "#2563eb",
+                          padding: "0.9rem 1rem",
+                          minWidth: 120,
+                          whiteSpace: "nowrap",
                         }}
                       >
-                        {v.tipo}
-                      </span>
-                    </td>
+                        <div style={{ display: "flex", gap: "6px" }}>
+                          <button
+                            onClick={() => onEdit(v)}
+                            title="Editar"
+                            style={{
+                              background: "rgba(245,166,35,0.1)",
+                              color: "#f5a623",
+                              border: "1.5px solid rgba(230, 157, 40, 0.1)",
+                              padding: "6px 10px",
+                              borderRadius: "6px",
+                              cursor: "pointer",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              transition: "background 0.2s",
+                            }}
+                          >
+                            <Pencil size={15} />
+                          </button>
 
-                    <td style={{ padding: "0.9rem 1rem" }}>
-                      <span
-                        style={{
-                          display: "inline-flex",
-                          padding: "3px 10px",
-                          borderRadius: "999px",
-                          fontSize: "0.78rem",
-                          fontWeight: 600,
-                          background: v.activo
-                            ? "rgba(34,197,94,0.1)"
-                            : "rgba(239,68,68,0.1)",
-                          color: v.activo ? "#16a34a" : "#dc2626",
-                        }}
-                      >
-                        {v.activo ? "Activo" : "Inactivo"}
-                      </span>
-                    </td>
-
-                    <td style={{ padding: "0.9rem 1rem" }}>
-                      <div style={{ display: "flex", gap: "6px" }}>
-                        <button
-                          onClick={() => onEdit(v)}
-                          title="Editar"
-                          style={{
-                            background: "rgba(245,166,35,0.1)",
-                            border: "none",
-                            borderRadius: "6px",
-                            padding: "6px",
-                            cursor: "pointer",
-                            color: "#f5a623",
-                            display: "flex",
-                            transition: "background 0.2s",
-                          }}
-                          onMouseEnter={(e) =>
-                            (e.currentTarget.style.background =
-                              "rgba(245,166,35,0.2)")
-                          }
-                          onMouseLeave={(e) =>
-                            (e.currentTarget.style.background =
-                              "rgba(245,166,35,0.1)")
-                          }
-                        >
-                          <Pencil size={15} />
-                        </button>
-
-                        <button
-                          onClick={() => onDelete(v.id)}
-                          title="Eliminar"
-                          style={{
-                            background: "rgba(220,38,38,0.08)",
-                            border: "none",
-                            borderRadius: "6px",
-                            padding: "6px",
-                            cursor: "pointer",
-                            color: "#dc2626",
-                            display: "flex",
-                            transition: "background 0.2s",
-                          }}
-                          onMouseEnter={(e) =>
-                            (e.currentTarget.style.background =
-                              "rgba(220,38,38,0.18)")
-                          }
-                          onMouseLeave={(e) =>
-                            (e.currentTarget.style.background =
-                              "rgba(220,38,38,0.08)")
-                          }
-                        >
-                          <Trash2 size={15} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                          <button
+                            onClick={() => onDelete(v.id)}
+                            title="Eliminar"
+                            style={{
+                              background: "rgba(220,53,69,0.08)",
+                              color: "#dc3545",
+                              border: "1px solid rgba(220,53,69,0.2)",
+                              padding: "6px 10px",
+                              borderRadius: "6px",
+                              cursor: "pointer",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <Trash2 size={15} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
+
+          <div
+            style={{
+              padding: "12px 16px",
+              borderTop: "1px solid #e8e8e8",
+              background: "#fafafa",
+              fontSize: "0.8rem",
+              color: "#aaa",
+            }}
+          >
+            {filtered.length} resultado{filtered.length !== 1 ? "s" : ""}
+            {filterTipo
+              ? ` en ${filterTipo === "video" ? "Videos" : "Vlogs"}`
+              : ""}
+          </div>
         </div>
       )}
 
       <style>{`
         @keyframes spin {
           to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+          form > div[style*="grid-template-columns: 1fr 1fr"] {
+            grid-template-columns: 1fr !important;
+          }
         }
       `}</style>
     </div>

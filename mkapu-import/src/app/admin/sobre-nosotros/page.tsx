@@ -55,6 +55,7 @@ export default function AdminSobreNosotrosPage() {
 
   async function load() {
     setLoading(true);
+
     const [{ data: secciones }, { data: imgs }] = await Promise.all([
       supabase.from("quienes_somos_secciones").select("*").order("orden"),
       supabase.from("quienes_somos_imagenes").select("seccion_id"),
@@ -66,6 +67,7 @@ export default function AdminSobreNosotrosPage() {
     for (const img of imgs ?? []) {
       mapa[img.seccion_id] = (mapa[img.seccion_id] ?? 0) + 1;
     }
+
     setImagenesMap(mapa);
     setLoading(false);
   }
@@ -140,11 +142,7 @@ export default function AdminSobreNosotrosPage() {
   async function persistOrder(list: Seccion[]) {
     setSavingOrder(true);
 
-    const reordered = list.map((s, i) => ({
-      ...s,
-      orden: i + 1,
-    }));
-
+    const reordered = list.map((s, i) => ({ ...s, orden: i + 1 }));
     setRows(reordered);
 
     await Promise.all(
@@ -161,23 +159,15 @@ export default function AdminSobreNosotrosPage() {
 
   function moveUp(idx: number) {
     if (idx === 0) return;
-
     const copy = [...rows];
-    const temp = copy[idx - 1];
-    copy[idx - 1] = copy[idx];
-    copy[idx] = temp;
-
+    [copy[idx - 1], copy[idx]] = [copy[idx], copy[idx - 1]];
     void persistOrder(copy);
   }
 
   function moveDown(idx: number) {
     if (idx === rows.length - 1) return;
-
     const copy = [...rows];
-    const temp = copy[idx + 1];
-    copy[idx + 1] = copy[idx];
-    copy[idx] = temp;
-
+    [copy[idx + 1], copy[idx]] = [copy[idx], copy[idx + 1]];
     void persistOrder(copy);
   }
 
@@ -324,6 +314,7 @@ export default function AdminSobreNosotrosPage() {
                 padding: "6px 10px",
                 borderRadius: "999px",
                 fontWeight: 600,
+                whiteSpace: "nowrap",
               }}
             >
               Guardando orden...
@@ -348,6 +339,7 @@ export default function AdminSobreNosotrosPage() {
               fontSize: "0.875rem",
               cursor: "pointer",
               transition: "background 0.2s",
+              whiteSpace: "nowrap",
             }}
             onMouseEnter={(e) => (e.currentTarget.style.background = "#d4891a")}
             onMouseLeave={(e) => (e.currentTarget.style.background = "#f5a623")}
@@ -383,7 +375,7 @@ export default function AdminSobreNosotrosPage() {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "2fr 1fr 1fr",
+                gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
                 gap: "1rem",
                 marginBottom: "1rem",
               }}
@@ -520,7 +512,7 @@ export default function AdminSobreNosotrosPage() {
                     <div key={img.id} style={{ position: "relative" }}>
                       <img
                         src={img.url_imagen}
-                        alt=""
+                        alt="Imagen de la sección"
                         style={{
                           width: 80,
                           height: 80,
@@ -532,6 +524,8 @@ export default function AdminSobreNosotrosPage() {
                       <button
                         type="button"
                         onClick={() => deleteImagen(img.id)}
+                        title="Eliminar imagen"
+                        aria-label={`Eliminar imagen ${img.id}`}
                         style={{
                           position: "absolute",
                           top: -6,
@@ -589,13 +583,7 @@ export default function AdminSobreNosotrosPage() {
                     <ImageIcon size={32} color="#ccc" />
                   </div>
 
-                  <p
-                    style={{
-                      margin: 0,
-                      fontSize: "0.82rem",
-                      color: "#bbb",
-                    }}
-                  >
+                  <p style={{ margin: 0, fontSize: "0.82rem", color: "#bbb" }}>
                     Crea la sección primero y podrás
                     <br />
                     subir imágenes de inmediato.
@@ -604,7 +592,7 @@ export default function AdminSobreNosotrosPage() {
               )}
             </div>
 
-            <div style={{ display: "flex", gap: "10px" }}>
+            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
               <button
                 type="submit"
                 style={{
@@ -651,13 +639,7 @@ export default function AdminSobreNosotrosPage() {
 
       {!showForm &&
         (loading ? (
-          <div
-            style={{
-              textAlign: "center",
-              padding: "3rem",
-              color: "#aaa",
-            }}
-          >
+          <div style={{ textAlign: "center", padding: "3rem", color: "#aaa" }}>
             Cargando secciones...
           </div>
         ) : (
@@ -669,216 +651,292 @@ export default function AdminSobreNosotrosPage() {
               overflow: "hidden",
             }}
           >
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead>
-                <tr
-                  style={{
-                    background: "#fafafa",
-                    borderBottom: "1px solid #e8e8e8",
-                  }}
-                >
-                  {[
-                    "Título",
-                    "Descripción",
-                    "Orden",
-                    "Mover",
-                    "Imágenes",
-                    "Estado",
-                    "Acciones",
-                  ].map((h) => (
-                    <th
-                      key={h}
-                      style={{
-                        padding: "0.85rem 1rem",
-                        textAlign: "left",
-                        fontSize: "0.8rem",
-                        fontWeight: 600,
-                        color: "#888",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.05em",
-                      }}
-                    >
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-
-              <tbody>
-                {rows.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={7}
-                      style={{
-                        padding: "3rem",
-                        textAlign: "center",
-                        color: "#aaa",
-                      }}
-                    >
-                      No hay secciones registradas.
-                    </td>
-                  </tr>
-                ) : (
-                  rows.map((s, i) => {
-                    const cantImg = imagenesMap[s.id] ?? 0;
-
-                    return (
-                      <tr
-                        key={s.id}
+            <div
+              style={{
+                overflowX: "auto",
+                WebkitOverflowScrolling: "touch",
+              }}
+            >
+              <table
+                style={{
+                  width: "100%",
+                  minWidth: 700,
+                  borderCollapse: "collapse",
+                }}
+              >
+                <thead>
+                  <tr
+                    style={{
+                      background: "#fafafa",
+                      borderBottom: "1px solid #e8e8e8",
+                    }}
+                  >
+                    {[
+                      "Título",
+                      "Descripción",
+                      "Orden",
+                      "Imágenes",
+                      "Estado",
+                      "Acciones",
+                    ].map((h) => (
+                      <th
+                        key={h}
                         style={{
-                          borderBottom:
-                            i < rows.length - 1 ? "1px solid #f0f0f0" : "none",
+                          padding: "0.85rem 1rem",
+                          textAlign: h === "Orden" ? "center" : "left",
+                          fontSize: "0.8rem",
+                          fontWeight: 600,
+                          color: "#888",
+                          textTransform: "uppercase",
+                          letterSpacing: "0.05em",
+                          whiteSpace: "nowrap",
                         }}
                       >
-                        <td
-                          style={{
-                            padding: "0.9rem 1rem",
-                            fontWeight: 600,
-                            color: "#1a1a1a",
-                            fontSize: "0.9rem",
-                          }}
-                        >
-                          {s.titulo || (
-                            <span style={{ color: "#ccc", fontWeight: 400 }}>
-                              Sin título
-                            </span>
-                          )}
-                        </td>
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
 
-                        <td
+                <tbody>
+                  {rows.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={6}
+                        style={{
+                          padding: "3rem",
+                          textAlign: "center",
+                          color: "#aaa",
+                        }}
+                      >
+                        No hay secciones registradas.
+                      </td>
+                    </tr>
+                  ) : (
+                    rows.map((s, i) => {
+                      const cantImg = imagenesMap[s.id] ?? 0;
+                      const isFirst = i === 0;
+                      const isLast = i === rows.length - 1;
+
+                      return (
+                        <tr
+                          key={s.id}
                           style={{
-                            padding: "0.9rem 1rem",
-                            color: "#555",
-                            fontSize: "0.875rem",
-                            maxWidth: 280,
+                            borderBottom:
+                              i < rows.length - 1
+                                ? "1px solid #f0f0f0"
+                                : "none",
                           }}
                         >
-                          <span
+                          <td
                             style={{
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              whiteSpace: "nowrap",
-                              display: "block",
+                              padding: "0.9rem 1rem",
+                              fontWeight: 600,
+                              color: "#1a1a1a",
+                              fontSize: "0.9rem",
+                              minWidth: 160,
                             }}
                           >
-                            {s.descripcion ? (
-                              s.descripcion
-                                .replace(/<[^>]*>/g, "")
-                                .slice(0, 90) +
-                              (s.descripcion.length > 90 ? "..." : "")
-                            ) : (
-                              <span style={{ color: "#ccc" }}>—</span>
+                            {s.titulo || (
+                              <span style={{ color: "#ccc", fontWeight: 400 }}>
+                                Sin título
+                              </span>
                             )}
-                          </span>
-                        </td>
+                          </td>
 
-                        <td
-                          style={{
-                            padding: "0.9rem 1rem",
-                            color: "#aaa",
-                            fontSize: "0.8rem",
-                            textAlign: "center",
-                            fontWeight: 700,
-                          }}
-                        >
-                          {s.orden}
-                        </td>
-
-                        <td
-                          style={{
-                            padding: "0.9rem 1rem",
-                            textAlign: "center",
-                          }}
-                        >
-                          <div
+                          <td
                             style={{
-                              display: "flex",
-                              flexDirection: "column",
-                              gap: "4px",
-                              alignItems: "center",
+                              padding: "0.9rem 1rem",
+                              color: "#555",
+                              fontSize: "0.875rem",
+                              maxWidth: 260,
+                              minWidth: 160,
                             }}
                           >
-                            <button
-                              type="button"
-                              onClick={() => moveUp(i)}
-                              disabled={i === 0 || savingOrder}
-                              title="Subir"
-                              style={{
-                                width: 26,
-                                height: 18,
-                                borderRadius: 4,
-                                border: "1px solid #e5e7eb",
-                                background: i === 0 ? "#f3f4f6" : "#fff",
-                                cursor:
-                                  i === 0 || savingOrder
-                                    ? "not-allowed"
-                                    : "pointer",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                fontSize: "0.65rem",
-                                color: "#666",
-                                opacity: i === 0 || savingOrder ? 0.5 : 1,
-                              }}
-                            >
-                              ↑
-                            </button>
-
-                            <button
-                              type="button"
-                              onClick={() => moveDown(i)}
-                              disabled={i === rows.length - 1 || savingOrder}
-                              title="Bajar"
-                              style={{
-                                width: 26,
-                                height: 18,
-                                borderRadius: 4,
-                                border: "1px solid #e5e7eb",
-                                background:
-                                  i === rows.length - 1 ? "#f3f4f6" : "#fff",
-                                cursor:
-                                  i === rows.length - 1 || savingOrder
-                                    ? "not-allowed"
-                                    : "pointer",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                fontSize: "0.65rem",
-                                color: "#666",
-                                opacity:
-                                  i === rows.length - 1 || savingOrder
-                                    ? 0.5
-                                    : 1,
-                              }}
-                            >
-                              ↓
-                            </button>
-                          </div>
-                        </td>
-
-                        <td
-                          style={{
-                            padding: "0.9rem 1rem",
-                            textAlign: "center",
-                          }}
-                        >
-                          {cantImg > 0 ? (
                             <span
                               style={{
-                                display: "inline-flex",
-                                alignItems: "center",
-                                gap: "5px",
-                                padding: "3px 10px",
-                                borderRadius: "999px",
-                                fontSize: "0.78rem",
-                                fontWeight: 700,
-                                background: "#eef4ff",
-                                color: "#2563eb",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                                display: "block",
                               }}
                             >
-                              🖼️ {cantImg}
+                              {s.descripcion ? (
+                                s.descripcion
+                                  .replace(/<[^>]*>/g, "")
+                                  .slice(0, 90) +
+                                (s.descripcion.length > 90 ? "..." : "")
+                              ) : (
+                                <span style={{ color: "#ccc" }}>—</span>
+                              )}
                             </span>
-                          ) : (
+                          </td>
+
+                          <td
+                            style={{
+                              padding: "0.9rem 1rem",
+                              textAlign: "center",
+                              minWidth: 80,
+                            }}
+                          >
+                            <div
+                              style={{
+                                display: "inline-flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                                border: "1px solid #e5e7eb",
+                                borderRadius: "8px",
+                                overflow: "hidden",
+                                background: "#fff",
+                              }}
+                            >
+                              <button
+                                type="button"
+                                onClick={() => moveUp(i)}
+                                disabled={isFirst || savingOrder}
+                                title="Subir"
+                                aria-label={`Subir sección ${s.titulo ?? s.id}`}
+                                style={{
+                                  width: 32,
+                                  height: 24,
+                                  border: "none",
+                                  borderBottom: "1px solid #e5e7eb",
+                                  background: isFirst ? "#f9fafb" : "#fff",
+                                  cursor:
+                                    isFirst || savingOrder
+                                      ? "not-allowed"
+                                      : "pointer",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  fontSize: "0.7rem",
+                                  color: isFirst ? "#d1d5db" : "#6b7280",
+                                  transition: "background 0.15s",
+                                  padding: 0,
+                                }}
+                                onMouseEnter={(e) => {
+                                  if (!isFirst && !savingOrder) {
+                                    e.currentTarget.style.background =
+                                      "#f3f4f6";
+                                  }
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.background = isFirst
+                                    ? "#f9fafb"
+                                    : "#fff";
+                                }}
+                              >
+                                ▲
+                              </button>
+
+                              <div
+                                style={{
+                                  width: 32,
+                                  height: 28,
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  fontSize: "0.8rem",
+                                  fontWeight: 700,
+                                  color: "#374151",
+                                  background: "#fafafa",
+                                  borderBottom: "1px solid #e5e7eb",
+                                  userSelect: "none",
+                                }}
+                              >
+                                {s.orden}
+                              </div>
+
+                              <button
+                                type="button"
+                                onClick={() => moveDown(i)}
+                                disabled={isLast || savingOrder}
+                                title="Bajar"
+                                aria-label={`Bajar sección ${s.titulo ?? s.id}`}
+                                style={{
+                                  width: 32,
+                                  height: 24,
+                                  border: "none",
+                                  background: isLast ? "#f9fafb" : "#fff",
+                                  cursor:
+                                    isLast || savingOrder
+                                      ? "not-allowed"
+                                      : "pointer",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  fontSize: "0.7rem",
+                                  color: isLast ? "#d1d5db" : "#6b7280",
+                                  transition: "background 0.15s",
+                                  padding: 0,
+                                }}
+                                onMouseEnter={(e) => {
+                                  if (!isLast && !savingOrder) {
+                                    e.currentTarget.style.background =
+                                      "#f3f4f6";
+                                  }
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.background = isLast
+                                    ? "#f9fafb"
+                                    : "#fff";
+                                }}
+                              >
+                                ▼
+                              </button>
+                            </div>
+                          </td>
+
+                          <td
+                            style={{
+                              padding: "0.9rem 1rem",
+                              textAlign: "left",
+                              minWidth: 130,
+                            }}
+                          >
+                            {cantImg > 0 ? (
+                              <span
+                                style={{
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  gap: "5px",
+                                  padding: "3px 10px",
+                                  borderRadius: "999px",
+                                  fontSize: "0.78rem",
+                                  fontWeight: 700,
+                                  background: "#eef4ff",
+                                  color: "#2563eb",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                🖼️ {cantImg}
+                              </span>
+                            ) : (
+                              <span
+                                style={{
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  gap: "5px",
+                                  padding: "3px 10px",
+                                  borderRadius: "999px",
+                                  fontSize: "0.78rem",
+                                  fontWeight: 600,
+                                  background: "#f5f5f5",
+                                  color: "#bbb",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                Sin imágenes
+                              </span>
+                            )}
+                          </td>
+
+                          <td
+                            style={{
+                              padding: "0.9rem 1rem",
+                              minWidth: 110,
+                            }}
+                          >
                             <span
                               style={{
                                 display: "inline-flex",
@@ -888,94 +946,101 @@ export default function AdminSobreNosotrosPage() {
                                 borderRadius: "999px",
                                 fontSize: "0.78rem",
                                 fontWeight: 600,
-                                background: "#f5f5f5",
-                                color: "#bbb",
+                                whiteSpace: "nowrap",
+                                background: s.activo
+                                  ? "rgba(34,197,94,0.1)"
+                                  : "rgba(239,68,68,0.1)",
+                                color: s.activo ? "#16a34a" : "#dc2626",
                               }}
                             >
-                              Sin imágenes
+                              {s.activo ? "Activo" : "Inactivo"}
                             </span>
-                          )}
-                        </td>
+                          </td>
 
-                        <td style={{ padding: "0.9rem 1rem" }}>
-                          <span
+                          <td
                             style={{
-                              display: "inline-flex",
-                              alignItems: "center",
-                              gap: "5px",
-                              padding: "3px 10px",
-                              borderRadius: "999px",
-                              fontSize: "0.78rem",
-                              fontWeight: 600,
-                              background: s.activo
-                                ? "rgba(34,197,94,0.1)"
-                                : "rgba(239,68,68,0.1)",
-                              color: s.activo ? "#16a34a" : "#dc2626",
+                              padding: "0.9rem 1rem",
+                              minWidth: 100,
                             }}
                           >
-                            {s.activo ? "Activo" : "Inactivo"}
-                          </span>
-                        </td>
+                            <div style={{ display: "flex", gap: "6px" }}>
+                              <button
+                                onClick={() => onEdit(s)}
+                                title="Editar sección"
+                                aria-label={`Editar sección ${s.titulo ?? s.id}`}
+                                style={{
+                                  background: "rgba(245,166,35,0.1)",
+                                  color: "#f5a623",
+                                  border: "1px solid rgba(245,166,35,0.18)",
+                                  padding: "7px",
+                                  borderRadius: "8px",
+                                  cursor: "pointer",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  transition: "background 0.2s",
+                                }}
+                                onMouseEnter={(e) =>
+                                  (e.currentTarget.style.background =
+                                    "rgba(245,166,35,0.2)")
+                                }
+                                onMouseLeave={(e) =>
+                                  (e.currentTarget.style.background =
+                                    "rgba(245,166,35,0.1)")
+                                }
+                              >
+                                <Pencil size={15} />
+                              </button>
 
-                        <td style={{ padding: "0.9rem 1rem" }}>
-                          <div style={{ display: "flex", gap: "6px" }}>
-                            <button
-                              onClick={() => onEdit(s)}
-                              title="Editar"
-                              style={{
-                                background: "rgba(245,166,35,0.1)",
-                                border: "none",
-                                borderRadius: "6px",
-                                padding: "6px",
-                                cursor: "pointer",
-                                color: "#f5a623",
-                                display: "flex",
-                                transition: "background 0.2s",
-                              }}
-                              onMouseEnter={(e) =>
-                                (e.currentTarget.style.background =
-                                  "rgba(245,166,35,0.2)")
-                              }
-                              onMouseLeave={(e) =>
-                                (e.currentTarget.style.background =
-                                  "rgba(245,166,35,0.1)")
-                              }
-                            >
-                              <Pencil size={15} />
-                            </button>
+                              <button
+                                onClick={() => onDelete(s.id)}
+                                title="Eliminar sección"
+                                aria-label={`Eliminar sección ${s.titulo ?? s.id}`}
+                                style={{
+                                  background: "rgba(220,38,38,0.08)",
+                                  border: "none",
+                                  borderRadius: "8px",
+                                  padding: "7px",
+                                  cursor: "pointer",
+                                  color: "#dc2626",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  transition: "background 0.2s",
+                                }}
+                                onMouseEnter={(e) =>
+                                  (e.currentTarget.style.background =
+                                    "rgba(220,38,38,0.18)")
+                                }
+                                onMouseLeave={(e) =>
+                                  (e.currentTarget.style.background =
+                                    "rgba(220,38,38,0.08)")
+                                }
+                              >
+                                <Trash2 size={15} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
 
-                            <button
-                              onClick={() => onDelete(s.id)}
-                              title="Eliminar"
-                              style={{
-                                background: "rgba(220,38,38,0.08)",
-                                border: "none",
-                                borderRadius: "6px",
-                                padding: "6px",
-                                cursor: "pointer",
-                                color: "#dc2626",
-                                display: "flex",
-                                transition: "background 0.2s",
-                              }}
-                              onMouseEnter={(e) =>
-                                (e.currentTarget.style.background =
-                                  "rgba(220,38,38,0.18)")
-                              }
-                              onMouseLeave={(e) =>
-                                (e.currentTarget.style.background =
-                                  "rgba(220,38,38,0.08)")
-                              }
-                            >
-                              <Trash2 size={15} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
+            <div
+              style={{
+                padding: "12px 16px",
+                borderTop: "1px solid #e8e8e8",
+                background: "#fafafa",
+                fontSize: "0.8rem",
+                color: "#aaa",
+              }}
+            >
+              {rows.length} sección{rows.length !== 1 ? "es" : ""} registrada
+              {rows.length !== 1 ? "s" : ""}
+            </div>
           </div>
         ))}
     </div>
