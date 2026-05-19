@@ -63,6 +63,7 @@ export default function RootLayout({
           flexDirection: "column",
           margin: 0,
           padding: 0,
+          backgroundColor: "#fafaf7",
         }}
       >
         <CartProvider>
