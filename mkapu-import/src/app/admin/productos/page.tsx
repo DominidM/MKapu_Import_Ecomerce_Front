@@ -119,7 +119,7 @@ export default function AdminProductosPage() {
 
     const products = ((prodRes.data as Producto[]) ?? []).map((p) => ({
       ...p,
-      imgCount: (p as any).img_count ?? 0, // ← vienen de la vista
+      imgCount: (p as any).img_count ?? 0,
       vidCount: (p as any).vid_count ?? 0,
     }));
 
@@ -211,6 +211,7 @@ export default function AdminProductosPage() {
       activo: form.activo,
       is_new: form.is_new,
       low_stock: form.low_stock,
+      agotado: form.agotado,
     };
 
     if (editId) {
@@ -284,6 +285,15 @@ export default function AdminProductosPage() {
     await load();
   }
 
+  // ── NUEVO: toggle agotado directo desde la tabla ──────────────────────────
+  async function toggleAgotado(p: Producto) {
+    await supabase
+      .from("productos")
+      .update({ agotado: !p.agotado })
+      .eq("id", p.id);
+    await load();
+  }
+
   function goToList() {
     setForm(initialForm);
     setEditId(null);
@@ -346,7 +356,7 @@ export default function AdminProductosPage() {
         .ap-section{background:#fafafa;border:1px solid #e8e8e8;border-radius:10px;padding:16px;margin-bottom:12px}
         .ap-badge{display:inline-flex;align-items:center;padding:2px 10px;border-radius:20px;font-size:.75rem;font-weight:700}
         .ap-table-wrap{background:#fff;border:1px solid #e8e8e8;border-radius:12px;overflow:auto;width:100%}
-        .ap-table{width:100%;min-width:1400px;border-collapse:collapse;font-size:.875rem}
+        .ap-table{width:100%;min-width:1500px;border-collapse:collapse;font-size:.875rem}
         .ap-th{padding:12px 16px;text-align:left;font-size:.7rem;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;background:#fafafa;border-bottom:1px solid #e8e8e8}
         .ap-td{padding:12px 16px}
         .ap-row{border-bottom:1px solid #f0f0f0;background:#fff;transition:background .12s}
@@ -364,6 +374,10 @@ export default function AdminProductosPage() {
         .ap-warn-box{background:#fef3c7;border:1px solid #f59e0b44;border-radius:10px;padding:14px 16px;font-size:.875rem;color:#92400e}
         .ap-row--incomplete{background:#fffbeb !important}
         .ap-row--incomplete:hover{background:#fef3c7 !important}
+        /* ── check agotado ── */
+        .ap-agotado-check{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:6px;border:2px solid #d1d5db;background:#fff;cursor:pointer;transition:all .15s;flex-shrink:0}
+        .ap-agotado-check--on{border-color:#dc2626;background:#dc2626}
+        .ap-agotado-check:hover{opacity:.75}
         @keyframes ap-spin{to{transform:rotate(360deg)}}
         .ap-spin{animation:ap-spin .8s linear infinite}
         @keyframes ap-fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
@@ -379,6 +393,7 @@ export default function AdminProductosPage() {
           padding: "20px 24px",
         }}
       >
+        {/* ── FORMULARIO CREATE / EDIT ─────────────────────────────────────── */}
         {formMode !== "list" && (
           <div className="ap-card ap-fadein">
             <div
@@ -427,6 +442,7 @@ export default function AdminProductosPage() {
             </div>
 
             <form onSubmit={(e) => handleSave(e, false)}>
+              {/* Fila 1: código / nombre / categoría */}
               <div
                 style={{
                   display: "grid",
@@ -476,6 +492,7 @@ export default function AdminProductosPage() {
                 </div>
               </div>
 
+              {/* Precio */}
               <div
                 style={{
                   display: "grid",
@@ -499,6 +516,7 @@ export default function AdminProductosPage() {
                 </div>
               </div>
 
+              {/* Imagen principal */}
               <div style={{ marginBottom: 16 }}>
                 <label className="ap-lbl">Imagen principal</label>
                 <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
@@ -564,6 +582,7 @@ export default function AdminProductosPage() {
                 )}
               </div>
 
+              {/* Descripción */}
               <div style={{ marginBottom: 16 }}>
                 <label className="ap-lbl">Descripción</label>
                 <textarea
@@ -577,6 +596,7 @@ export default function AdminProductosPage() {
                 />
               </div>
 
+              {/* Checkboxes */}
               <div
                 style={{
                   display: "flex",
@@ -616,6 +636,7 @@ export default function AdminProductosPage() {
                 ))}
               </div>
 
+              {/* Botones de guardado */}
               <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                 <button
                   type="submit"
@@ -700,8 +721,10 @@ export default function AdminProductosPage() {
           </div>
         )}
 
+        {/* ── LISTADO ─────────────────────────────────────────────────────── */}
         {formMode === "list" && (
           <div className="ap-fadein">
+            {/* Header */}
             <div
               style={{
                 display: "flex",
@@ -740,6 +763,7 @@ export default function AdminProductosPage() {
               </button>
             </div>
 
+            {/* Tabs de vista */}
             <div
               style={{
                 display: "flex",
@@ -805,6 +829,7 @@ export default function AdminProductosPage() {
               )}
             </div>
 
+            {/* Filtros */}
             <div
               style={{
                 display: "flex",
@@ -864,6 +889,7 @@ export default function AdminProductosPage() {
               )}
             </div>
 
+            {/* Tabla */}
             {loading ? (
               <div
                 style={{
@@ -895,20 +921,30 @@ export default function AdminProductosPage() {
                         "Categoría",
                         "Badges",
                         "Estado",
+                        "Agotado",
                         "Media",
                         "Acciones",
                       ].map((h) => (
-                        <th key={h} className="ap-th">
+                        <th
+                          key={h}
+                          className="ap-th"
+                          style={
+                            h === "Agotado"
+                              ? { textAlign: "center" }
+                              : undefined
+                          }
+                        >
                           {h}
                         </th>
                       ))}
                     </tr>
                   </thead>
+
                   <tbody>
                     {rows.length === 0 ? (
                       <tr>
                         <td
-                          colSpan={9}
+                          colSpan={10}
                           style={{ padding: 48, textAlign: "center" }}
                         >
                           <div
@@ -944,6 +980,7 @@ export default function AdminProductosPage() {
                             key={p.id}
                             className={`ap-row ${incomplete && viewMode === "incompletos" ? "ap-row--incomplete" : ""}`}
                           >
+                            {/* Imagen miniatura */}
                             <td className="ap-td" style={{ width: 52 }}>
                               {p.image_url ? (
                                 <img
@@ -958,9 +995,12 @@ export default function AdminProductosPage() {
                                     display: "block",
                                   }}
                                   onError={(e) =>
-                                    ((
-                                      e.target as HTMLImageElement
-                                    ).style.display = "none")
+                                    (e.target as HTMLImageElement).style
+                                      .display === "none"
+                                      ? null
+                                      : ((
+                                          e.target as HTMLImageElement
+                                        ).style.display = "none")
                                   }
                                 />
                               ) : (
@@ -983,6 +1023,7 @@ export default function AdminProductosPage() {
                               )}
                             </td>
 
+                            {/* Código */}
                             <td className="ap-td">
                               <code
                                 style={{
@@ -997,6 +1038,7 @@ export default function AdminProductosPage() {
                               </code>
                             </td>
 
+                            {/* Nombre */}
                             <td
                               className="ap-td"
                               style={{
@@ -1017,6 +1059,7 @@ export default function AdminProductosPage() {
                               </span>
                             </td>
 
+                            {/* Precio */}
                             <td
                               className="ap-td"
                               style={{ fontWeight: 600, whiteSpace: "nowrap" }}
@@ -1024,6 +1067,7 @@ export default function AdminProductosPage() {
                               S/ {p.price?.toFixed(2)}
                             </td>
 
+                            {/* Categoría */}
                             <td className="ap-td">
                               <span
                                 style={{
@@ -1038,6 +1082,7 @@ export default function AdminProductosPage() {
                               </span>
                             </td>
 
+                            {/* Badges */}
                             <td className="ap-td">
                               <div
                                 style={{
@@ -1058,7 +1103,6 @@ export default function AdminProductosPage() {
                                     Destacado
                                   </span>
                                 )}
-
                                 {p.is_new && (
                                   <span
                                     className="ap-badge"
@@ -1071,7 +1115,6 @@ export default function AdminProductosPage() {
                                     Nuevo
                                   </span>
                                 )}
-
                                 {p.low_stock && (
                                   <span
                                     className="ap-badge"
@@ -1084,22 +1127,10 @@ export default function AdminProductosPage() {
                                     Stock bajo
                                   </span>
                                 )}
-
-                                {p.agotado && (
-                                  <span
-                                    className="ap-badge"
-                                    style={{
-                                      background: "#1a1a1a",
-                                      color: "#fff",
-                                      border: "1px solid #333",
-                                    }}
-                                  >
-                                    Agotado
-                                  </span>
-                                )}
                               </div>
                             </td>
 
+                            {/* Estado activo/inactivo */}
                             <td className="ap-td">
                               <span
                                 className="ap-badge"
@@ -1112,6 +1143,52 @@ export default function AdminProductosPage() {
                               </span>
                             </td>
 
+                            {/* ── COLUMNA AGOTADO (nueva) ─────────────── */}
+                            <td
+                              className="ap-td"
+                              style={{ textAlign: "center", width: 80 }}
+                            >
+                              <button
+                                onClick={() => toggleAgotado(p)}
+                                title={
+                                  p.agotado
+                                    ? "Marcar como disponible"
+                                    : "Marcar como agotado"
+                                }
+                                style={{
+                                  background: "none",
+                                  border: "none",
+                                  cursor: "pointer",
+                                  padding: "2px 4px",
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                }}
+                              >
+                                <span
+                                  className={`ap-agotado-check ${p.agotado ? "ap-agotado-check--on" : ""}`}
+                                >
+                                  {p.agotado && (
+                                    <svg
+                                      width="12"
+                                      height="12"
+                                      viewBox="0 0 12 12"
+                                      fill="none"
+                                    >
+                                      <path
+                                        d="M2 6l3 3 5-5"
+                                        stroke="#fff"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                      />
+                                    </svg>
+                                  )}
+                                </span>
+                              </button>
+                            </td>
+
+                            {/* Media */}
                             <td className="ap-td">
                               <div
                                 style={{
@@ -1140,6 +1217,7 @@ export default function AdminProductosPage() {
                               </div>
                             </td>
 
+                            {/* Acciones */}
                             <td className="ap-td">
                               <div
                                 style={{
@@ -1180,11 +1258,12 @@ export default function AdminProductosPage() {
                   </tbody>
                 </table>
 
+                {/* Paginación */}
                 <div className="ap-pager">
                   <span>
                     {totalCount === 0
                       ? "Sin resultados"
-                      : `Mostrando ${startIndex + 1}-${Math.min(
+                      : `Mostrando ${startIndex + 1}–${Math.min(
                           startIndex + ITEMS_PER_PAGE,
                           totalCount,
                         )} de ${totalCount}`}
