@@ -1167,20 +1167,35 @@ button {
   color: #555;
 }
 .nb__search-btn {
-  background: #f5a623;
+  background: #d2691e;
   border: none;
-  padding: 0 13px;
+  padding: 0 12px;
   color: #fff;
   cursor: pointer;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 38px;
-  transition: background 0.15s;
+  height: 100%;
   flex-shrink: 0;
+  transition: background 0.15s;
 }
 .nb__search-btn:hover {
-  background: #b77c1b;
+  background: #b8561a;
+}
+
+.nb__cart-icon-wrap {
+  position: relative;
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.nb__cart-icon {
+  width: 20px;
+  height: 20px;
 }
 .nb__right {
   display: flex;
@@ -1215,43 +1230,42 @@ button {
   background: #2a2a2a;
 }
 .nb__cart {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 7px;
-  background: #f5a623;
-  color: #1a1a1a;
+  gap: 10px;
   border: none;
-  border-radius: 10px;
-  padding: 0.5rem 1rem;
-  font-size: 0.88rem;
+  background: #fff7f1;
+  color: #d2691e;
+  padding: 9px 14px;
   font-weight: 800;
   cursor: pointer;
   position: relative;
+  border-radius: 10px;
   transition:
     background 0.15s,
     transform 0.12s;
   white-space: nowrap;
 }
 .nb__cart:hover {
-  background: #d4901f;
+  background: #f5ede4;
   transform: translateY(-1px);
 }
 .nb__badge {
   position: absolute;
   top: -7px;
-  right: -7px;
-  background: #fff;
-  color: #f5a623;
-  font-size: 0.6rem;
-  font-weight: 800;
+  right: -9px;
   min-width: 18px;
   height: 18px;
-  border-radius: 99px;
-  display: flex;
+  border-radius: 999px;
+  background: #e05c2a;
+  color: #fff;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0 4px;
-  border: 2px solid #f5a623;
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 0 5px;
+  line-height: 1;
 }
 .nb__lock-btn {
   width: 40px;

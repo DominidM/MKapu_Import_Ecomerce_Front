@@ -1,3 +1,6 @@
+export const dynamic = "force-static";
+export const revalidate = 300;
+
 import Link from "next/link";
 import Carousel from "@/components/carousel";
 import BrandsCarousel from "@/components/BrandsCarousel";
