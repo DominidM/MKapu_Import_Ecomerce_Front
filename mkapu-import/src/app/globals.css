@@ -3167,6 +3167,11 @@ button {
   color: #fff;
 }
 
+.detail-badge--agotado {
+  background: #1a1a1a;
+  color: #fff;
+}
+
 .detail-image-stage {
   aspect-ratio: 1 / 1;
   min-height: 0;
@@ -3505,6 +3510,33 @@ button {
   font-size: 1.5rem;
   font-weight: 900;
   color: var(--orange);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.detail-price-old {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #999;
+  text-decoration: line-through;
+}
+
+.detail-price-final {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--orange);
+}
+
+.detail-price-badge {
+  font-size: 0.72rem;
+  font-weight: 800;
+  background: #dc2626;
+  color: #fff;
+  padding: 3px 10px;
+  border-radius: 6px;
+  letter-spacing: 0.04em;
 }
 
 .detail-total {
@@ -3544,6 +3576,31 @@ button {
 .detail-cta--consult {
   background: linear-gradient(135deg, #25d366 0%, #18b957 100%);
   box-shadow: 0 14px 28px rgba(37, 211, 102, 0.22);
+}
+
+.detail-agotado-msg {
+  width: 100%;
+  min-height: 54px;
+  border-radius: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 18px;
+  background: #fafafa;
+  color: #999;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: 1px dashed #d1d5db;
+}
+
+.detail-agotado-msg__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
 }
 
 .detail-stepper {
@@ -3737,6 +3794,17 @@ button {
   font-weight: 700;
   color: #1a1a1a;
   margin: 0 0 3px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.detail-sug-old {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #999;
+  text-decoration: line-through;
 }
 .detail-sug-name {
   font-size: 0.78rem;
