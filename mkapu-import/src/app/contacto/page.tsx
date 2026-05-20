@@ -160,7 +160,7 @@ export default function ContactoPage() {
   const inputStyle: React.CSSProperties = {
     width: "100%",
     padding: "0.7rem 1rem",
-    fontSize: "0.92rem",
+    fontSize: "16px",
     border: "1.5px solid #ddd",
     borderRadius: "10px",
     outline: "none",
@@ -521,7 +521,7 @@ export default function ContactoPage() {
                       name="telefono"
                       value={form.telefono}
                       onChange={handleChange}
-                      placeholder="+51 977 600 019"
+                      placeholder="999 000 000"
                       style={inputStyle}
                       onFocus={(e) => (e.target.style.borderColor = "#f5a623")}
                       onBlur={(e) => (e.target.style.borderColor = "#ddd")}
