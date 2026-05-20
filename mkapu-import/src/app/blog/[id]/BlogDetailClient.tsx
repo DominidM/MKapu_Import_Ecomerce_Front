@@ -179,7 +179,7 @@ export default function BlogDetailClient({ post, imagenes, videos }: Props) {
         />
       </article>
 
-      <style jsx>{`
+      <style>{`
         .blog-detail {
           max-width: 900px;
           margin: 0 auto;
@@ -382,41 +382,65 @@ export default function BlogDetailClient({ post, imagenes, videos }: Props) {
           color: #1f1a17;
         }
 
-        .blog-detail-content :global(h2) {
+        .blog-detail-content h2 {
           font-size: 1.8rem;
           font-weight: 800;
           margin: 40px 0 16px 0;
           color: #1f1a17;
         }
 
-        .blog-detail-content :global(h3) {
+        .blog-detail-content h3 {
           font-size: 1.4rem;
           font-weight: 700;
           margin: 32px 0 12px 0;
           color: #1f1a17;
         }
 
-        .blog-detail-content :global(p) {
+        .blog-detail-content p {
           margin: 16px 0;
         }
 
-        .blog-detail-content :global(ul),
-        .blog-detail-content :global(ol) {
+        .blog-detail-content ul,
+        .blog-detail-content ol {
           margin: 16px 0;
           padding-left: 24px;
         }
 
-        .blog-detail-content :global(li) {
+        .blog-detail-content li {
           margin: 8px 0;
         }
 
         @media (max-width: 768px) {
+          .blog-detail {
+            padding: 24px 14px 60px;
+          }
+
           .blog-detail-article {
-            padding: 32px 24px;
+            padding: 28px 20px;
+            border-radius: 20px;
+          }
+
+          .blog-detail-header {
+            margin-bottom: 28px;
           }
 
           .blog-detail-thumbs {
             grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+          }
+
+          .blog-detail-media-container {
+            margin: 28px 0;
+          }
+        }
+
+        @media (max-width: 520px) {
+          .blog-detail-article {
+            padding: 20px 16px;
+          }
+
+          .blog-detail-back {
+            font-size: 0.85rem;
+            padding: 8px 14px;
           }
         }
       `}</style>
