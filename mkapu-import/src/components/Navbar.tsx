@@ -115,8 +115,6 @@ export default function Navbar({ categories = [] }: NavbarProps) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // ✅ FIX: El buscador ahora muestra sugerencias correctamente
-  // Se eliminó el bug donde suggestOpen nunca se abría en el render inicial
   useEffect(() => {
     if (suggestTimer.current) clearTimeout(suggestTimer.current);
 
@@ -794,19 +792,6 @@ export default function Navbar({ categories = [] }: NavbarProps) {
           font-weight: 700;
           color: #d2691e;
           border-top: 1px solid #f2e7db;
-        }
-
-        .nb__cart {
-          display: inline-flex;
-          align-items: center;
-          gap: 10px;
-          border: none;
-          background: #fff7f1;
-          color: #d2691e;
-          padding: 9px 14px;
-          font-weight: 800;
-          cursor: pointer;
-          position: relative;
         }
 
         .nb__cart-icon-wrap {
