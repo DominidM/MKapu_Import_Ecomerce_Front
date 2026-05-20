@@ -794,34 +794,6 @@ export default function Navbar({ categories = [] }: NavbarProps) {
           border-top: 1px solid #f2e7db;
         }
 
-        .nb__cart {
-          display: inline-flex;
-          align-items: center;
-          gap: 10px;
-          border: none;
-          background: #fff7f1;
-          color: #d2691e;
-          padding: 9px 14px;
-          font-weight: 800;
-          cursor: pointer;
-          position: relative;
-        }
-        .nb__search-btn {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          padding: 0 12px;
-          background: #d2691e;
-          border: none;
-          cursor: pointer;
-          color: #fff;
-          height: 100%;
-          flex-shrink: 0;
-        }
-
-        .nb__search-btn:hover {
-          background: #b8561a;
-        }
         .nb__cart-icon-wrap {
           position: relative;
           width: 22px;
