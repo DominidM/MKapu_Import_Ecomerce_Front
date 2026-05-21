@@ -19,6 +19,7 @@ import type { Producto } from "@/lib/supabase";
 interface Props {
   producto: Producto & { category_name?: string | null };
   sugeridos: any[];
+  promocionesMap: Record<number, { tipo_descuento: string; valor_descuento: number }>;
 }
 
 type ProductoImagen = {
@@ -40,7 +41,22 @@ function formatPrice(value: number) {
   return `S/ ${value.toFixed(2)}`;
 }
 
-export default function ProductoDetailClient({ producto, sugeridos }: Props) {
+function calcDescuento(
+  price: number,
+  promo: { tipo_descuento: string; valor_descuento: number } | undefined,
+): { precioFinal: number; descuentoTexto: string } | null {
+  if (!promo) return null;
+  let d = promo.tipo_descuento === "porcentaje"
+    ? (price * promo.valor_descuento) / 100
+    : promo.valor_descuento;
+  const precioFinal = Math.max(0, price - d);
+  const descuentoTexto = promo.tipo_descuento === "porcentaje"
+    ? `${promo.valor_descuento}% OFF`
+    : `S/ ${promo.valor_descuento.toFixed(2)} OFF`;
+  return { precioFinal, descuentoTexto };
+}
+
+export default function ProductoDetailClient({ producto, sugeridos, promocionesMap }: Props) {
   const { addItem, items, updateQty, removeItem } = useCart();
   const [imgError, setImgError] = useState(false);
   const [imagenes, setImagenes] = useState<ProductoImagen[]>([]);
@@ -50,6 +66,10 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
   const cartItem = items.find((item) => item.id === String(producto.id));
   const qty = cartItem?.qty ?? 0;
   const isConsult = producto.price === 0;
+  const isAgotado = producto.agotado === true;
+  const descuento = calcDescuento(producto.price, promocionesMap[producto.id]);
+  const precioFinal = descuento ? descuento.precioFinal : producto.price;
+  const tieneDescuento = descuento && precioFinal < producto.price;
   const categoryLabel =
     producto.category_name || `Categoría ${producto.category}`;
 
@@ -93,7 +113,7 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
 
   const currentMedia = allMedia[activeMediaIdx];
   const hasMultipleMedia = allMedia.length > 1;
-  const totalPrice = qty * producto.price;
+  const totalPrice = qty * precioFinal;
 
   function handleUpdateQty(newQty: number) {
     if (newQty <= 0) {
@@ -103,16 +123,17 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
     updateQty(String(producto.id), newQty);
   }
   function handleAdd() {
+    if (isAgotado) return;
     addItem({
       id: String(producto.id),
       code: producto.code ?? "",
       name: producto.name,
-      price: producto.price,
-      itemTotal: producto.price,
+      price: precioFinal,
+      itemTotal: precioFinal,
       imageUrl: producto.image_url ?? undefined,
       emoji: "📦",
       product: {
-        price: producto.price,
+        price: precioFinal,
       },
     });
   }
@@ -144,11 +165,17 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
                 {categoryLabel}
               </span>
 
-              {producto.is_new && (
+              {isAgotado && (
+                <span className="detail-badge detail-badge--agotado">
+                  Agotado
+                </span>
+              )}
+
+              {producto.is_new && !isAgotado && (
                 <span className="detail-badge detail-badge--new">Nuevo</span>
               )}
 
-              {producto.featured && (
+              {producto.featured && !isAgotado && (
                 <span className="detail-badge detail-badge--featured">
                   Destacado
                 </span>
@@ -311,7 +338,23 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
                 Precio por unidad
               </div>
               <div className="detail-price-value">
-                {isConsult ? "Consultar" : formatPrice(producto.price)}
+                {isConsult ? (
+                  "Consultar"
+                ) : tieneDescuento ? (
+                  <>
+                    <span className="detail-price-old">
+                      {formatPrice(producto.price)}
+                    </span>
+                    <span className="detail-price-final">
+                      {formatPrice(precioFinal)}
+                    </span>
+                    <span className="detail-price-badge">
+                      {descuento!.descuentoTexto}
+                    </span>
+                  </>
+                ) : (
+                  formatPrice(producto.price)
+                )}
               </div>
             </div>
           </div>
@@ -326,7 +369,18 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
               )}
             </div>
 
-            {qty === 0 ? (
+            {isAgotado ? (
+              <div className="detail-agotado-msg">
+                <span className="detail-agotado-msg__icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="15" y1="9" x2="9" y2="15" />
+                    <line x1="9" y1="9" x2="15" y2="15" />
+                  </svg>
+                </span>
+                Producto agotado
+              </div>
+            ) : qty === 0 ? (
               <button
                 className={`detail-cta${
                   isConsult ? " detail-cta--consult" : ""
@@ -342,7 +396,7 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
                 ) : (
                   <>
                     <ShoppingCart size={18} />
-                    Agregar al carrito - {formatPrice(producto.price)}
+                    Agregar al carrito - {formatPrice(precioFinal)}
                   </>
                 )}
               </button>
@@ -362,7 +416,7 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
                     {qty} unidades
                   </strong>
                   <span className="detail-stepper__tier">
-                    {formatPrice(producto.price)} c/u
+                    {tieneDescuento ? formatPrice(precioFinal) : formatPrice(producto.price)} c/u
                   </span>
                 </div>
 
@@ -386,7 +440,10 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
             También te puede interesar
           </h2>
           <div className="detail-sugeridos__scroll">
-            {sugeridos.map((p) => (
+            {sugeridos.map((p) => {
+              const d = calcDescuento(p.price, promocionesMap[p.id]);
+              const pf = d ? d.precioFinal : p.price;
+              return (
               <a
                 key={p.id}
                 href={`/productos/${p.id}`}
@@ -401,12 +458,18 @@ export default function ProductoDetailClient({ producto, sugeridos }: Props) {
                 </div>
                 <div className="detail-sug-body">
                   <p className="detail-sug-price">
-                    {p.price === 0 ? "Consultar" : `S/ ${p.price.toFixed(2)}`}
+                    {p.price === 0 ? "Consultar" : d ? (
+                      <>
+                        <span className="detail-sug-old">S/ {p.price.toFixed(2)}</span>
+                        <span>S/ {pf.toFixed(2)}</span>
+                      </>
+                    ) : `S/ ${p.price.toFixed(2)}`}
                   </p>
                   <p className="detail-sug-name">{p.name}</p>
                 </div>
               </a>
-            ))}
+              );
+            })}
           </div>
         </section>
       )}

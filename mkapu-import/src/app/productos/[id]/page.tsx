@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { getPromocionesActivasMap, calcularPrecioConDescuento } from "@/lib/queries";
 import ProductoDetailClient from "./ProductoDetailClient";
 
 interface PageProps {
@@ -43,7 +44,13 @@ export default async function Page({ params }: PageProps) {
     .neq("id", Number(id))
     .limit(8);
 
+  const promocionesMap = await getPromocionesActivasMap();
+
   return (
-    <ProductoDetailClient producto={producto} sugeridos={sugeridos ?? []} />
+    <ProductoDetailClient
+      producto={producto}
+      sugeridos={sugeridos ?? []}
+      promocionesMap={promocionesMap}
+    />
   );
 }
