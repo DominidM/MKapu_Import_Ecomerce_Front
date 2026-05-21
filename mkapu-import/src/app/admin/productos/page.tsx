@@ -123,6 +123,20 @@ export default function AdminProductosPage() {
       vidCount: (p as any).vid_count ?? 0,
     }));
 
+    if (products.length > 0) {
+      const ids = products.map((p) => p.id);
+      const { data: agRows } = await supabase
+        .from("productos")
+        .select("id, agotado")
+        .in("id", ids);
+      if (agRows) {
+        const agMap = new Map(agRows.map((a: any) => [a.id, a.agotado]));
+        for (const p of products) {
+          if (agMap.has(p.id)) p.agotado = agMap.get(p.id) ?? p.agotado;
+        }
+      }
+    }
+
     const { data: allCounts } = await supabase
       .from("productos_con_media")
       .select("img_count, vid_count")
@@ -374,6 +388,13 @@ export default function AdminProductosPage() {
         .ap-warn-box{background:#fef3c7;border:1px solid #f59e0b44;border-radius:10px;padding:14px 16px;font-size:.875rem;color:#92400e}
         .ap-row--incomplete{background:#fffbeb !important}
         .ap-row--incomplete:hover{background:#fef3c7 !important}
+        /* ── toggle activo ── */
+        .ap-toggle{display:inline-flex;align-items:center;gap:10px;cursor:pointer;font-size:.875rem;color:#555;user-select:none}
+        .ap-toggle input{display:none}
+        .ap-toggle__slider{width:44px;height:24px;background:#e0e0e0;border-radius:12px;position:relative;transition:background .2s;flex-shrink:0}
+        .ap-toggle__slider::after{content:'';position:absolute;width:20px;height:20px;background:#fff;border-radius:50%;top:2px;left:2px;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+        .ap-toggle input:checked+.ap-toggle__slider{background:#22c55e}
+        .ap-toggle input:checked+.ap-toggle__slider::after{transform:translateX(20px)}
         /* ── check agotado ── */
         .ap-agotado-check{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:6px;border:2px solid #d1d5db;background:#fff;cursor:pointer;transition:all .15s;flex-shrink:0}
         .ap-agotado-check--on{border-color:#dc2626;background:#dc2626}
@@ -603,14 +624,13 @@ export default function AdminProductosPage() {
                   gap: 24,
                   marginBottom: 20,
                   flexWrap: "wrap",
+                  alignItems: "center",
                 }}
               >
                 {[
                   { key: "featured", label: "Destacado" },
-                  { key: "activo", label: "Activo" },
                   { key: "is_new", label: "Nuevo" },
                   { key: "low_stock", label: "Últimas unidades" },
-                  { key: "agotado", label: "Agotado" },
                 ].map(({ key, label }) => (
                   <label
                     key={key}
@@ -634,6 +654,18 @@ export default function AdminProductosPage() {
                     {label}
                   </label>
                 ))}
+
+                <label className="ap-toggle">
+                  <input
+                    type="checkbox"
+                    checked={form.activo}
+                    onChange={(e) =>
+                      setForm({ ...form, activo: e.target.checked })
+                    }
+                  />
+                  <span className="ap-toggle__slider" />
+                  <span>{form.activo ? "Activo" : "Inactivo"}</span>
+                </label>
               </div>
 
               {/* Botones de guardado */}
