@@ -3172,6 +3172,16 @@ button {
   color: #fff;
 }
 
+.detail-badge--delivery {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.detail-badge--store {
+  background: #e3f2fd;
+  color: #1565c0;
+}
+
 .detail-image-stage {
   aspect-ratio: 1 / 1;
   min-height: 0;
@@ -3437,7 +3447,7 @@ button {
 
 .detail-meta {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
 }
 
@@ -3465,6 +3475,40 @@ button {
 .detail-meta-card strong {
   font-size: 0.98rem;
   line-height: 1.35;
+}
+
+.detail-delivery-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.detail-delivery-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: #f5f7fa;
+  border: 1px solid #e6eaf0;
+}
+
+.detail-delivery-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  color: #475569;
+  flex-shrink: 0;
+}
+
+.detail-delivery-label {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #1e293b;
 }
 
 .detail-pricing-panel,

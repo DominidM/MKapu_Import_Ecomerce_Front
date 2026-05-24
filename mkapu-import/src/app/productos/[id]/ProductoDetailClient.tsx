@@ -11,6 +11,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Play,
+  Truck,
+  Store,
 } from "lucide-react";
 import { useCart } from "@/app/context/CartContext";
 import { supabase } from "@/lib/supabase";
@@ -185,7 +187,6 @@ export default function ProductoDetailClient({ producto, sugeridos, promocionesM
             <div
               className={`detail-image-stage${currentMedia?.type === "video" ? " detail-image-stage--video" : ""}`}
             >
-              {" "}
               {currentMedia && currentMedia.url && !imgError ? (
                 currentMedia.type === "video" ? (
                   <video
@@ -318,13 +319,6 @@ export default function ProductoDetailClient({ producto, sugeridos, promocionesM
               <span className="detail-meta-label">Categoría</span>
               <strong>{categoryLabel}</strong>
             </div>
-
-            <div className="detail-meta-card">
-              <span className="detail-meta-label">Estado de compra</span>
-              <strong>
-                {qty > 0 ? `${qty} en tu carrito` : "Listo para agregar"}
-              </strong>
-            </div>
           </div>
 
           <div className="detail-pricing-panel">
@@ -382,9 +376,7 @@ export default function ProductoDetailClient({ producto, sugeridos, promocionesM
               </div>
             ) : qty === 0 ? (
               <button
-                className={`detail-cta${
-                  isConsult ? " detail-cta--consult" : ""
-                }`}
+                className={`detail-cta${isConsult ? " detail-cta--consult" : ""}`}
                 onClick={handleAdd}
                 type="button"
               >
@@ -431,6 +423,23 @@ export default function ProductoDetailClient({ producto, sugeridos, promocionesM
               </div>
             )}
           </div>
+
+          {/* Opciones de entrega */}
+          <div className="detail-delivery-options">
+            <div className="detail-delivery-item">
+              <div className="detail-delivery-icon">
+                <Truck size={22} />
+              </div>
+              <span className="detail-delivery-label">Disponible envío a domicilio</span>
+            </div>
+
+            <div className="detail-delivery-item">
+              <div className="detail-delivery-icon">
+                <Store size={22} />
+              </div>
+              <span className="detail-delivery-label">Disponible retiro en tienda</span>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -444,36 +453,35 @@ export default function ProductoDetailClient({ producto, sugeridos, promocionesM
               const d = calcDescuento(p.price, promocionesMap[p.id]);
               const pf = d ? d.precioFinal : p.price;
               return (
-              <a
-                key={p.id}
-                href={`/productos/${p.id}`}
-                className="detail-sug-card"
-              >
-                <div className="detail-sug-img">
-                  {p.image_url ? (
-                    <img src={p.image_url} alt={p.name} loading="lazy" />
-                  ) : (
-                    <div className="detail-sug-noimg">Sin imagen</div>
-                  )}
-                </div>
-                <div className="detail-sug-body">
-                  <p className="detail-sug-price">
-                    {p.price === 0 ? "Consultar" : d ? (
-                      <>
-                        <span className="detail-sug-old">S/ {p.price.toFixed(2)}</span>
-                        <span>S/ {pf.toFixed(2)}</span>
-                      </>
-                    ) : `S/ ${p.price.toFixed(2)}`}
-                  </p>
-                  <p className="detail-sug-name">{p.name}</p>
-                </div>
-              </a>
+                <a
+                  key={p.id}
+                  href={`/productos/${p.id}`}
+                  className="detail-sug-card"
+                >
+                  <div className="detail-sug-img">
+                    {p.image_url ? (
+                      <img src={p.image_url} alt={p.name} loading="lazy" />
+                    ) : (
+                      <div className="detail-sug-noimg">Sin imagen</div>
+                    )}
+                  </div>
+                  <div className="detail-sug-body">
+                    <p className="detail-sug-price">
+                      {p.price === 0 ? "Consultar" : d ? (
+                        <>
+                          <span className="detail-sug-old">S/ {p.price.toFixed(2)}</span>
+                          <span>S/ {pf.toFixed(2)}</span>
+                        </>
+                      ) : `S/ ${p.price.toFixed(2)}`}
+                    </p>
+                    <p className="detail-sug-name">{p.name}</p>
+                  </div>
+                </a>
               );
             })}
           </div>
         </section>
       )}
-
     </div>
   );
 }
