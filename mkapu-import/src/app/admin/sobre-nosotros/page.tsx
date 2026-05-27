@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { Pencil, Trash2, Image as ImageIcon } from "lucide-react";
+import { Pencil, Trash2, Image as ImageIcon, ImageOff, ImagePlus, CheckCircle } from "lucide-react";
 
 type Seccion = {
   id: number;
@@ -51,6 +51,7 @@ export default function AdminSobreNosotrosPage() {
   const [imagenesMap, setImagenesMap] = useState<Record<number, number>>({});
   const [uploadingImg, setUploadingImg] = useState(false);
   const [savingOrder, setSavingOrder] = useState(false);
+  const [successMsg, setSuccessMsg] = useState("");
   const imgRef = useRef<HTMLInputElement>(null);
 
   async function load() {
@@ -174,6 +175,8 @@ export default function AdminSobreNosotrosPage() {
   async function save(e: React.FormEvent) {
     e.preventDefault();
 
+    if (!confirm("¿Guardar estos cambios?")) return;
+
     const payload = {
       titulo: form.titulo || null,
       descripcion: form.descripcion || null,
@@ -189,6 +192,8 @@ export default function AdminSobreNosotrosPage() {
 
       if (error) return alert(error.message);
 
+      setSuccessMsg("Sección actualizada correctamente");
+      setTimeout(() => setSuccessMsg(""), 3000);
       cancelForm();
       await load();
     } else {
@@ -200,6 +205,8 @@ export default function AdminSobreNosotrosPage() {
 
       if (error) return alert(error.message);
 
+      setSuccessMsg("Sección creada correctamente");
+      setTimeout(() => setSuccessMsg(""), 3000);
       await load();
 
       setEditId(data.id);
@@ -272,6 +279,16 @@ export default function AdminSobreNosotrosPage() {
         minHeight: "100vh",
       }}
     >
+      {successMsg && (
+        <div style={{
+          position: "fixed", top: "1rem", right: "1rem", zIndex: 9999,
+          background: "#16a34a", color: "#fff", padding: "0.75rem 1.25rem",
+          borderRadius: "10px", fontWeight: 600, fontSize: "0.875rem",
+          boxShadow: "0 4px 16px rgba(0,0,0,0.12)", display: "flex", alignItems: "center", gap: "8px",
+        }}>
+          <CheckCircle size={16} /> {successMsg}
+        </div>
+      )}
       <div
         style={{
           display: "flex",
@@ -323,8 +340,9 @@ export default function AdminSobreNosotrosPage() {
 
           <button
             onClick={() => {
-              setShowForm(!showForm);
               if (showForm) cancelForm();
+              else setForm({ ...initialForm, orden: rows.length + 1 });
+              setShowForm(!showForm);
             }}
             style={{
               display: "flex",
@@ -781,13 +799,9 @@ export default function AdminSobreNosotrosPage() {
                           >
                             <div
                               style={{
-                                display: "inline-flex",
-                                flexDirection: "column",
+                                display: "flex",
                                 alignItems: "center",
-                                border: "1px solid #e5e7eb",
-                                borderRadius: "8px",
-                                overflow: "hidden",
-                                background: "#fff",
+                                gap: "6px",
                               }}
                             >
                               <button
@@ -795,94 +809,65 @@ export default function AdminSobreNosotrosPage() {
                                 onClick={() => moveUp(i)}
                                 disabled={isFirst || savingOrder}
                                 title="Subir"
-                                aria-label={`Subir sección ${s.titulo ?? s.id}`}
                                 style={{
-                                  width: 32,
-                                  height: 24,
-                                  border: "none",
-                                  borderBottom: "1px solid #e5e7eb",
-                                  background: isFirst ? "#f9fafb" : "#fff",
+                                  width: 26,
+                                  height: 26,
+                                  borderRadius: "6px",
+                                  border: "1px solid #e2e2e2",
+                                  background: "#fff",
                                   cursor:
                                     isFirst || savingOrder
                                       ? "not-allowed"
                                       : "pointer",
+                                  opacity: isFirst || savingOrder ? 0.35 : 1,
+                                  fontWeight: 700,
+                                  color: "#666",
+                                  fontSize: "0.85rem",
                                   display: "flex",
                                   alignItems: "center",
                                   justifyContent: "center",
-                                  fontSize: "0.7rem",
-                                  color: isFirst ? "#d1d5db" : "#6b7280",
-                                  transition: "background 0.15s",
-                                  padding: 0,
-                                }}
-                                onMouseEnter={(e) => {
-                                  if (!isFirst && !savingOrder) {
-                                    e.currentTarget.style.background =
-                                      "#f3f4f6";
-                                  }
-                                }}
-                                onMouseLeave={(e) => {
-                                  e.currentTarget.style.background = isFirst
-                                    ? "#f9fafb"
-                                    : "#fff";
+                                  flexShrink: 0,
                                 }}
                               >
-                                ▲
+                                ↑
                               </button>
-
-                              <div
+                              <span
                                 style={{
-                                  width: 32,
-                                  height: 28,
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                  fontSize: "0.8rem",
+                                  minWidth: "20px",
+                                  textAlign: "center",
                                   fontWeight: 700,
-                                  color: "#374151",
-                                  background: "#fafafa",
-                                  borderBottom: "1px solid #e5e7eb",
-                                  userSelect: "none",
+                                  color: "#555",
+                                  fontSize: "0.85rem",
                                 }}
                               >
                                 {s.orden}
-                              </div>
-
+                              </span>
                               <button
                                 type="button"
                                 onClick={() => moveDown(i)}
                                 disabled={isLast || savingOrder}
                                 title="Bajar"
-                                aria-label={`Bajar sección ${s.titulo ?? s.id}`}
                                 style={{
-                                  width: 32,
-                                  height: 24,
-                                  border: "none",
-                                  background: isLast ? "#f9fafb" : "#fff",
+                                  width: 26,
+                                  height: 26,
+                                  borderRadius: "6px",
+                                  border: "1px solid #e2e2e2",
+                                  background: "#fff",
                                   cursor:
                                     isLast || savingOrder
                                       ? "not-allowed"
                                       : "pointer",
+                                  opacity: isLast || savingOrder ? 0.35 : 1,
+                                  fontWeight: 700,
+                                  color: "#666",
+                                  fontSize: "0.85rem",
                                   display: "flex",
                                   alignItems: "center",
                                   justifyContent: "center",
-                                  fontSize: "0.7rem",
-                                  color: isLast ? "#d1d5db" : "#6b7280",
-                                  transition: "background 0.15s",
-                                  padding: 0,
-                                }}
-                                onMouseEnter={(e) => {
-                                  if (!isLast && !savingOrder) {
-                                    e.currentTarget.style.background =
-                                      "#f3f4f6";
-                                  }
-                                }}
-                                onMouseLeave={(e) => {
-                                  e.currentTarget.style.background = isLast
-                                    ? "#f9fafb"
-                                    : "#fff";
+                                  flexShrink: 0,
                                 }}
                               >
-                                ▼
+                                ↓
                               </button>
                             </div>
                           </td>
@@ -904,12 +889,12 @@ export default function AdminSobreNosotrosPage() {
                                   borderRadius: "999px",
                                   fontSize: "0.78rem",
                                   fontWeight: 700,
-                                  background: "#eef4ff",
-                                  color: "#2563eb",
+                                  background: "#eef2ff",
+                                  color: "#4f46e5",
                                   whiteSpace: "nowrap",
                                 }}
                               >
-                                🖼️ {cantImg}
+                                <ImagePlus size={12} strokeWidth={2} /> {cantImg}
                               </span>
                             ) : (
                               <span
@@ -922,11 +907,11 @@ export default function AdminSobreNosotrosPage() {
                                   fontSize: "0.78rem",
                                   fontWeight: 600,
                                   background: "#f5f5f5",
-                                  color: "#bbb",
+                                  color: "#ccc",
                                   whiteSpace: "nowrap",
                                 }}
                               >
-                                Sin imágenes
+                                <ImageOff size={12} strokeWidth={1.5} /> Sin imágenes
                               </span>
                             )}
                           </td>

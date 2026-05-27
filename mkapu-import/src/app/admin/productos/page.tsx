@@ -15,6 +15,8 @@ import {
   Search,
   Image as ImageIcon,
   Video,
+  ImageOff,
+  VideoOff,
   LayoutGrid,
   AlertCircle,
   List,
@@ -79,6 +81,7 @@ export default function AdminProductosPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCompletos, setTotalCompletos] = useState(0);
   const [totalIncompletos, setTotalIncompletos] = useState(0);
+  const [successMsg, setSuccessMsg] = useState("");
 
   const fileRef = useRef<HTMLInputElement>(null);
   const topRef = useRef<HTMLDivElement>(null);
@@ -263,9 +266,13 @@ export default function AdminProductosPage() {
   async function handleSave(e: React.FormEvent, closeAfter = false) {
     e.preventDefault();
 
+    if (!confirm("¿Guardar estos cambios?")) return;
+
     const id = await saveProducto();
     if (!id) return;
 
+    setSuccessMsg(editId ? "Producto actualizado correctamente" : "Producto creado correctamente");
+    setTimeout(() => setSuccessMsg(""), 3000);
     setSavedId(id);
     setEditId(id);
     await load();
@@ -349,8 +356,8 @@ export default function AdminProductosPage() {
         .ap-btn--ghost{background:transparent;color:#888;border:1px solid #e0e0e0}
         .ap-btn--ghost:hover{background:#f5f5f5}
         .ap-btn--sm{padding:6px 12px;font-size:.8rem;border-radius:6px}
-        .ap-btn--edit{background:rgba(0,123,255,.07);color:#007bff;border:1px solid rgba(0,123,255,.2)}
-        .ap-btn--edit:hover{background:rgba(0,123,255,.15)}
+        .ap-btn--edit{background:rgba(245,166,35,.1);color:#f5a623;border:1px solid rgba(245,166,35,.18)}
+        .ap-btn--edit:hover{background:rgba(245,166,35,.2)}
         .ap-btn--delete{background:rgba(220,53,69,.07);color:#dc3545;border:1px solid rgba(220,53,69,.2)}
         .ap-btn--delete:hover{background:rgba(220,53,69,.15)}
         .ap-btn--media{background:rgba(99,102,241,.07);color:#6366f1;border:1px solid rgba(99,102,241,.2)}
@@ -376,9 +383,10 @@ export default function AdminProductosPage() {
         .ap-row{border-bottom:1px solid #f0f0f0;background:#fff;transition:background .12s}
         .ap-row:last-child{border-bottom:none}
         .ap-row:hover{background:#fafafa !important}
-        .ap-media-pip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:6px;font-size:.72rem;font-weight:700}
-        .ap-media-pip--ok{background:#dcfce7;color:#166534}
-        .ap-media-pip--empty{background:#fee2e2;color:#991b1b}
+        .ap-media-pip{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:999px;font-size:.78rem;font-weight:700;white-space:nowrap}
+        .ap-media-pip--ok{background:#eef2ff;color:#4f46e5}
+        .ap-media-pip--empty{background:#f5f5f5;color:#ccc}
+        .ap-media-pip--vid-ok{background:#f0fdf4;color:#16a34a}
         .ap-pager{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding:14px 20px;border-top:1px solid #e8e8e8;background:#fafafa;font-size:.875rem;color:#888}
         .ap-page-btn{padding:6px 10px;border:1px solid #e0e0e0;border-radius:6px;background:#fff;color:#666;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .15s}
         .ap-page-btn:hover:not(:disabled){border-color:#f5a623;color:#f5a623}
@@ -412,8 +420,20 @@ export default function AdminProductosPage() {
           maxWidth: "100%",
           margin: 0,
           padding: "20px 24px",
+          background: "#f8f7f4",
+          minHeight: "100vh",
         }}
       >
+        {successMsg && (
+          <div style={{
+            position: "fixed", top: "1rem", right: "1rem", zIndex: 9999,
+            background: "#16a34a", color: "#fff", padding: "0.75rem 1.25rem",
+            borderRadius: "10px", fontWeight: 600, fontSize: "0.875rem",
+            boxShadow: "0 4px 16px rgba(0,0,0,0.12)", display: "flex", alignItems: "center", gap: "8px",
+          }}>
+            <CheckCircle size={16} /> {successMsg}
+          </div>
+        )}
         {/* ── FORMULARIO CREATE / EDIT ─────────────────────────────────────── */}
         {formMode !== "list" && (
           <div className="ap-card ap-fadein">
@@ -771,8 +791,8 @@ export default function AdminProductosPage() {
                 <h1
                   style={{
                     margin: 0,
-                    fontSize: "1.5rem",
-                    fontWeight: 800,
+                    fontSize: "1.4rem",
+                    fontWeight: 700,
                     color: "#1a1a1a",
                   }}
                 >
@@ -1226,26 +1246,28 @@ export default function AdminProductosPage() {
                                 style={{
                                   display: "flex",
                                   flexDirection: "column",
-                                  gap: 3,
+                                  gap: 6,
                                 }}
                               >
-                                <span
-                                  className={`ap-media-pip ${hasImg ? "ap-media-pip--ok" : "ap-media-pip--empty"}`}
-                                >
-                                  <ImageIcon size={10} />
-                                  {hasImg
-                                    ? `${p.imgCount} foto${p.imgCount !== 1 ? "s" : ""}`
-                                    : "Sin fotos"}
-                                </span>
+                                {hasImg ? (
+                                  <span className="ap-media-pip ap-media-pip--ok">
+                                    <ImageIcon size={12} /> {p.imgCount}
+                                  </span>
+                                ) : (
+                                  <span className="ap-media-pip ap-media-pip--empty">
+                                    <ImageOff size={12} /> Sin fotos
+                                  </span>
+                                )}
 
-                                <span
-                                  className={`ap-media-pip ${hasVid ? "ap-media-pip--ok" : "ap-media-pip--empty"}`}
-                                >
-                                  <Video size={10} />
-                                  {hasVid
-                                    ? `${p.vidCount} video${p.vidCount !== 1 ? "s" : ""}`
-                                    : "Sin videos"}
-                                </span>
+                                {hasVid ? (
+                                  <span className={`ap-media-pip ap-media-pip--vid-ok`}>
+                                    <Video size={12} /> {p.vidCount}
+                                  </span>
+                                ) : (
+                                  <span className="ap-media-pip ap-media-pip--empty">
+                                    <VideoOff size={12} /> Sin videos
+                                  </span>
+                                )}
                               </div>
                             </td>
 

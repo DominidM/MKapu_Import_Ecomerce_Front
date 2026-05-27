@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { Pencil, Trash2, Upload, ImageIcon } from "lucide-react";
+import { Pencil, Trash2, Upload, ImageIcon, CheckCircle } from "lucide-react";
 
 type BannerCarousel = {
   id: number;
@@ -77,6 +77,7 @@ export default function AdminBannersPage() {
   const fileRefCfg = useRef<HTMLInputElement>(null);
 
   const [loading, setLoading] = useState(true);
+  const [successMsg, setSuccessMsg] = useState("");
 
   async function load() {
     setLoading(true);
@@ -154,6 +155,7 @@ export default function AdminBannersPage() {
 
   async function saveCarousel(e: React.FormEvent) {
     e.preventDefault();
+    if (!confirm("¿Guardar estos cambios?")) return;
     if (!formC.image_url) return alert("Imagen requerida");
     const payload = {
       titulo: formC.titulo || null,
@@ -172,6 +174,8 @@ export default function AdminBannersPage() {
           .eq("id", editCId)
       : await supabase.from("banners_carousel").insert(payload);
     if (error) return alert(error.message);
+    setSuccessMsg(editCId ? "Slide actualizado correctamente" : "Slide creado correctamente");
+    setTimeout(() => setSuccessMsg(""), 3000);
     setFormC(initialCarousel);
     setEditCId(null);
     setShowFormC(false);
@@ -202,6 +206,7 @@ export default function AdminBannersPage() {
 
   async function saveConfig(e: React.FormEvent) {
     e.preventDefault();
+    if (!confirm("¿Guardar estos cambios?")) return;
     if (!editConfig) return;
     const { error } = await supabase
       .from("banners_config")
@@ -213,6 +218,8 @@ export default function AdminBannersPage() {
       })
       .eq("id", editConfig.id);
     if (error) return alert(error.message);
+    setSuccessMsg("Banner de página actualizado correctamente");
+    setTimeout(() => setSuccessMsg(""), 3000);
     setEditConfig(null);
     await load();
   }
@@ -321,9 +328,9 @@ export default function AdminBannersPage() {
   const thStyle: React.CSSProperties = {
     padding: "0.8rem 1rem",
     textAlign: "left",
-    fontSize: "0.72rem",
+    fontSize: "0.8rem",
     fontWeight: 700,
-    color: "#999",
+    color: "#888",
     textTransform: "uppercase",
     letterSpacing: "0.06em",
     whiteSpace: "nowrap",
@@ -342,19 +349,21 @@ export default function AdminBannersPage() {
         minHeight: "100vh",
       }}
     >
+      {successMsg && (<div style={{position:"fixed",top:"1rem",right:"1rem",zIndex:9999,background:"#16a34a",color:"#fff",padding:"0.75rem 1.25rem",borderRadius:"10px",fontWeight:600,fontSize:"0.875rem",boxShadow:"0 4px 16px rgba(0,0,0,0.12)",display:"flex",alignItems:"center",gap:"8px"}}><CheckCircle size={16}/> {successMsg}</div>)}
+
       {/* ── Header ── */}
       <div style={{ marginBottom: "1.75rem" }}>
         <h1
           style={{
             margin: 0,
-            fontSize: "1.35rem",
+            fontSize: "1.4rem",
             fontWeight: 700,
-            color: "#111",
+            color: "#1a1a1a",
           }}
         >
           Banners
         </h1>
-        <p style={{ fontSize: "0.85rem", color: "#999", margin: "0.3rem 0 0" }}>
+        <p style={{ fontSize: "0.85rem", color: "#888", margin: "0.3rem 0 0" }}>
           Gestiona el carrusel principal y los banners de cada página
         </p>
       </div>

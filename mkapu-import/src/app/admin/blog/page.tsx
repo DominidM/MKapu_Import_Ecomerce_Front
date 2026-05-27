@@ -10,6 +10,7 @@ import {
   VideoOff,
   Upload,
   Loader2,
+  CheckCircle,
 } from "lucide-react";
 
 type BlogPost = {
@@ -79,6 +80,7 @@ export default function AdminBlogPage() {
   const [uploadingImg, setUploadingImg] = useState(false);
   const [uploadingVid, setUploadingVid] = useState(false);
   const [savingOrder, setSavingOrder] = useState(false);
+  const [successMsg, setSuccessMsg] = useState("");
   const imgRef = useRef<HTMLInputElement>(null);
   const vidRef = useRef<HTMLInputElement>(null);
 
@@ -242,6 +244,7 @@ export default function AdminBlogPage() {
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
+    if (!confirm("¿Guardar estos cambios?")) return;
     if (!form.titulo.trim()) return alert("Título requerido");
     const payload = {
       titulo: form.titulo.trim(),
@@ -264,6 +267,7 @@ export default function AdminBlogPage() {
       if (error) return alert(error.message);
       cancelForm();
       await load();
+      setSuccessMsg("Post guardado correctamente"); setTimeout(() => setSuccessMsg(""), 3000);
     } else {
       const { data, error } = await supabase
         .from("vlog_posts")
@@ -272,6 +276,7 @@ export default function AdminBlogPage() {
         .single();
       if (error) return alert(error.message);
       await load();
+      setSuccessMsg("Post guardado correctamente"); setTimeout(() => setSuccessMsg(""), 3000);
       setEditId(data.id);
       setForm({
         titulo: data.titulo ?? "",
@@ -345,6 +350,7 @@ export default function AdminBlogPage() {
         minHeight: "100vh",
       }}
     >
+      {successMsg && (<div style={{position:"fixed",top:"1rem",right:"1rem",zIndex:9999,background:"#16a34a",color:"#fff",padding:"0.75rem 1.25rem",borderRadius:"10px",fontWeight:600,fontSize:"0.875rem",boxShadow:"0 4px 16px rgba(0,0,0,0.12)",display:"flex",alignItems:"center",gap:"8px"}}><CheckCircle size={16}/> {successMsg}</div>)}
       {/* ── Header ── */}
       <div
         style={{
@@ -1106,120 +1112,92 @@ export default function AdminBlogPage() {
                               )}
                             </td>
 
-                            {/* Orden + Mover (columna fusionada) */}
-                            <td
-                              style={{
-                                padding: "0.6rem 1rem",
-                                textAlign: "center",
-                              }}
-                            >
-                              <div
-                                style={{
-                                  display: "inline-flex",
-                                  flexDirection: "column",
-                                  alignItems: "center",
-                                  gap: 0,
-                                }}
-                              >
-                                <button
-                                  type="button"
-                                  onClick={() => moveUp(i)}
-                                  disabled={i === 0 || savingOrder}
-                                  title="Subir"
-                                  style={{
-                                    width: 28,
-                                    height: 20,
-                                    border: "1px solid #e5e7eb",
-                                    borderRadius: "4px 4px 0 0",
-                                    borderBottom: "none",
-                                    background: i === 0 ? "#f3f4f6" : "#fff",
-                                    cursor:
-                                      i === 0 || savingOrder
-                                        ? "not-allowed"
-                                        : "pointer",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    fontSize: "0.6rem",
-                                    color: "#666",
-                                    opacity: i === 0 || savingOrder ? 0.4 : 1,
-                                    transition: "background 0.15s",
-                                  }}
-                                  onMouseEnter={(e) => {
-                                    if (i !== 0 && !savingOrder)
-                                      e.currentTarget.style.background =
-                                        "#f0f0f0";
-                                  }}
-                                  onMouseLeave={(e) => {
-                                    e.currentTarget.style.background =
-                                      i === 0 ? "#f3f4f6" : "#fff";
-                                  }}
-                                >
-                                  ▲
-                                </button>
-                                <div
-                                  style={{
-                                    width: 28,
-                                    padding: "3px 0",
-                                    background: "#f8f9fa",
-                                    border: "1px solid #e5e7eb",
-                                    fontSize: "0.75rem",
-                                    fontWeight: 700,
-                                    color: "#555",
-                                    textAlign: "center",
-                                    lineHeight: 1,
-                                  }}
-                                >
-                                  {p.orden}
-                                </div>
-                                <button
-                                  type="button"
-                                  onClick={() => moveDown(i)}
-                                  disabled={
-                                    i === rows.length - 1 || savingOrder
-                                  }
-                                  title="Bajar"
-                                  style={{
-                                    width: 28,
-                                    height: 20,
-                                    border: "1px solid #e5e7eb",
-                                    borderRadius: "0 0 4px 4px",
-                                    borderTop: "none",
-                                    background:
-                                      i === rows.length - 1
-                                        ? "#f3f4f6"
-                                        : "#fff",
-                                    cursor:
-                                      i === rows.length - 1 || savingOrder
-                                        ? "not-allowed"
-                                        : "pointer",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    fontSize: "0.6rem",
-                                    color: "#666",
-                                    opacity:
-                                      i === rows.length - 1 || savingOrder
-                                        ? 0.4
-                                        : 1,
-                                    transition: "background 0.15s",
-                                  }}
-                                  onMouseEnter={(e) => {
-                                    if (i !== rows.length - 1 && !savingOrder)
-                                      e.currentTarget.style.background =
-                                        "#f0f0f0";
-                                  }}
-                                  onMouseLeave={(e) => {
-                                    e.currentTarget.style.background =
-                                      i === rows.length - 1
-                                        ? "#f3f4f6"
-                                        : "#fff";
-                                  }}
-                                >
-                                  ▼
-                                </button>
-                              </div>
-                            </td>
+                             {/* Orden + Mover (columna fusionada) */}
+                             <td
+                               style={{
+                                 padding: "0.6rem 1rem",
+                                 textAlign: "center",
+                               }}
+                             >
+                               <div
+                                 style={{
+                                   display: "flex",
+                                   alignItems: "center",
+                                   gap: 6,
+                                 }}
+                               >
+                                 <button
+                                   type="button"
+                                   onClick={() => moveUp(i)}
+                                   disabled={i === 0 || savingOrder}
+                                   title="Subir"
+                                   style={{
+                                     width: 26,
+                                     height: 26,
+                                     borderRadius: 6,
+                                     border: "1px solid #e2e2e2",
+                                     background: "#fff",
+                                     cursor:
+                                       i === 0 || savingOrder
+                                         ? "not-allowed"
+                                         : "pointer",
+                                     opacity: i === 0 || savingOrder ? 0.35 : 1,
+                                     fontWeight: 700,
+                                     color: "#666",
+                                     fontSize: "0.85rem",
+                                     display: "flex",
+                                     alignItems: "center",
+                                     justifyContent: "center",
+                                     transition: "background 0.15s",
+                                   }}
+                                 >
+                                   ↑
+                                 </button>
+                                 <span
+                                   style={{
+                                     minWidth: 20,
+                                     textAlign: "center",
+                                     fontWeight: 700,
+                                     color: "#555",
+                                     fontSize: "0.85rem",
+                                   }}
+                                 >
+                                   {p.orden}
+                                 </span>
+                                 <button
+                                   type="button"
+                                   onClick={() => moveDown(i)}
+                                   disabled={
+                                     i === rows.length - 1 || savingOrder
+                                   }
+                                   title="Bajar"
+                                   style={{
+                                     width: 26,
+                                     height: 26,
+                                     borderRadius: 6,
+                                     border: "1px solid #e2e2e2",
+                                     background: "#fff",
+                                     cursor:
+                                       i === rows.length - 1 || savingOrder
+                                         ? "not-allowed"
+                                         : "pointer",
+                                     opacity:
+                                       i === rows.length - 1 || savingOrder
+                                         ? 0.35
+                                         : 1,
+                                     fontWeight: 700,
+                                     color: "#666",
+                                     fontSize: "0.85rem",
+                                     display: "flex",
+                                     alignItems: "center",
+                                     justifyContent: "center",
+                                     transition: "background 0.15s",
+                                   }}
+                                 >
+                                   ↓
+                                 </button>
+                               </div>
+                             </td>
 
                             {/* Imágenes badge */}
                             <td

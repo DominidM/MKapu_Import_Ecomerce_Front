@@ -7,6 +7,7 @@ import {
   Pencil,
   Trash2,
   Tag,
+  CheckCircle,
   CheckCircle2,
   XCircle,
   ChevronLeft,
@@ -77,7 +78,7 @@ const C = {
   text: "#1a1a1a",
   textMuted: "#6b7280",
   textFaint: "#9ca3af",
-  bg: "#f5f5f5",
+  bg: "#f8f7f4",
   surface: "#ffffff",
   border: "#e5e7eb",
   borderLight: "#f0f0f0",
@@ -146,6 +147,7 @@ function IconBtn({
   color,
   bg,
   bgHover,
+  border,
   children,
 }: {
   onClick: () => void;
@@ -153,6 +155,7 @@ function IconBtn({
   color: string;
   bg: string;
   bgHover: string;
+  border?: string;
   children: React.ReactNode;
 }) {
   return (
@@ -161,7 +164,7 @@ function IconBtn({
       title={title}
       style={{
         background: bg,
-        border: "none",
+        border: border || "none",
         borderRadius: 7,
         padding: "6px 7px",
         cursor: "pointer",
@@ -226,7 +229,7 @@ const Th = ({
       textAlign: center ? "center" : "left",
       fontSize: "0.75rem",
       fontWeight: 700,
-      color: C.textFaint,
+      color: "#888",
       textTransform: "uppercase",
       letterSpacing: "0.07em",
       whiteSpace: "nowrap",
@@ -253,6 +256,7 @@ export default function AdminPromocionesPage() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [successMsg, setSuccessMsg] = useState("");
   const [page, setPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
 
@@ -369,6 +373,8 @@ export default function AdminPromocionesPage() {
   async function save(e: React.FormEvent) {
     e.preventDefault();
 
+    if (!confirm("¿Guardar estos cambios?")) return;
+
     if (!form.producto_id) return alert("Ingresa un código de producto válido");
     if (!form.valor_descuento || form.valor_descuento <= 0)
       return alert("Valor de descuento inválido");
@@ -396,6 +402,8 @@ export default function AdminPromocionesPage() {
     if (error) return alert(error.message);
 
     cancelForm();
+    setSuccessMsg("Promoción guardada correctamente");
+    setTimeout(() => setSuccessMsg(""), 3000);
     setPage(1);
     loadPromociones(1, search);
   }
@@ -498,6 +506,7 @@ export default function AdminPromocionesPage() {
           "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
       }}
     >
+      {successMsg && (<div style={{position:"fixed",top:"1rem",right:"1rem",zIndex:9999,background:"#16a34a",color:"#fff",padding:"0.75rem 1.25rem",borderRadius:"10px",fontWeight:600,fontSize:"0.875rem",boxShadow:"0 4px 16px rgba(0,0,0,0.12)",display:"flex",alignItems:"center",gap:"8px"}}><CheckCircle size={16}/> {successMsg}</div>)}
       <div
         style={{
           display: "flex",
@@ -512,8 +521,8 @@ export default function AdminPromocionesPage() {
           <h1
             style={{
               margin: 0,
-              fontSize: "1.45rem",
-              fontWeight: 800,
+              fontSize: "1.4rem",
+              fontWeight: 700,
               color: C.text,
               letterSpacing: "-0.02em",
             }}
@@ -572,10 +581,10 @@ export default function AdminPromocionesPage() {
         <div
           style={{
             background: C.surface,
-            borderRadius: "14px",
+            borderRadius: "12px",
             padding: "1.75rem",
             marginBottom: "1.5rem",
-            boxShadow: shadow.card,
+            border: "1px solid #e8e8e8",
             borderTop: `3px solid ${C.primary}`,
           }}
         >
@@ -928,11 +937,11 @@ export default function AdminPromocionesPage() {
             <div
               style={{
                 background: C.surface,
-                borderRadius: "14px",
+                borderRadius: "12px",
                 padding: "3rem",
                 textAlign: "center",
                 color: C.textFaint,
-                boxShadow: shadow.card,
+                border: "1px solid #e8e8e8",
               }}
             >
               Cargando promociones...
@@ -941,8 +950,8 @@ export default function AdminPromocionesPage() {
             <div
               style={{
                 background: C.surface,
-                borderRadius: "14px",
-                boxShadow: shadow.card,
+                borderRadius: "12px",
+                border: "1px solid #e8e8e8",
                 overflow: "hidden",
               }}
             >
@@ -1143,9 +1152,10 @@ export default function AdminPromocionesPage() {
                               <IconBtn
                                 onClick={() => onEdit(p)}
                                 title="Editar"
-                                color={C.blue}
-                                bg={C.blueLight}
-                                bgHover={C.blueHover}
+                                color="#f5a623"
+                                bg="rgba(245,166,35,0.1)"
+                                bgHover="rgba(245,166,35,0.18)"
+                                border="1px solid rgba(245,166,35,0.18)"
                               >
                                 <Pencil size={14} />
                               </IconBtn>

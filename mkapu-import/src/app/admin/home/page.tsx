@@ -447,7 +447,7 @@ export default function AdminHomePage() {
                     borderBottom: "1px solid #e8e8e8",
                   }}
                 >
-                  {["Orden", "Categoría", "Estado", "Acciones"].map((h) => (
+                  {["Categoría", "Orden", "Estado", "Acciones"].map((h) => (
                     <th
                       key={h}
                       style={{
@@ -496,127 +496,6 @@ export default function AdminHomePage() {
                         (e.currentTarget.style.background = "#fff")
                       }
                     >
-                      {/* Columna Orden unificada: drag + ▲ número ▼ */}
-                      <td
-                        style={{
-                          padding: "0.9rem 1rem",
-                          textAlign: "center",
-                          minWidth: 90,
-                        }}
-                      >
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            gap: 8,
-                          }}
-                        >
-                          <GripVertical size={16} color="#d1d5db" />
-
-                          {/* Control ▲ número ▼ */}
-                          <div
-                            style={{
-                              display: "inline-flex",
-                              flexDirection: "column",
-                              alignItems: "center",
-                              border: "1px solid #e5e7eb",
-                              borderRadius: "8px",
-                              overflow: "hidden",
-                              background: "#fff",
-                            }}
-                          >
-                            {/* Botón ▲ */}
-                            <button
-                              type="button"
-                              onClick={() => moveUp(idx)}
-                              disabled={isFirst || saving}
-                              title="Subir"
-                              style={{
-                                width: 32,
-                                height: 24,
-                                border: "none",
-                                borderBottom: "1px solid #e5e7eb",
-                                background: isFirst ? "#f9fafb" : "#fff",
-                                cursor:
-                                  isFirst || saving ? "not-allowed" : "pointer",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                fontSize: "0.7rem",
-                                color: isFirst ? "#d1d5db" : "#6b7280",
-                                transition: "background 0.15s",
-                                padding: 0,
-                              }}
-                              onMouseEnter={(e) => {
-                                if (!isFirst && !saving)
-                                  e.currentTarget.style.background = "#f3f4f6";
-                              }}
-                              onMouseLeave={(e) => {
-                                e.currentTarget.style.background = isFirst
-                                  ? "#f9fafb"
-                                  : "#fff";
-                              }}
-                            >
-                              ▲
-                            </button>
-
-                            {/* Número */}
-                            <div
-                              style={{
-                                width: 32,
-                                height: 28,
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                fontSize: "0.8rem",
-                                fontWeight: 700,
-                                color: "#374151",
-                                background: "#fafafa",
-                                borderBottom: "1px solid #e5e7eb",
-                                userSelect: "none",
-                              }}
-                            >
-                              {idx + 1}
-                            </div>
-
-                            {/* Botón ▼ */}
-                            <button
-                              type="button"
-                              onClick={() => moveDown(idx)}
-                              disabled={isLast || saving}
-                              title="Bajar"
-                              style={{
-                                width: 32,
-                                height: 24,
-                                border: "none",
-                                background: isLast ? "#f9fafb" : "#fff",
-                                cursor:
-                                  isLast || saving ? "not-allowed" : "pointer",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                fontSize: "0.7rem",
-                                color: isLast ? "#d1d5db" : "#6b7280",
-                                transition: "background 0.15s",
-                                padding: 0,
-                              }}
-                              onMouseEnter={(e) => {
-                                if (!isLast && !saving)
-                                  e.currentTarget.style.background = "#f3f4f6";
-                              }}
-                              onMouseLeave={(e) => {
-                                e.currentTarget.style.background = isLast
-                                  ? "#f9fafb"
-                                  : "#fff";
-                              }}
-                            >
-                              ▼
-                            </button>
-                          </div>
-                        </div>
-                      </td>
-
                       {/* Categoría */}
                       <td style={{ padding: "0.9rem 1rem", minWidth: 200 }}>
                         <div
@@ -639,6 +518,83 @@ export default function AdminHomePage() {
                           }}
                         >
                           /categoria/{cat?.slug}
+                        </div>
+                      </td>
+
+                      {/* Columna Orden: ↑ número ↓ */}
+                      <td
+                        style={{
+                          padding: "0.9rem 1rem",
+                          textAlign: "center",
+                          minWidth: 90,
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 6,
+                          }}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => moveUp(idx)}
+                            disabled={isFirst || saving}
+                            title="Subir"
+                            style={{
+                              width: 26,
+                              height: 26,
+                              borderRadius: "6px",
+                              border: "1px solid #e2e2e2",
+                              background: "#fff",
+                              fontWeight: 700,
+                              color: "#666",
+                              fontSize: "0.85rem",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              cursor: isFirst || saving ? "not-allowed" : "pointer",
+                              opacity: isFirst ? 0.4 : 1,
+                              padding: 0,
+                            }}
+                          >
+                            ↑
+                          </button>
+                          <span
+                            style={{
+                              minWidth: "20px",
+                              textAlign: "center",
+                              fontWeight: 700,
+                              color: "#555",
+                              fontSize: "0.85rem",
+                            }}
+                          >
+                            {idx + 1}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => moveDown(idx)}
+                            disabled={isLast || saving}
+                            title="Bajar"
+                            style={{
+                              width: 26,
+                              height: 26,
+                              borderRadius: "6px",
+                              border: "1px solid #e2e2e2",
+                              background: "#fff",
+                              fontWeight: 700,
+                              color: "#666",
+                              fontSize: "0.85rem",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              cursor: isLast || saving ? "not-allowed" : "pointer",
+                              opacity: isLast ? 0.4 : 1,
+                              padding: 0,
+                            }}
+                          >
+                            ↓
+                          </button>
                         </div>
                       </td>
 

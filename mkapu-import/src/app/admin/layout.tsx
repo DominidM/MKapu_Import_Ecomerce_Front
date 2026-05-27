@@ -140,7 +140,6 @@ export default function AdminLayout({
     { name: "Videos", icon: Video, href: "/admin/videos" },
     { name: "Reclamaciones", icon: AlertCircle, href: "/admin/reclamos" },
     { name: "Empleados", icon: Users, href: "/admin/empleados" },
-    { name: "Empresa", icon: Building2, href: "/admin/empresa" },
     { name: "Banners", icon: Image, href: "/admin/banners" },
     { name: "Blog", icon: FileText, href: "/admin/blog" },
     { name: "Categorías", icon: FolderTree, href: "/admin/categorias" },
@@ -280,6 +279,15 @@ export default function AdminLayout({
               transition: "opacity 0.15s",
             }}
           >
+            <Link
+              href="/admin/empresa"
+              className={`nav-link ${pathname === "/admin/empresa" ? "active" : ""}`}
+              title={!sidebarOpen && !isMobile ? "Configuración de empresa" : undefined}
+              style={{ borderRadius: "8px", borderLeft: "none" }}
+            >
+              <Building2 size={18} style={{ flexShrink: 0 }} />
+              {(sidebarOpen || isMobile) && "Configuración de empresa"}
+            </Link>
             <Link
               href="/"
               className="btn-store"

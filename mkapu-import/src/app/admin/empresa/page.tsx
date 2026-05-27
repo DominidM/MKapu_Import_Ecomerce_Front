@@ -94,6 +94,7 @@ export default function AdminEmpresaPage() {
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
+    if (!confirm("¿Guardar estos cambios?")) return;
     if (!data.nombre.trim()) return showToast("El nombre es requerido", "error");
 
     setSaving(true);
@@ -166,26 +167,9 @@ export default function AdminEmpresaPage() {
       </h1>
 
       <form onSubmit={save}>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "360px 1fr",
-            gap: "1.5rem",
-            alignItems: "start",
-          }}
-        >
-          {/* ─── LEFT COLUMN: Logo + Redes ─── */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-            {/* Logo */}
-            <div
-              style={{
-                background: "#fff",
-                border: "1px solid #e8e8e8",
-                borderRadius: "12px",
-                padding: "2rem 1.5rem 1.5rem",
-                textAlign: "center",
-              }}
-            >
+        <div className="empresa-grid">
+            {/* ─── ROW 1: Logo (left) + Info General (right) ─── */}
+            <div className="empresa-card empresa-card-logo">
               <div
                 style={{
                   width: 180,
@@ -273,75 +257,8 @@ export default function AdminEmpresaPage() {
               </button>
             </div>
 
-            {/* Redes Sociales */}
-            <div
-              style={{
-                background: "#fff",
-                border: "1px solid #e8e8e8",
-                borderRadius: "12px",
-                padding: "1.25rem 1.5rem",
-              }}
-            >
-              <h2
-                style={{
-                  margin: "0 0 1rem",
-                  fontSize: "0.9rem",
-                  fontWeight: 700,
-                  color: "#1a1a1a",
-                }}
-              >
-                Redes Sociales
-              </h2>
-
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.85rem" }}>
-                <div>
-                  <label style={lbl}>Instagram URL</label>
-                  <input
-                    style={inp}
-                    placeholder="https://instagram.com/..."
-                    value={data.instagram_url ?? ""}
-                    onChange={(e) => set("instagram_url", e.target.value)}
-                    onFocus={onFocus}
-                    onBlur={onBlur}
-                  />
-                </div>
-                <div>
-                  <label style={lbl}>Facebook URL</label>
-                  <input
-                    style={inp}
-                    placeholder="https://facebook.com/..."
-                    value={data.facebook_url ?? ""}
-                    onChange={(e) => set("facebook_url", e.target.value)}
-                    onFocus={onFocus}
-                    onBlur={onBlur}
-                  />
-                </div>
-                <div>
-                  <label style={lbl}>TikTok URL</label>
-                  <input
-                    style={inp}
-                    placeholder="https://tiktok.com/@..."
-                    value={data.tiktok_url ?? ""}
-                    onChange={(e) => set("tiktok_url", e.target.value)}
-                    onFocus={onFocus}
-                    onBlur={onBlur}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* ─── RIGHT COLUMN: Info + Contacto + Save ─── */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
             {/* Información general */}
-            <div
-              style={{
-                background: "#fff",
-                border: "1px solid #e8e8e8",
-                borderRadius: "12px",
-                padding: "1.5rem",
-              }}
-            >
+            <div className="empresa-card empresa-card-info">
               <h2
                 style={{
                   margin: "0 0 1.25rem",
@@ -353,13 +270,7 @@ export default function AdminEmpresaPage() {
                 Información general
               </h2>
 
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: "1rem",
-                }}
-              >
+              <div className="empresa-field-row">
                 <div>
                   <label style={lbl}>Nombre *</label>
                   <input
@@ -430,15 +341,58 @@ export default function AdminEmpresaPage() {
               </div>
             </div>
 
+            {/* ─── ROW 2: Redes (left) + Contacto (right) ─── */}
+            <div className="empresa-card empresa-card-redes">
+              <h2
+                style={{
+                  margin: "0 0 1rem",
+                  fontSize: "0.9rem",
+                  fontWeight: 700,
+                  color: "#1a1a1a",
+                }}
+              >
+                Redes Sociales
+              </h2>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.85rem" }}>
+                <div>
+                  <label style={lbl}>Instagram URL</label>
+                  <input
+                    style={inp}
+                    placeholder="https://instagram.com/..."
+                    value={data.instagram_url ?? ""}
+                    onChange={(e) => set("instagram_url", e.target.value)}
+                    onFocus={onFocus}
+                    onBlur={onBlur}
+                  />
+                </div>
+                <div>
+                  <label style={lbl}>Facebook URL</label>
+                  <input
+                    style={inp}
+                    placeholder="https://facebook.com/..."
+                    value={data.facebook_url ?? ""}
+                    onChange={(e) => set("facebook_url", e.target.value)}
+                    onFocus={onFocus}
+                    onBlur={onBlur}
+                  />
+                </div>
+                <div>
+                  <label style={lbl}>TikTok URL</label>
+                  <input
+                    style={inp}
+                    placeholder="https://tiktok.com/@..."
+                    value={data.tiktok_url ?? ""}
+                    onChange={(e) => set("tiktok_url", e.target.value)}
+                    onFocus={onFocus}
+                    onBlur={onBlur}
+                  />
+                </div>
+              </div>
+            </div>
+
             {/* Contacto */}
-            <div
-              style={{
-                background: "#fff",
-                border: "1px solid #e8e8e8",
-                borderRadius: "12px",
-                padding: "1.5rem",
-              }}
-            >
+            <div className="empresa-card empresa-card-contacto">
               <h2
                 style={{
                   margin: "0 0 1.25rem",
@@ -450,13 +404,7 @@ export default function AdminEmpresaPage() {
                 Contacto
               </h2>
 
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: "1rem",
-                }}
-              >
+              <div className="empresa-field-row">
                 <div>
                   <label style={lbl}>Email</label>
                   <input
@@ -505,8 +453,8 @@ export default function AdminEmpresaPage() {
               </div>
             </div>
 
-            {/* Save */}
-            <div style={{ display: "flex", justifyContent: "flex-end" }}>
+            {/* ─── ROW 3: Save (right column only) ─── */}
+            <div className="empresa-save">
               <button
                 type="submit"
                 disabled={saving}
@@ -535,13 +483,71 @@ export default function AdminEmpresaPage() {
                 {saving ? "Guardando..." : "Guardar cambios"}
               </button>
             </div>
-          </div>
         </div>
       </form>
 
       <style>{`
         @keyframes spin {
           to { transform: rotate(360deg); }
+        }
+
+        .empresa-grid {
+          display: grid;
+          grid-template-columns: 360px 1fr;
+          gap: 1.5rem;
+        }
+
+        .empresa-card {
+          background: #fff;
+          border: 1px solid #e8e8e8;
+          border-radius: 12px;
+        }
+
+        .empresa-card-logo {
+          padding: 2rem 1.5rem 1.5rem;
+          text-align: center;
+        }
+
+        .empresa-card-info {
+          padding: 1.5rem;
+        }
+
+        .empresa-card-redes {
+          padding: 1.25rem 1.5rem;
+        }
+
+        .empresa-card-contacto {
+          padding: 1.5rem;
+        }
+
+        .empresa-save {
+          grid-column: 2;
+          display: flex;
+          justify-content: flex-end;
+        }
+
+        .empresa-field-row {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 1rem;
+        }
+
+        @media (max-width: 900px) {
+          .empresa-grid {
+            grid-template-columns: 1fr;
+          }
+          .empresa-save {
+            grid-column: 1;
+          }
+          .empresa-card-logo {
+            min-height: auto;
+          }
+        }
+
+        @media (max-width: 640px) {
+          .empresa-field-row {
+            grid-template-columns: 1fr;
+          }
         }
       `}</style>
     </div>
