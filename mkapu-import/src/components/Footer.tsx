@@ -1,15 +1,36 @@
 "use client";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { Mail } from "lucide-react";
 
 export default function Footer() {
+  const [empresa, setEmpresa] = useState<any>(null);
+
+  useEffect(() => {
+    fetch("/api/empresa")
+      .then((r) => r.json())
+      .then((d) => { if (d) setEmpresa(d); })
+      .catch(() => {});
+  }, []);
+
   return (
     <footer className="footer">
       <div className="footer__inner">
         <div className="footer__brand">
-          <span className="footer__logo-title">mkapu</span>
-          <span className="footer__logo-sub">import</span>
+          {empresa?.logo ? (
+            <img
+              src={empresa.logo}
+              alt={empresa.nombre || "MKapu Import"}
+              className="footer__logo-img"
+            />
+          ) : (
+            <>
+              <span className="footer__logo-title">mkapu</span>
+              <span className="footer__logo-sub">import</span>
+            </>
+          )}
           <p className="footer__tagline">
-            Equipos de importación para tu negocio
+            {empresa?.descripcion || "Equipos de importación para tu negocio"}
           </p>
         </div>
 
@@ -27,7 +48,7 @@ export default function Footer() {
           <div className="footer__col">
             <h4 className="footer__col-title">Contacto</h4>
             <a
-              href={`https://wa.me/${process.env.NEXT_PUBLIC_SUPORT_WHATSAPP_NUMBER}`}
+              href={`https://wa.me/${empresa?.whatsapp || process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}`}
               target="_blank"
               rel="noopener noreferrer"
               className="footer__link footer__link--wsp"
@@ -43,9 +64,10 @@ export default function Footer() {
               </svg>
               WhatsApp
             </a>
-            <a href="mailto:marlomauriciop1@gmail.com" className="footer__link">
-              marlomauriciop1@gmail.com
-            </a>
+            <Link href="/contacto" className="footer__link">
+              <Mail size={14} />
+              Email
+            </Link>
           </div>
 
           <div className="footer__col">
@@ -72,7 +94,7 @@ export default function Footer() {
 
       <div className="footer__bottom">
         <div className="footer__bottom-inner">
-          <p>© {new Date().getFullYear()} MKAPU IMPORT S.A.C. Todos los derechos reservados.</p>
+          <p>© {new Date().getFullYear()} {empresa?.razon_social || "MKAPU IMPORT S.A.C."} Todos los derechos reservados.</p>
           <a
             href="https://www.instagram.com/solvegrades.com_/"
             target="_blank"
@@ -109,6 +131,13 @@ export default function Footer() {
           display: flex;
           flex-direction: column;
           gap: 0.25rem;
+        }
+
+        .footer__logo-img {
+          height: 100px;
+          width: 100px;
+          display: block;
+          justify-content: center;
         }
 
         .footer__logo-title {

@@ -53,6 +53,14 @@ export default function Navbar({ categories = [] }: NavbarProps) {
   const [search, setSearch] = useState("");
   const [megaOpen, setMegaOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [logoUrl, setLogoUrl] = useState("");
+
+  useEffect(() => {
+    fetch("/api/empresa")
+      .then((r) => r.json())
+      .then((d) => { if (d?.logo) setLogoUrl(d.logo); })
+      .catch(() => {});
+  }, []);
 
   const [cats, setCats] = useState<Categoria[]>(categories);
   const megaTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -201,8 +209,14 @@ export default function Navbar({ categories = [] }: NavbarProps) {
             className="nb__logo"
             onClick={() => setMobileOpen(false)}
           >
-            <span className="nb__logo-t">mkapu</span>
-            <span className="nb__logo-s">import</span>
+            {logoUrl ? (
+              <img src={logoUrl} alt="MKapu Import" className="nb__logo-img" />
+            ) : (
+              <>
+                <span className="nb__logo-t">mkapu</span>
+                <span className="nb__logo-s">import</span>
+              </>
+            )}
           </Link>
 
           <div
@@ -829,6 +843,16 @@ export default function Navbar({ categories = [] }: NavbarProps) {
 
         .nb__cart-label {
           line-height: 1;
+        }
+
+        .nb__logo-img {
+          height: 40px;
+          width: auto;
+          display: block;
+          transition: transform 0.2s ease;
+        }
+        .nb__logo-img:hover {
+          transform: scale(1.25);
         }
       `}</style>
     </>

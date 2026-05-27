@@ -1,8 +1,19 @@
+"use client";
+import { useEffect, useState } from "react";
+
 export default function MapaLocal() {
-  const lat = -11.9981982;
-  const lng = -77.0145005;
-  const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
-  const embedUrl = `https://maps.google.com/maps?q=${lat},${lng}&z=17&output=embed`;
+  const [direccion, setDireccion] = useState("");
+
+  useEffect(() => {
+    fetch("/api/empresa")
+      .then((r) => r.json())
+      .then((d) => { if (d?.direccion) setDireccion(d.direccion); })
+      .catch(() => {});
+  }, []);
+
+  const address = direccion || "San Juan de Lurigancho, Lima, Perú";
+  const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`;
+  const embedUrl = `https://maps.google.com/maps?q=${encodeURIComponent(address)}&z=17&output=embed`;
 
   return (
     <section className="mapa-section">
@@ -10,7 +21,7 @@ export default function MapaLocal() {
         <div className="mapa-info">
           <span className="mapa-tag">Encuéntranos</span>
           <h2 className="mapa-title">Visita nuestra tienda</h2>
-          <p className="mapa-address">📍 San Juan de Luringancho, Lima, Perú</p>
+          <p className="mapa-address">📍 {address}</p>
           <p className="mapa-desc">
             Contamos con showroom para que puedas ver los equipos en persona
             antes de comprar.

@@ -8,6 +8,9 @@ type BannerCarousel = {
   id: number;
   titulo: string | null;
   subtitulo: string | null;
+  descripcion: string | null;
+  eyebrow: string | null;
+  titulo_completo: string | null;
   image_url: string;
   orden: number;
   activo: boolean;
@@ -49,6 +52,9 @@ const lbl: React.CSSProperties = {
 const initialCarousel = {
   titulo: "",
   subtitulo: "",
+  descripcion: "",
+  eyebrow: "",
+  titulo_completo: "",
   image_url: "",
   orden: 0,
   activo: true,
@@ -152,6 +158,9 @@ export default function AdminBannersPage() {
     const payload = {
       titulo: formC.titulo || null,
       subtitulo: formC.subtitulo || null,
+      descripcion: formC.descripcion || null,
+      eyebrow: formC.eyebrow || null,
+      titulo_completo: formC.titulo_completo || null,
       image_url: formC.image_url,
       orden: formC.orden,
       activo: formC.activo,
@@ -174,6 +183,9 @@ export default function AdminBannersPage() {
     setFormC({
       titulo: b.titulo ?? "",
       subtitulo: b.subtitulo ?? "",
+      descripcion: b.descripcion ?? "",
+      eyebrow: b.eyebrow ?? "",
+      titulo_completo: b.titulo_completo ?? "",
       image_url: b.image_url,
       orden: b.orden,
       activo: b.activo,
@@ -205,12 +217,12 @@ export default function AdminBannersPage() {
     await load();
   }
 
-  function onFocusInput(e: React.FocusEvent<HTMLInputElement>) {
+  function onFocusInput(e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) {
     e.currentTarget.style.borderColor = "#f5a623";
     e.currentTarget.style.boxShadow = "0 0 0 3px rgba(245,166,35,0.12)";
   }
 
-  function onBlurInput(e: React.FocusEvent<HTMLInputElement>) {
+  function onBlurInput(e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) {
     e.currentTarget.style.borderColor = "#e2e2e2";
     e.currentTarget.style.boxShadow = "none";
   }
@@ -537,6 +549,59 @@ export default function AdminBannersPage() {
                       placeholder="Ej: Hasta 50% de descuento"
                       onChange={(e) =>
                         setFormC({ ...formC, subtitulo: e.target.value })
+                      }
+                      onFocus={onFocusInput}
+                      onBlur={onBlurInput}
+                    />
+                  </div>
+                </div>
+
+                {/* Descripción larga */}
+                <div style={{ marginBottom: "1rem" }}>
+                  <label style={lbl}>Descripción</label>
+                  <textarea
+                    style={{ ...inp, minHeight: "80px", resize: "vertical" }}
+                    value={formC.descripcion}
+                    placeholder="Texto completo para el slide..."
+                    onChange={(e) =>
+                      setFormC({ ...formC, descripcion: e.target.value })
+                    }
+                    onFocus={onFocusInput}
+                    onBlur={onBlurInput}
+                  />
+                </div>
+
+                {/* Fila: eyebrow + titulo_completo */}
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns:
+                      "repeat(auto-fit, minmax(min(100%, 240px), 1fr))",
+                    gap: "1rem",
+                    marginBottom: "1rem",
+                  }}
+                >
+                  <div>
+                    <label style={lbl}>Eyebrow</label>
+                    <input
+                      style={inp}
+                      value={formC.eyebrow}
+                      placeholder="Ej: Equipos de importación · Lima, Perú"
+                      onChange={(e) =>
+                        setFormC({ ...formC, eyebrow: e.target.value })
+                      }
+                      onFocus={onFocusInput}
+                      onBlur={onBlurInput}
+                    />
+                  </div>
+                  <div>
+                    <label style={lbl}>Título completo (HTML)</label>
+                    <input
+                      style={inp}
+                      value={formC.titulo_completo}
+                      placeholder='Ej: Equipos que&lt;br/&gt;&lt;em&gt;Profesionales&lt;/em&gt;&lt;br/&gt;para tu negocio'
+                      onChange={(e) =>
+                        setFormC({ ...formC, titulo_completo: e.target.value })
                       }
                       onFocus={onFocusInput}
                       onBlur={onBlurInput}
