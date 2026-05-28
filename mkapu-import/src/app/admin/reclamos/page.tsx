@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
-import { Eye, ChevronLeft } from "lucide-react";
+import { Eye, ChevronLeft, CheckCircle } from "lucide-react";
 
 type Reclamacion = {
   id: number;
@@ -33,6 +33,7 @@ export default function AdminReclamacionesPage() {
   const [loading, setLoading] = useState(true);
   const [filterEstado, setFilterEstado] = useState("todos");
   const [selected, setSelected] = useState<Reclamacion | null>(null);
+  const [successMsg, setSuccessMsg] = useState("");
 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
@@ -118,6 +119,8 @@ export default function AdminReclamacionesPage() {
     if (!error) {
       load();
       loadStats();
+      setSuccessMsg("Estado actualizado correctamente");
+      setTimeout(() => setSuccessMsg(""), 3000);
 
       if (selected?.id === id) {
         setSelected((prev) => (prev ? { ...prev, estado: nuevoEstado } : null));
@@ -146,6 +149,16 @@ export default function AdminReclamacionesPage() {
         minHeight: "100vh",
       }}
     >
+      {successMsg && (
+        <div style={{
+          position: "fixed", top: "1rem", right: "1rem", zIndex: 9999,
+          background: "#16a34a", color: "#fff", padding: "0.75rem 1.25rem",
+          borderRadius: "10px", fontWeight: 600, fontSize: "0.875rem",
+          boxShadow: "0 4px 16px rgba(0,0,0,0.12)", display: "flex", alignItems: "center", gap: "8px",
+        }}>
+          <CheckCircle size={16} /> {successMsg}
+        </div>
+      )}
       {selected ? (
         <>
           <div
@@ -449,7 +462,7 @@ export default function AdminReclamacionesPage() {
                 style={{
                   background: s.bg,
                   border: s.border,
-                  borderRadius: "10px",
+                  borderRadius: "12px",
                   padding: "1rem 1.25rem",
                   minWidth: 0,
                 }}
@@ -735,9 +748,9 @@ export default function AdminReclamacionesPage() {
                                   display: "inline-flex",
                                   alignItems: "center",
                                   gap: "5px",
-                                  background: "rgba(0,123,255,0.07)",
-                                  color: "#007bff",
-                                  border: "1px solid rgba(0,123,255,0.2)",
+                                  background: "rgba(245,166,35,0.1)",
+                                  color: "#f5a623",
+                                  border: "1px solid rgba(245,166,35,0.18)",
                                   padding: "5px 12px",
                                   borderRadius: "6px",
                                   fontSize: "0.8rem",

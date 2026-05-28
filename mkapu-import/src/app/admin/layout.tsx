@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
+import Toast from "@/components/Toast";
 import {
   Package,
   AlertCircle,
@@ -19,6 +20,7 @@ import {
   Info,
   LayoutDashboard,
   Percent,
+  Building2,
   X,
 } from "lucide-react";
 
@@ -278,6 +280,15 @@ export default function AdminLayout({
             }}
           >
             <Link
+              href="/admin/empresa"
+              className={`nav-link ${pathname === "/admin/empresa" ? "active" : ""}`}
+              title={!sidebarOpen && !isMobile ? "Configuración de empresa" : undefined}
+              style={{ borderRadius: "8px", borderLeft: "none" }}
+            >
+              <Building2 size={18} style={{ flexShrink: 0 }} />
+              {(sidebarOpen || isMobile) && "Configuración de empresa"}
+            </Link>
+            <Link
               href="/"
               className="btn-store"
               title={!sidebarOpen && !isMobile ? "Ir a tienda" : undefined}
@@ -347,7 +358,36 @@ export default function AdminLayout({
             >
               Panel de Administración
             </span>
-            <div style={{ width: "36px" }} />
+            <Link
+              href="/admin/empresa"
+              title="Configurar empresa"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: 36,
+                height: 36,
+                borderRadius: 8,
+                color: pathname === "/admin/empresa" ? "#f5a623" : "#999",
+                background: pathname === "/admin/empresa" ? "rgba(245,166,35,0.1)" : "transparent",
+                transition: "all 0.2s",
+                textDecoration: "none",
+              }}
+              onMouseEnter={(e) => {
+                if (pathname !== "/admin/empresa") {
+                  e.currentTarget.style.background = "rgba(245,166,35,0.08)";
+                  e.currentTarget.style.color = "#f5a623";
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (pathname !== "/admin/empresa") {
+                  e.currentTarget.style.background = "transparent";
+                  e.currentTarget.style.color = "#999";
+                }
+              }}
+            >
+              <Building2 size={20} />
+            </Link>
           </div>
 
           {/* Content */}
@@ -359,6 +399,7 @@ export default function AdminLayout({
           </div>
         </main>
       </div>
+      <Toast />
     </>
   );
 }

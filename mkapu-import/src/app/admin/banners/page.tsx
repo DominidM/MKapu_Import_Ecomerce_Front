@@ -2,12 +2,15 @@
 
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { Pencil, Trash2, Upload, ImageIcon } from "lucide-react";
+import { Pencil, Trash2, Upload, ImageIcon, CheckCircle } from "lucide-react";
 
 type BannerCarousel = {
   id: number;
   titulo: string | null;
   subtitulo: string | null;
+  descripcion: string | null;
+  eyebrow: string | null;
+  titulo_completo: string | null;
   image_url: string;
   orden: number;
   activo: boolean;
@@ -49,6 +52,9 @@ const lbl: React.CSSProperties = {
 const initialCarousel = {
   titulo: "",
   subtitulo: "",
+  descripcion: "",
+  eyebrow: "",
+  titulo_completo: "",
   image_url: "",
   orden: 0,
   activo: true,
@@ -71,6 +77,7 @@ export default function AdminBannersPage() {
   const fileRefCfg = useRef<HTMLInputElement>(null);
 
   const [loading, setLoading] = useState(true);
+  const [successMsg, setSuccessMsg] = useState("");
 
   async function load() {
     setLoading(true);
@@ -148,10 +155,14 @@ export default function AdminBannersPage() {
 
   async function saveCarousel(e: React.FormEvent) {
     e.preventDefault();
+    if (!confirm("¿Guardar estos cambios?")) return;
     if (!formC.image_url) return alert("Imagen requerida");
     const payload = {
       titulo: formC.titulo || null,
       subtitulo: formC.subtitulo || null,
+      descripcion: formC.descripcion || null,
+      eyebrow: formC.eyebrow || null,
+      titulo_completo: formC.titulo_completo || null,
       image_url: formC.image_url,
       orden: formC.orden,
       activo: formC.activo,
@@ -163,6 +174,8 @@ export default function AdminBannersPage() {
           .eq("id", editCId)
       : await supabase.from("banners_carousel").insert(payload);
     if (error) return alert(error.message);
+    setSuccessMsg(editCId ? "Slide actualizado correctamente" : "Slide creado correctamente");
+    setTimeout(() => setSuccessMsg(""), 3000);
     setFormC(initialCarousel);
     setEditCId(null);
     setShowFormC(false);
@@ -174,6 +187,9 @@ export default function AdminBannersPage() {
     setFormC({
       titulo: b.titulo ?? "",
       subtitulo: b.subtitulo ?? "",
+      descripcion: b.descripcion ?? "",
+      eyebrow: b.eyebrow ?? "",
+      titulo_completo: b.titulo_completo ?? "",
       image_url: b.image_url,
       orden: b.orden,
       activo: b.activo,
@@ -190,6 +206,7 @@ export default function AdminBannersPage() {
 
   async function saveConfig(e: React.FormEvent) {
     e.preventDefault();
+    if (!confirm("¿Guardar estos cambios?")) return;
     if (!editConfig) return;
     const { error } = await supabase
       .from("banners_config")
@@ -201,16 +218,18 @@ export default function AdminBannersPage() {
       })
       .eq("id", editConfig.id);
     if (error) return alert(error.message);
+    setSuccessMsg("Banner de página actualizado correctamente");
+    setTimeout(() => setSuccessMsg(""), 3000);
     setEditConfig(null);
     await load();
   }
 
-  function onFocusInput(e: React.FocusEvent<HTMLInputElement>) {
+  function onFocusInput(e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) {
     e.currentTarget.style.borderColor = "#f5a623";
     e.currentTarget.style.boxShadow = "0 0 0 3px rgba(245,166,35,0.12)";
   }
 
-  function onBlurInput(e: React.FocusEvent<HTMLInputElement>) {
+  function onBlurInput(e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) {
     e.currentTarget.style.borderColor = "#e2e2e2";
     e.currentTarget.style.boxShadow = "none";
   }
@@ -309,9 +328,9 @@ export default function AdminBannersPage() {
   const thStyle: React.CSSProperties = {
     padding: "0.8rem 1rem",
     textAlign: "left",
-    fontSize: "0.72rem",
+    fontSize: "0.8rem",
     fontWeight: 700,
-    color: "#999",
+    color: "#888",
     textTransform: "uppercase",
     letterSpacing: "0.06em",
     whiteSpace: "nowrap",
@@ -330,19 +349,21 @@ export default function AdminBannersPage() {
         minHeight: "100vh",
       }}
     >
+      {successMsg && (<div style={{position:"fixed",top:"1rem",right:"1rem",zIndex:9999,background:"#16a34a",color:"#fff",padding:"0.75rem 1.25rem",borderRadius:"10px",fontWeight:600,fontSize:"0.875rem",boxShadow:"0 4px 16px rgba(0,0,0,0.12)",display:"flex",alignItems:"center",gap:"8px"}}><CheckCircle size={16}/> {successMsg}</div>)}
+
       {/* ── Header ── */}
       <div style={{ marginBottom: "1.75rem" }}>
         <h1
           style={{
             margin: 0,
-            fontSize: "1.35rem",
+            fontSize: "1.4rem",
             fontWeight: 700,
-            color: "#111",
+            color: "#1a1a1a",
           }}
         >
           Banners
         </h1>
-        <p style={{ fontSize: "0.85rem", color: "#999", margin: "0.3rem 0 0" }}>
+        <p style={{ fontSize: "0.85rem", color: "#888", margin: "0.3rem 0 0" }}>
           Gestiona el carrusel principal y los banners de cada página
         </p>
       </div>
@@ -537,6 +558,59 @@ export default function AdminBannersPage() {
                       placeholder="Ej: Hasta 50% de descuento"
                       onChange={(e) =>
                         setFormC({ ...formC, subtitulo: e.target.value })
+                      }
+                      onFocus={onFocusInput}
+                      onBlur={onBlurInput}
+                    />
+                  </div>
+                </div>
+
+                {/* Descripción larga */}
+                <div style={{ marginBottom: "1rem" }}>
+                  <label style={lbl}>Descripción</label>
+                  <textarea
+                    style={{ ...inp, minHeight: "80px", resize: "vertical" }}
+                    value={formC.descripcion}
+                    placeholder="Texto completo para el slide..."
+                    onChange={(e) =>
+                      setFormC({ ...formC, descripcion: e.target.value })
+                    }
+                    onFocus={onFocusInput}
+                    onBlur={onBlurInput}
+                  />
+                </div>
+
+                {/* Fila: eyebrow + titulo_completo */}
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns:
+                      "repeat(auto-fit, minmax(min(100%, 240px), 1fr))",
+                    gap: "1rem",
+                    marginBottom: "1rem",
+                  }}
+                >
+                  <div>
+                    <label style={lbl}>Eyebrow</label>
+                    <input
+                      style={inp}
+                      value={formC.eyebrow}
+                      placeholder="Ej: Equipos de importación · Lima, Perú"
+                      onChange={(e) =>
+                        setFormC({ ...formC, eyebrow: e.target.value })
+                      }
+                      onFocus={onFocusInput}
+                      onBlur={onBlurInput}
+                    />
+                  </div>
+                  <div>
+                    <label style={lbl}>Título completo (HTML)</label>
+                    <input
+                      style={inp}
+                      value={formC.titulo_completo}
+                      placeholder='Ej: Equipos que&lt;br/&gt;&lt;em&gt;Profesionales&lt;/em&gt;&lt;br/&gt;para tu negocio'
+                      onChange={(e) =>
+                        setFormC({ ...formC, titulo_completo: e.target.value })
                       }
                       onFocus={onFocusInput}
                       onBlur={onBlurInput}

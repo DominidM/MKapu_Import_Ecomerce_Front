@@ -1,15 +1,26 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import { useEmpresa } from "@/context/EmpresaContext";
 
 export default function WhatsAppButton() {
   const pathname = usePathname();
+  const { empresa } = useEmpresa();
+  const [whatsapp, setWhatsapp] = useState("");
+
+  useEffect(() => {
+    if (empresa?.whatsapp_soporte) setWhatsapp(empresa.whatsapp_soporte);
+  }, [empresa]);
 
   if (pathname.startsWith("/admin")) return null;
 
+  const number = whatsapp || process.env.NEXT_PUBLIC_SUPORT_WHATSAPP_NUMBER;
+  if (!number) return null;
+
   return (
     <a
-      href={`https://wa.me/${process.env.NEXT_PUBLIC_SUPORT_WHATSAPP_NUMBER}?text=Hola,%20necesito%20ayuda%20con%20mi%20pedido`}
+      href={`https://wa.me/${number}?text=Hola,%20necesito%20ayuda%20con%20mi%20pedido`}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Contactar por WhatsApp"

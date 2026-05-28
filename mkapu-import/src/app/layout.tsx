@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { EmpresaProvider } from "@/context/EmpresaContext";
 import { CartProvider } from "@/app/context/CartContext";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import ClientShell from "@/components/ClientShell";
@@ -52,6 +53,9 @@ export default function RootLayout({
           rel="apple-touch-icon"
           href="https://res.cloudinary.com/dxuk9bogw/image/upload/w_180,h_180,c_fill/v1767836605/474716814_581641201299027_4444346315622797816_n_karlgu.png"
         />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
         <link rel="preconnect" href="https://kodmbciwlfscwtdaejen.supabase.co" />
         <link rel="dns-prefetch" href="https://kodmbciwlfscwtdaejen.supabase.co" />
       </head>
@@ -66,10 +70,12 @@ export default function RootLayout({
           backgroundColor: "#fafaf7",
         }}
       >
-        <CartProvider>
-          <ClientShell>{children}</ClientShell>
-          <WhatsAppButton />
-        </CartProvider>
+        <EmpresaProvider>
+          <CartProvider>
+            <ClientShell>{children}</ClientShell>
+            <WhatsAppButton />
+          </CartProvider>
+        </EmpresaProvider>
       </body>
     </html>
   );

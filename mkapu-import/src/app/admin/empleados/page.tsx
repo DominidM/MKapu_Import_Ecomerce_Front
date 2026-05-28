@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import bcrypt from "bcryptjs";
-import { Pencil, Trash2, Eye, EyeOff } from "lucide-react";
+import { Pencil, Trash2, Eye, EyeOff, CheckCircle } from "lucide-react";
 
 interface Empleado {
   id: number;
@@ -60,6 +60,7 @@ export default function EmpleadosPage() {
   const [guardando, setGuardando] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
 
   useEffect(() => {
     fetchEmpleados();
@@ -101,6 +102,7 @@ export default function EmpleadosPage() {
   }
 
   async function guardar(e: React.FormEvent) {
+    if (!confirm("¿Guardar estos cambios?")) return;
     e.preventDefault();
     setError("");
 
@@ -151,6 +153,8 @@ export default function EmpleadosPage() {
 
       cancelForm();
       await fetchEmpleados();
+      setSuccessMsg(editando ? "Empleado actualizado correctamente" : "Empleado creado correctamente");
+      setTimeout(() => setSuccessMsg(""), 3000);
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "Error al guardar.";
       setError(msg);
@@ -209,6 +213,16 @@ export default function EmpleadosPage() {
         minHeight: "100vh",
       }}
     >
+      {successMsg && (
+        <div style={{
+          position: "fixed", top: "1rem", right: "1rem", zIndex: 9999,
+          background: "#16a34a", color: "#fff", padding: "0.75rem 1.25rem",
+          borderRadius: "10px", fontWeight: 600, fontSize: "0.875rem",
+          boxShadow: "0 4px 16px rgba(0,0,0,0.12)", display: "flex", alignItems: "center", gap: "8px",
+        }}>
+          <CheckCircle size={16} /> {successMsg}
+        </div>
+      )}
       <div
         style={{
           display: "flex",
@@ -425,7 +439,7 @@ export default function EmpleadosPage() {
                     cursor: "pointer",
                   }}
                 />
-                ✅ Empleado activo
+                Activo
               </label>
             </div>
 
@@ -651,9 +665,9 @@ export default function EmpleadosPage() {
                             style={{
                               background: "rgba(245,166,35,0.1)",
                               color: "#f5a623",
-                              border: "1.5px solid rgba(230, 157, 40, 0.1)",
+                              border: "1px solid rgba(245,166,35,0.18)",
                               padding: "6px 10px",
-                              borderRadius: "6px",
+                              borderRadius: "8px",
                               cursor: "pointer",
                               display: "flex",
                               alignItems: "center",
@@ -677,7 +691,7 @@ export default function EmpleadosPage() {
                             title="Eliminar"
                             style={{
                               background: "rgba(220,38,38,0.08)",
-                              border: "none",
+                              border: "1px solid rgba(220,53,69,0.2)",
                               borderRadius: "6px",
                               padding: "6px",
                               cursor: "pointer",

@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { Pencil, Trash2 } from "lucide-react";
+import { CheckCircle, Pencil, Trash2 } from "lucide-react";
 
 type Categoria = {
   id: number;
@@ -50,6 +50,7 @@ export default function AdminCategoriasPage() {
   const [showForm, setShowForm] = useState(false);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [successMsg, setSuccessMsg] = useState("");
 
   async function load() {
     setLoading(true);
@@ -64,6 +65,7 @@ export default function AdminCategoriasPage() {
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
+    if (!confirm("¿Guardar estos cambios?")) return;
     if (!form.name.trim()) return alert("Nombre requerido");
     if (!form.slug.trim()) return alert("Slug requerido");
 
@@ -79,7 +81,9 @@ export default function AdminCategoriasPage() {
 
     if (error) return alert(error.message);
     cancelForm();
-    load();
+    await load();
+    setSuccessMsg(editId ? "Categoría actualizada correctamente" : "Categoría creada correctamente");
+    setTimeout(() => setSuccessMsg(""), 3000);
   }
 
   function onEdit(c: Categoria) {
@@ -150,6 +154,16 @@ export default function AdminCategoriasPage() {
         minHeight: "100vh",
       }}
     >
+      {successMsg && (
+        <div style={{
+          position: "fixed", top: "1rem", right: "1rem", zIndex: 9999,
+          background: "#16a34a", color: "#fff", padding: "0.75rem 1.25rem",
+          borderRadius: "10px", fontWeight: 600, fontSize: "0.875rem",
+          boxShadow: "0 4px 16px rgba(0,0,0,0.12)", display: "flex", alignItems: "center", gap: "8px",
+        }}>
+          <CheckCircle size={16} /> {successMsg}
+        </div>
+      )}
       <div
         style={{
           display: "flex",

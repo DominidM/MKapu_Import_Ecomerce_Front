@@ -1,15 +1,24 @@
 "use client";
 import Link from "next/link";
+import { Mail } from "lucide-react";
+import { useEmpresa } from "@/context/EmpresaContext";
 
 export default function Footer() {
+  const { empresa } = useEmpresa();
+
   return (
     <footer className="footer">
       <div className="footer__inner">
         <div className="footer__brand">
-          <span className="footer__logo-title">mkapu</span>
-          <span className="footer__logo-sub">import</span>
+          {empresa?.logo && (
+            <img
+              src={empresa.logo}
+              alt={empresa.nombre || "MKapu Import"}
+              className="footer__logo-img"
+            />
+          )}
           <p className="footer__tagline">
-            Equipos de importación para tu negocio
+            {empresa?.descripcion || "Equipos de importación para tu negocio"}
           </p>
         </div>
 
@@ -27,7 +36,7 @@ export default function Footer() {
           <div className="footer__col">
             <h4 className="footer__col-title">Contacto</h4>
             <a
-              href={`https://wa.me/${process.env.NEXT_PUBLIC_SUPORT_WHATSAPP_NUMBER}`}
+              href={`https://wa.me/${empresa?.whatsapp || process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}`}
               target="_blank"
               rel="noopener noreferrer"
               className="footer__link footer__link--wsp"
@@ -43,9 +52,10 @@ export default function Footer() {
               </svg>
               WhatsApp
             </a>
-            <a href="mailto:marlomauriciop1@gmail.com" className="footer__link">
-              marlomauriciop1@gmail.com
-            </a>
+            <Link href="/contacto" className="footer__link">
+              <Mail size={14} />
+              Email
+            </Link>
           </div>
 
           <div className="footer__col">
@@ -72,7 +82,7 @@ export default function Footer() {
 
       <div className="footer__bottom">
         <div className="footer__bottom-inner">
-          <p>© {new Date().getFullYear()} MKAPU IMPORT S.A.C. Todos los derechos reservados.</p>
+          <p>© {new Date().getFullYear()} {empresa?.razon_social || "MKAPU IMPORT S.A.C."} Todos los derechos reservados.</p>
           <a
             href="https://www.instagram.com/solvegrades.com_/"
             target="_blank"
@@ -87,138 +97,6 @@ export default function Footer() {
           </a>
         </div>
       </div>
-
-      <style>{`
-        .footer {
-          background: #1a1a1a;
-          color: #ccc;
-          margin-top: auto;
-        }
-
-        .footer__inner {
-          max-width: 1200px;
-          margin: 0 auto;
-          padding: 2.5rem 1.5rem 1.5rem;
-          display: flex;
-          gap: 2rem;
-          flex-wrap: wrap;
-          justify-content: space-between;
-        }
-
-        .footer__brand {
-          display: flex;
-          flex-direction: column;
-          gap: 0.25rem;
-        }
-
-        .footer__logo-title {
-          font-size: 1.4rem;
-          font-weight: 900;
-          color: #fff;
-          letter-spacing: -0.03em;
-          text-transform: lowercase;
-        }
-
-        .footer__logo-sub {
-          font-size: 0.75rem;
-          font-weight: 600;
-          color: #f5a623;
-          text-transform: uppercase;
-          letter-spacing: 0.12em;
-          margin-top: -4px;
-        }
-
-        .footer__tagline {
-          font-size: 0.8rem;
-          color: #888;
-          margin-top: 0.4rem;
-          max-width: 220px;
-        }
-
-        .footer__links {
-          display: flex;
-          gap: 3rem;
-          flex-wrap: wrap;
-        }
-
-        .footer__col {
-          display: flex;
-          flex-direction: column;
-          gap: 0.5rem;
-        }
-
-        .footer__col-title {
-          font-size: 0.75rem;
-          font-weight: 700;
-          color: #fff;
-          text-transform: uppercase;
-          letter-spacing: 0.08em;
-          margin: 0 0 0.25rem;
-        }
-
-        .footer__link {
-          font-size: 0.85rem;
-          color: #aaa;
-          text-decoration: none;
-          transition: color 0.15s;
-          display: flex;
-          align-items: center;
-          gap: 6px;
-        }
-
-        .footer__link:hover {
-          color: #fff;
-        }
-
-        .footer__link--wsp:hover {
-          color: #25d366;
-        }
-
-        .footer__link--reclamos:hover {
-          opacity: 0.85;
-        }
-
-        .footer__reclamos-img {
-          width: 120px;
-          height: auto;
-          border-radius: 4px;
-          display: block;
-          margin-top: 0.25rem;
-        }
-
-        .footer__bottom {
-          border-top: 1px solid #2a2a2a;
-          padding: 1.5rem 1.5rem;
-          font-size: 0.75rem;
-          color: #888;
-        }
-
-        .footer__bottom-inner {
-          max-width: 1200px;
-          margin: 0 auto;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 1.5rem;
-          flex-wrap: wrap;
-        }
-
-        .footer__solvegrades {
-          display: inline-flex;
-          opacity: 0.7;
-          transition: opacity 0.2s;
-        }
-
-        .footer__solvegrades:hover {
-          opacity: 1;
-        }
-
-        .footer__solvegrades-img {
-          height: 120px;
-          width: auto;
-          display: block;
-        }
-      `}</style>
     </footer>
   );
 }

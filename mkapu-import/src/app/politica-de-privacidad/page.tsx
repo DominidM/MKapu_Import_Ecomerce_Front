@@ -167,67 +167,6 @@ export default function PoliticaDePrivacidad() {
         </section>
       </div>
 
-      <style>{`
-        .legal-page {
-          background: #111;
-          color: #ccc;
-          min-height: 100vh;
-          padding: 3rem 1.5rem;
-        }
-
-        .legal-page__container {
-          max-width: 800px;
-          margin: 0 auto;
-        }
-
-        .legal-page__title {
-          font-size: 2rem;
-          font-weight: 900;
-          color: #fff;
-          margin-bottom: 0.25rem;
-        }
-
-        .legal-page__updated {
-          font-size: 0.8rem;
-          color: #555;
-          margin-bottom: 2.5rem;
-        }
-
-        .legal-page__section {
-          margin-bottom: 2rem;
-          border-left: 3px solid #f5a623;
-          padding-left: 1.25rem;
-        }
-
-        .legal-page__section h2 {
-          font-size: 1rem;
-          font-weight: 700;
-          color: #fff;
-          margin-bottom: 0.6rem;
-        }
-
-        .legal-page__section p,
-        .legal-page__section ul,
-        .legal-page__section li {
-          font-size: 0.9rem;
-          line-height: 1.75;
-          color: #aaa;
-          margin-bottom: 0.5rem;
-        }
-
-        .legal-page__section ul {
-          padding-left: 1.25rem;
-        }
-
-        .legal-page__section a {
-          color: #f5a623;
-          text-decoration: none;
-        }
-
-        .legal-page__section a:hover {
-          text-decoration: underline;
-        }
-      `}</style>
     </main>
   );
 }

@@ -1,4 +1,4 @@
-import { supabase, Producto, Categoria, Promocion } from "./supabase";
+import { supabase, Producto, Categoria, Promocion, Empresa } from "./supabase";
 
 // ── TIPOS NUEVOS ───────────────────────────────────────────
 
@@ -38,6 +38,37 @@ export type ProductoImagen = {
   orden: number;
   created_at: string;
 };
+
+// ── EMPRESA ────────────────────────────────────────────────
+
+export async function getEmpresa(): Promise<Empresa | null> {
+  const { data, error } = await supabase
+    .from("empresa")
+    .select("*")
+    .eq("id", 1)
+    .single();
+
+  if (error) {
+    console.error("Error fetching empresa:", error.message);
+    return null;
+  }
+  return data;
+}
+
+export async function updateEmpresa(
+  payload: Partial<Empresa>,
+): Promise<boolean> {
+  const { error } = await supabase
+    .from("empresa")
+    .update(payload)
+    .eq("id", 1);
+
+  if (error) {
+    console.error("Error updating empresa:", error.message);
+    return false;
+  }
+  return true;
+}
 
 // ── PRODUCTOS ──────────────────────────────────────────────
 
@@ -317,6 +348,9 @@ export type Banner = {
   id: number;
   titulo: string;
   subtitulo: string;
+  descripcion: string | null;
+  eyebrow: string | null;
+  titulo_completo: string | null;
   image_url: string;
   link_url: string;
   orden: number;

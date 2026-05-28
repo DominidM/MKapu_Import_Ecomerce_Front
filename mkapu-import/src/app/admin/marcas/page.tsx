@@ -45,6 +45,7 @@ export default function AdminMarcasPage() {
   const [loading, setLoading] = useState(true);
   const [savingOrder, setSavingOrder] = useState(false);
   const [logoName, setLogoName] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
   async function load() {
@@ -93,6 +94,8 @@ export default function AdminMarcasPage() {
   async function save(e: React.FormEvent) {
     e.preventDefault();
 
+    if (!confirm("¿Guardar estos cambios?")) return;
+
     if (!form.name.trim()) return alert("Nombre requerido");
     if (!form.logo_url.trim()) return alert("Sube un logo para la marca");
 
@@ -109,6 +112,8 @@ export default function AdminMarcasPage() {
 
     if (error) return alert(error.message);
 
+    setSuccessMsg(editId ? "Marca actualizada correctamente" : "Marca creada correctamente");
+    setTimeout(() => setSuccessMsg(""), 3000);
     resetForm();
     await load();
   }
@@ -187,6 +192,16 @@ export default function AdminMarcasPage() {
         minHeight: "100vh",
       }}
     >
+      {successMsg && (
+        <div style={{
+          position: "fixed", top: "1rem", right: "1rem", zIndex: 9999,
+          background: "#16a34a", color: "#fff", padding: "0.75rem 1.25rem",
+          borderRadius: "10px", fontWeight: 600, fontSize: "0.875rem",
+          boxShadow: "0 4px 16px rgba(0,0,0,0.12)", display: "flex", alignItems: "center", gap: "8px",
+        }}>
+          <CheckCircle size={16} /> {successMsg}
+        </div>
+      )}
       <div
         style={{
           display: "flex",
@@ -223,6 +238,7 @@ export default function AdminMarcasPage() {
         <button
           onClick={() => {
             setShowForm(!showForm);
+            if (!showForm) setForm({ ...initialForm, orden: rows.length + 1 });
             if (showForm) resetForm();
           }}
           style={{
@@ -713,10 +729,7 @@ export default function AdminMarcasPage() {
                             style={{
                               display: "flex",
                               alignItems: "center",
-                              justifyContent: "space-between",
-                              gap: "10px",
-                              width: "100%",
-                              maxWidth: 130,
+                              gap: "6px",
                             }}
                           >
                             <button
@@ -724,18 +737,19 @@ export default function AdminMarcasPage() {
                               onClick={() => moveUp(i)}
                               disabled={i === 0 || savingOrder}
                               style={{
-                                width: 28,
-                                height: 28,
+                                width: 26,
+                                height: 26,
                                 borderRadius: "6px",
-                                border: "1px solid #e0e0e0",
+                                border: "1px solid #e2e2e2",
                                 background: "#fff",
                                 cursor:
                                   i === 0 || savingOrder
                                     ? "not-allowed"
                                     : "pointer",
-                                opacity: i === 0 || savingOrder ? 0.45 : 1,
+                                opacity: i === 0 || savingOrder ? 0.35 : 1,
                                 fontWeight: 700,
                                 color: "#666",
+                                fontSize: "0.85rem",
                                 display: "flex",
                                 alignItems: "center",
                                 justifyContent: "center",
@@ -747,12 +761,11 @@ export default function AdminMarcasPage() {
 
                             <span
                               style={{
-                                minWidth: 24,
+                                minWidth: "20px",
                                 textAlign: "center",
                                 fontWeight: 700,
-                                color: "#666",
-                                fontSize: "0.9rem",
-                                flex: 1,
+                                color: "#555",
+                                fontSize: "0.85rem",
                               }}
                             >
                               {m.orden}
@@ -763,10 +776,10 @@ export default function AdminMarcasPage() {
                               onClick={() => moveDown(i)}
                               disabled={i === rows.length - 1 || savingOrder}
                               style={{
-                                width: 28,
-                                height: 28,
+                                width: 26,
+                                height: 26,
                                 borderRadius: "6px",
-                                border: "1px solid #e0e0e0",
+                                border: "1px solid #e2e2e2",
                                 background: "#fff",
                                 cursor:
                                   i === rows.length - 1 || savingOrder
@@ -774,10 +787,11 @@ export default function AdminMarcasPage() {
                                     : "pointer",
                                 opacity:
                                   i === rows.length - 1 || savingOrder
-                                    ? 0.45
+                                    ? 0.35
                                     : 1,
                                 fontWeight: 700,
                                 color: "#666",
+                                fontSize: "0.85rem",
                                 display: "flex",
                                 alignItems: "center",
                                 justifyContent: "center",
@@ -825,9 +839,9 @@ export default function AdminMarcasPage() {
                               onClick={() => onEdit(m)}
                               title="Editar"
                               style={{
-                                background: "rgba(0,123,255,0.08)",
-                                color: "#007bff",
-                                border: "1px solid rgba(0,123,255,0.2)",
+                                background: "rgba(245,166,35,0.1)",
+                                color: "#f5a623",
+                                border: "1px solid rgba(245,166,35,0.18)",
                                 padding: "6px 10px",
                                 borderRadius: "6px",
                                 cursor: "pointer",

@@ -121,22 +121,6 @@ export default function CartDrawer({ open, onClose }: Props) {
         )}
       </aside>
 
-      <style jsx>{`
-        .cart-item__img {
-          width: 44px;
-          height: 44px;
-          object-fit: cover;
-          border-radius: 8px;
-          flex-shrink: 0;
-          border: 1px solid #ede8e1;
-        }
-        .cart-item__emoji {
-          font-size: 1.6rem;
-          width: 44px;
-          text-align: center;
-          flex-shrink: 0;
-        }
-      `}</style>
     </>
   );
 }

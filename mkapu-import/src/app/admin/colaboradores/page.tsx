@@ -11,6 +11,10 @@ import {
   Users,
   Image,
   Video,
+  ImageOff,
+  VideoOff,
+  ImagePlus,
+  VideoIcon,
   PlusCircle,
   X,
 } from "lucide-react";
@@ -66,6 +70,7 @@ export default function AdminColaboradoresPage() {
   const [uploadingImg, setUploadingImg] = useState(false);
   const [uploadingVid, setUploadingVid] = useState(false);
   const [savingOrder, setSavingOrder] = useState(false);
+  const [successMsg, setSuccessMsg] = useState("");
 
   const fileRef = useRef<HTMLInputElement>(null);
   const imgRef = useRef<HTMLInputElement>(null);
@@ -213,6 +218,8 @@ export default function AdminColaboradoresPage() {
   async function save(e: React.FormEvent) {
     e.preventDefault();
 
+    if (!confirm("¿Guardar estos cambios?")) return;
+
     if (!form.name.trim()) return alert("Nombre requerido");
     if (!form.logo_url.trim()) {
       return alert("Sube un logo para el colaborador");
@@ -234,6 +241,8 @@ export default function AdminColaboradoresPage() {
 
       if (error) return alert(error.message);
 
+      setSuccessMsg("Colaborador actualizado correctamente");
+      setTimeout(() => setSuccessMsg(""), 3000);
       resetForm();
       await load();
     } else {
@@ -245,6 +254,8 @@ export default function AdminColaboradoresPage() {
 
       if (error) return alert(error.message);
 
+      setSuccessMsg("Colaborador creado correctamente");
+      setTimeout(() => setSuccessMsg(""), 3000);
       setEditId(data.id);
       setForm({
         name: data.name,
@@ -342,6 +353,16 @@ export default function AdminColaboradoresPage() {
         minHeight: "100vh",
       }}
     >
+      {successMsg && (
+        <div style={{
+          position: "fixed", top: "1rem", right: "1rem", zIndex: 9999,
+          background: "#16a34a", color: "#fff", padding: "0.75rem 1.25rem",
+          borderRadius: "10px", fontWeight: 600, fontSize: "0.875rem",
+          boxShadow: "0 4px 16px rgba(0,0,0,0.12)", display: "flex", alignItems: "center", gap: "8px",
+        }}>
+          <CheckCircle size={16} /> {successMsg}
+        </div>
+      )}
       <div
         style={{
           display: "flex",
@@ -378,6 +399,7 @@ export default function AdminColaboradoresPage() {
         <button
           onClick={() => {
             setShowForm(!showForm);
+            if (!showForm) setForm({ ...initialForm, orden: rows.length + 1 });
             if (showForm) resetForm();
           }}
           style={{
@@ -1153,10 +1175,10 @@ export default function AdminColaboradoresPage() {
                             {c.name}
                           </td>
 
-                          <td
+                           <td
                             style={{
                               padding: "0.9rem 1rem",
-                              minWidth: 170,
+                              minWidth: 120,
                               whiteSpace: "nowrap",
                             }}
                           >
@@ -1164,10 +1186,7 @@ export default function AdminColaboradoresPage() {
                               style={{
                                 display: "flex",
                                 alignItems: "center",
-                                justifyContent: "space-between",
-                                gap: "10px",
-                                width: "100%",
-                                maxWidth: 130,
+                                gap: "6px",
                               }}
                             >
                               <button
@@ -1175,18 +1194,19 @@ export default function AdminColaboradoresPage() {
                                 onClick={() => moveUp(i)}
                                 disabled={i === 0 || savingOrder}
                                 style={{
-                                  width: 28,
-                                  height: 28,
+                                  width: 26,
+                                  height: 26,
                                   borderRadius: "6px",
-                                  border: "1px solid #e0e0e0",
+                                  border: "1px solid #e2e2e2",
                                   background: "#fff",
                                   cursor:
                                     i === 0 || savingOrder
                                       ? "not-allowed"
                                       : "pointer",
-                                  opacity: i === 0 || savingOrder ? 0.45 : 1,
+                                  opacity: i === 0 || savingOrder ? 0.35 : 1,
                                   fontWeight: 700,
                                   color: "#666",
+                                  fontSize: "0.85rem",
                                   display: "flex",
                                   alignItems: "center",
                                   justifyContent: "center",
@@ -1198,18 +1218,11 @@ export default function AdminColaboradoresPage() {
 
                               <span
                                 style={{
-                                  minWidth: 28,
-                                  height: 28,
-                                  borderRadius: "999px",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
+                                  minWidth: "20px",
+                                  textAlign: "center",
                                   fontWeight: 700,
-                                  color: "#666",
+                                  color: "#555",
                                   fontSize: "0.85rem",
-                                  background: "#fafafa",
-                                  border: "1px solid #e8e8e8",
-                                  flex: 1,
                                 }}
                               >
                                 {c.orden}
@@ -1220,10 +1233,10 @@ export default function AdminColaboradoresPage() {
                                 onClick={() => moveDown(i)}
                                 disabled={i === rows.length - 1 || savingOrder}
                                 style={{
-                                  width: 28,
-                                  height: 28,
+                                  width: 26,
+                                  height: 26,
                                   borderRadius: "6px",
-                                  border: "1px solid #e0e0e0",
+                                  border: "1px solid #e2e2e2",
                                   background: "#fff",
                                   cursor:
                                     i === rows.length - 1 || savingOrder
@@ -1231,10 +1244,11 @@ export default function AdminColaboradoresPage() {
                                       : "pointer",
                                   opacity:
                                     i === rows.length - 1 || savingOrder
-                                      ? 0.45
+                                      ? 0.35
                                       : 1,
                                   fontWeight: 700,
                                   color: "#666",
+                                  fontSize: "0.85rem",
                                   display: "flex",
                                   alignItems: "center",
                                   justifyContent: "center",
@@ -1253,24 +1267,33 @@ export default function AdminColaboradoresPage() {
                                   display: "inline-flex",
                                   alignItems: "center",
                                   gap: "5px",
-                                  padding: "2px 10px",
-                                  borderRadius: "20px",
-                                  fontSize: "0.75rem",
+                                  padding: "3px 10px",
+                                  borderRadius: "999px",
+                                  fontSize: "0.78rem",
                                   fontWeight: 700,
-                                  background: "#eef4ff",
-                                  color: "#2563eb",
+                                  background: "#eef2ff",
+                                  color: "#4f46e5",
+                                  whiteSpace: "nowrap",
                                 }}
                               >
-                                <Image size={11} /> {m.imgs}
+                                <ImagePlus size={12} strokeWidth={2} /> {m.imgs}
                               </span>
                             ) : (
                               <span
                                 style={{
-                                  color: "#ddd",
-                                  fontSize: "0.8rem",
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  gap: "5px",
+                                  padding: "3px 10px",
+                                  borderRadius: "999px",
+                                  fontSize: "0.78rem",
+                                  fontWeight: 600,
+                                  background: "#f5f5f5",
+                                  color: "#ccc",
+                                  whiteSpace: "nowrap",
                                 }}
                               >
-                                —
+                                <ImageOff size={12} strokeWidth={1.5} /> Sin fotos
                               </span>
                             )}
                           </td>
@@ -1282,24 +1305,33 @@ export default function AdminColaboradoresPage() {
                                   display: "inline-flex",
                                   alignItems: "center",
                                   gap: "5px",
-                                  padding: "2px 10px",
-                                  borderRadius: "20px",
-                                  fontSize: "0.75rem",
+                                  padding: "3px 10px",
+                                  borderRadius: "999px",
+                                  fontSize: "0.78rem",
                                   fontWeight: 700,
                                   background: "#f0fdf4",
                                   color: "#16a34a",
+                                  whiteSpace: "nowrap",
                                 }}
                               >
-                                <Video size={11} /> {m.vids}
+                                <VideoIcon size={12} strokeWidth={2} /> {m.vids}
                               </span>
                             ) : (
                               <span
                                 style={{
-                                  color: "#ddd",
-                                  fontSize: "0.8rem",
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  gap: "5px",
+                                  padding: "3px 10px",
+                                  borderRadius: "999px",
+                                  fontSize: "0.78rem",
+                                  fontWeight: 600,
+                                  background: "#f5f5f5",
+                                  color: "#ccc",
+                                  whiteSpace: "nowrap",
                                 }}
                               >
-                                —
+                                <VideoOff size={12} strokeWidth={1.5} /> Sin videos
                               </span>
                             )}
                           </td>
@@ -1339,9 +1371,9 @@ export default function AdminColaboradoresPage() {
                                 onClick={() => onEdit(c)}
                                 title="Editar"
                                 style={{
-                                  background: "rgba(0,123,255,0.08)",
-                                  color: "#007bff",
-                                  border: "1px solid rgba(0,123,255,0.2)",
+                                  background: "rgba(245,166,35,0.1)",
+                                  color: "#f5a623",
+                                  border: "1px solid rgba(245,166,35,0.18)",
                                   padding: "6px 10px",
                                   borderRadius: "6px",
                                   cursor: "pointer",

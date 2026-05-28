@@ -54,6 +54,7 @@ export default function AdminVideosPage() {
   const [uploadingVideo, setUploadingVideo] = useState(false);
   const [uploadProgress, setUploadProgress] = useState("");
   const [selectedFileName, setSelectedFileName] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
 
   async function uploadVideo(file: File): Promise<string | null> {
     const MAX_MB = 50;
@@ -116,6 +117,7 @@ export default function AdminVideosPage() {
   }
 
   async function save(e: React.FormEvent) {
+    if (!confirm("¿Guardar estos cambios?")) return;
     e.preventDefault();
 
     if (!form.title.trim()) return alert("Título requerido");
@@ -135,8 +137,11 @@ export default function AdminVideosPage() {
 
     if (error) return alert(error.message);
 
+    const isEdit = !!editId;
     resetForm();
     await load();
+    setSuccessMsg(isEdit ? "Video actualizado correctamente" : "Video creado correctamente");
+    setTimeout(() => setSuccessMsg(""), 3000);
   }
 
   function onEdit(v: Video) {
@@ -195,6 +200,16 @@ export default function AdminVideosPage() {
         minHeight: "100vh",
       }}
     >
+      {successMsg && (
+        <div style={{
+          position: "fixed", top: "1rem", right: "1rem", zIndex: 9999,
+          background: "#16a34a", color: "#fff", padding: "0.75rem 1.25rem",
+          borderRadius: "10px", fontWeight: 600, fontSize: "0.875rem",
+          boxShadow: "0 4px 16px rgba(0,0,0,0.12)", display: "flex", alignItems: "center", gap: "8px",
+        }}>
+          <CheckCircle size={16} /> {successMsg}
+        </div>
+      )}
       <div
         style={{
           display: "flex",
@@ -786,9 +801,9 @@ export default function AdminVideosPage() {
                             style={{
                               background: "rgba(245,166,35,0.1)",
                               color: "#f5a623",
-                              border: "1.5px solid rgba(230, 157, 40, 0.1)",
+                              border: "1px solid rgba(245,166,35,0.18)",
                               padding: "6px 10px",
-                              borderRadius: "6px",
+                              borderRadius: "8px",
                               cursor: "pointer",
                               display: "flex",
                               alignItems: "center",

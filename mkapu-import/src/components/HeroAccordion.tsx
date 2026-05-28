@@ -6,6 +6,9 @@ type Banner = {
   id: number;
   titulo: string;
   subtitulo: string;
+  descripcion: string | null;
+  eyebrow: string | null;
+  titulo_completo: string | null;
   image_url: string;
   link_url: string;
   orden: number;
@@ -32,18 +35,21 @@ export default function HeroAccordion({ initialBanners }: { initialBanners: Bann
       <div className="hacc__inner">
         <div className="hacc__text">
           <span className="hacc__eyebrow">
-            Equipos de importación · Lima, Perú
+            {active.eyebrow || "Equipos de importación · Lima, Perú"}
           </span>
-          <h1 className="hacc__title">
-            Equipos que
-            <br />
-            <em style={{ color: activeColor }}>{active.titulo}</em>
-            <br />
-            para tu negocio
-          </h1>
+          {active.titulo_completo ? (
+            <h1 className="hacc__title" dangerouslySetInnerHTML={{ __html: active.titulo_completo }} />
+          ) : (
+            <h1 className="hacc__title">
+              Equipos que
+              <br />
+              <em style={{ color: activeColor }}>{active.titulo}</em>
+              <br />
+              para tu negocio
+            </h1>
+          )}
           <p className="hacc__desc">
-            {active.subtitulo}. Directo del fabricante, con garantía y soporte
-            técnico en Lima.
+            {active.descripcion || `${active.subtitulo}. Directo del fabricante, con garantía y soporte técnico en Lima.`}
           </p>
         </div>
 

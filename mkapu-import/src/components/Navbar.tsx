@@ -5,6 +5,7 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import CartDrawer from "./cartDrawer";
 import { useCart } from "@/app/context/CartContext";
+import { useEmpresa } from "@/context/EmpresaContext";
 import { supabase } from "@/lib/supabase";
 import {
   ShieldCheckIcon,
@@ -53,6 +54,14 @@ export default function Navbar({ categories = [] }: NavbarProps) {
   const [search, setSearch] = useState("");
   const [megaOpen, setMegaOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { empresa, loaded: logoLoaded } = useEmpresa();
+
+  const logoUrl = empresa?.logo || "";
+  const socialUrls = {
+    instagram: empresa?.instagram_url || null,
+    facebook: empresa?.facebook_url || null,
+    tiktok: empresa?.tiktok_url || null,
+  };
 
   const [cats, setCats] = useState<Categoria[]>(categories);
   const megaTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -201,8 +210,11 @@ export default function Navbar({ categories = [] }: NavbarProps) {
             className="nb__logo"
             onClick={() => setMobileOpen(false)}
           >
-            <span className="nb__logo-t">mkapu</span>
-            <span className="nb__logo-s">import</span>
+            <span className={`nb__logo-placeholder${!logoLoaded ? " nb__logo-placeholder--loading" : ""}${logoUrl ? "" : " nb__logo-placeholder--empty"}`}>
+              {logoUrl && (
+                <img src={logoUrl} alt="MKapu Import" className="nb__logo-img" fetchPriority="high" loading="eager" />
+              )}
+            </span>
           </Link>
 
           <div
@@ -359,62 +371,29 @@ export default function Navbar({ categories = [] }: NavbarProps) {
 
           <div className="nb__right">
             <div className="nb__socials">
-              <a
-                href="https://www.instagram.com/mkapu.import"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="nb__social"
-                aria-label="Instagram"
-              >
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <rect x="2" y="2" width="20" height="20" rx="5" />
-                  <circle cx="12" cy="12" r="4" />
-                  <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" />
-                </svg>
-              </a>
-
-              <a
-                href="https://www.facebook.com/mkapu.peru/?locale=es_LA"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="nb__social"
-                aria-label="Facebook"
-              >
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
-                </svg>
-              </a>
-
-              <a
-                href="https://www.tiktok.com/@mkapu.import"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="nb__social"
-                aria-label="TikTok"
-              >
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.17 8.17 0 0 0 4.78 1.52V6.75a4.85 4.85 0 0 1-1.01-.06z" />
-                </svg>
-              </a>
+              {socialUrls.instagram && (
+                <a href={socialUrls.instagram} target="_blank" rel="noopener noreferrer" className="nb__social" aria-label="Instagram">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="2" y="2" width="20" height="20" rx="5" />
+                    <circle cx="12" cy="12" r="4" />
+                    <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" />
+                  </svg>
+                </a>
+              )}
+              {socialUrls.facebook && (
+                <a href={socialUrls.facebook} target="_blank" rel="noopener noreferrer" className="nb__social" aria-label="Facebook">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+                  </svg>
+                </a>
+              )}
+              {socialUrls.tiktok && (
+                <a href={socialUrls.tiktok} target="_blank" rel="noopener noreferrer" className="nb__social" aria-label="TikTok">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.17 8.17 0 0 0 4.78 1.52V6.75a4.85 4.85 0 0 1-1.01-.06z" />
+                  </svg>
+                </a>
+              )}
             </div>
 
             <button
@@ -646,30 +625,15 @@ export default function Navbar({ categories = [] }: NavbarProps) {
                 </>
               )}
 
-              <a
-                href="https://www.instagram.com/mkapu.import"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="nb__mobile-social"
-              >
-                Instagram
-              </a>
-              <a
-                href="https://www.facebook.com/mkapu.peru/?locale=es_LA"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="nb__mobile-social"
-              >
-                Facebook
-              </a>
-              <a
-                href="https://www.tiktok.com/@mkapu.import"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="nb__mobile-social"
-              >
-                TikTok
-              </a>
+              {socialUrls.instagram && (
+                <a href={socialUrls.instagram} target="_blank" rel="noopener noreferrer" className="nb__mobile-social">Instagram</a>
+              )}
+              {socialUrls.facebook && (
+                <a href={socialUrls.facebook} target="_blank" rel="noopener noreferrer" className="nb__mobile-social">Facebook</a>
+              )}
+              {socialUrls.tiktok && (
+                <a href={socialUrls.tiktok} target="_blank" rel="noopener noreferrer" className="nb__mobile-social">TikTok</a>
+              )}
             </div>
           </div>
         )}
@@ -677,6 +641,12 @@ export default function Navbar({ categories = [] }: NavbarProps) {
 
       <div className="nb__subnav">
         <div className="nb__subnav-inner">
+          <Link href="/" className="nb__subnav-link">
+            <span className="nb__subnav-text">Home</span>
+          </Link>
+          <Link href="/productos" className="nb__subnav-link">
+            <span className="nb__subnav-text">Catálogo</span>
+          </Link>
           <Link href="/blog" className="nb__subnav-link">
             <span className="nb__subnav-text">Blog</span>
           </Link>
@@ -690,147 +660,6 @@ export default function Navbar({ categories = [] }: NavbarProps) {
       </div>
 
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
-
-      <style jsx>{`
-        .nb__search-wrap,
-        .nb__mobile-search-wrap {
-          position: relative;
-        }
-
-        .nb__suggest {
-          position: absolute;
-          top: calc(100% + 8px);
-          left: 0;
-          width: 100%;
-          background: #fff;
-          border: 1px solid #ece3d8;
-          border-radius: 16px;
-          box-shadow: 0 18px 36px rgba(0, 0, 0, 0.12);
-          overflow: hidden;
-          z-index: 60;
-        }
-
-        .nb__suggest--mobile {
-          position: static;
-          margin-top: 10px;
-          box-shadow: none;
-        }
-
-        .nb__suggest-item,
-        .nb__suggest-all {
-          width: 100%;
-          border: none;
-          background: #fff;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 12px 14px;
-          text-align: left;
-          transition: background 0.15s ease;
-        }
-
-        .nb__suggest-item:hover,
-        .nb__suggest-all:hover {
-          background: #faf6f1;
-        }
-
-        .nb__suggest-thumb {
-          width: 44px;
-          height: 44px;
-          border-radius: 10px;
-          overflow: hidden;
-          background: #f3ede5;
-          flex-shrink: 0;
-        }
-
-        .nb__suggest-thumb img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          display: block;
-        }
-
-        .nb__suggest-thumb-empty {
-          width: 100%;
-          height: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: #8c8177;
-        }
-
-        .nb__suggest-text {
-          min-width: 0;
-          display: flex;
-          flex-direction: column;
-          gap: 3px;
-        }
-
-        .nb__suggest-name {
-          font-size: 0.9rem;
-          font-weight: 700;
-          color: #1f1a17;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-
-        .nb__suggest-meta {
-          font-size: 0.78rem;
-          color: #756a60;
-        }
-
-        .nb__suggest-state {
-          padding: 14px;
-          font-size: 0.85rem;
-          color: #756a60;
-        }
-
-        .nb__suggest-all {
-          justify-content: center;
-          font-weight: 700;
-          color: #d2691e;
-          border-top: 1px solid #f2e7db;
-        }
-
-        .nb__cart-icon-wrap {
-          position: relative;
-          width: 22px;
-          height: 22px;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          flex-shrink: 0;
-        }
-
-        .nb__cart-icon {
-          width: 20px;
-          height: 20px;
-        }
-
-        .nb__badge {
-          position: absolute;
-          top: -7px;
-          right: -9px;
-          min-width: 18px;
-          height: 18px;
-          border-radius: 999px;
-          background: #e05c2a;
-          color: #fff;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 0.68rem;
-          font-weight: 800;
-          padding: 0 5px;
-          line-height: 1;
-        }
-
-        .nb__cart-label {
-          line-height: 1;
-        }
-      `}</style>
     </>
   );
 }

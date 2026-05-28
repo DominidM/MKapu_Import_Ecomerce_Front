@@ -37,6 +37,24 @@ export type Categoria = {
   activo?: boolean;
 };
 
+export type Empresa = {
+  id: number;
+  nombre: string;
+  razon_social: string | null;
+  ruc: string | null;
+  direccion: string | null;
+  logo: string | null;
+  email: string | null;
+  whatsapp: string | null;
+  whatsapp_soporte: string | null;
+  numero_reclamos: string | null;
+  descripcion: string | null;
+  horario_atencion: string | null;
+  instagram_url: string | null;
+  facebook_url: string | null;
+  tiktok_url: string | null;
+};
+
 export type Reclamacion = {
   id?: number;
   ticket?: string;
@@ -66,3 +84,8 @@ if (!supabaseUrl || !supabaseKey) {
 }
 
 export const supabase = createClient(supabaseUrl, supabaseKey);
+
+const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+export const supabaseAdmin = typeof window === "undefined" && serviceRoleKey
+  ? createClient(supabaseUrl, serviceRoleKey)
+  : supabase;
