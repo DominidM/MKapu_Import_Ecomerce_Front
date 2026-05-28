@@ -1,15 +1,14 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useEmpresa } from "@/context/EmpresaContext";
 
 export default function MapaLocal() {
+  const { empresa } = useEmpresa();
   const [direccion, setDireccion] = useState("");
 
   useEffect(() => {
-    fetch("/api/empresa")
-      .then((r) => r.json())
-      .then((d) => { if (d?.direccion) setDireccion(d.direccion); })
-      .catch(() => {});
-  }, []);
+    if (empresa?.direccion) setDireccion(empresa.direccion);
+  }, [empresa]);
 
   const address = direccion || "San Juan de Lurigancho, Lima, Perú";
   const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`;

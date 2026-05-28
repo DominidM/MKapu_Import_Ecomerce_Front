@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { supabase } from "@/lib/supabase";
+import { useEmpresa } from "@/context/EmpresaContext";
 
 type BannerConfig = {
   titulo: string;
@@ -58,8 +59,7 @@ const socialDefaults: { label: string; key: keyof EmpresaData }[] = [
 
 export default function ContactoPage() {
   const [banner, setBanner] = useState<BannerConfig | null>(null);
-  const [empresa, setEmpresa] = useState<EmpresaData | null>(null);
-  const [loaded, setLoaded] = useState(false);
+  const { empresa, loaded } = useEmpresa();
   const [form, setForm] = useState({
     nombre: "", email: "", telefono: "", asunto: "", mensaje: "",
   });
@@ -68,19 +68,12 @@ export default function ContactoPage() {
   const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
-    let pending = 2;
-    const done = () => { pending--; if (pending === 0) setLoaded(true); };
-
     supabase
       .from("banners_config")
       .select("titulo, subtitulo, image_url, activo")
       .eq("ruta", "/contacto")
       .single()
-      .then(({ data }) => { setBanner(data); done(); });
-    fetch("/api/empresa")
-      .then((r) => r.json())
-      .then((d) => { if (d) setEmpresa(d); })
-      .finally(done);
+      .then(({ data }) => setBanner(data));
   }, []);
 
   const heroTitulo = banner?.titulo || "Contáctanos";

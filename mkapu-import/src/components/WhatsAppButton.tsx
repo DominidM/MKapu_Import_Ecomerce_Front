@@ -2,17 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import { useEmpresa } from "@/context/EmpresaContext";
 
 export default function WhatsAppButton() {
   const pathname = usePathname();
+  const { empresa } = useEmpresa();
   const [whatsapp, setWhatsapp] = useState("");
 
   useEffect(() => {
-    fetch("/api/empresa")
-      .then((r) => r.json())
-      .then((d) => { if (d?.whatsapp_soporte) setWhatsapp(d.whatsapp_soporte); })
-      .catch(() => {});
-  }, []);
+    if (empresa?.whatsapp_soporte) setWhatsapp(empresa.whatsapp_soporte);
+  }, [empresa]);
 
   if (pathname.startsWith("/admin")) return null;
 

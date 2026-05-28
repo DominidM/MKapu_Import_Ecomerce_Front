@@ -1,17 +1,10 @@
 "use client";
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Mail } from "lucide-react";
+import { useEmpresa } from "@/context/EmpresaContext";
 
 export default function Footer() {
-  const [empresa, setEmpresa] = useState<any>(null);
-
-  useEffect(() => {
-    fetch("/api/empresa")
-      .then((r) => r.json())
-      .then((d) => { if (d) setEmpresa(d); })
-      .catch(() => {});
-  }, []);
+  const { empresa } = useEmpresa();
 
   return (
     <footer className="footer">

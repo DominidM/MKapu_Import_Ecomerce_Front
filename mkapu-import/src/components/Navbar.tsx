@@ -5,6 +5,7 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import CartDrawer from "./cartDrawer";
 import { useCart } from "@/app/context/CartContext";
+import { useEmpresa } from "@/context/EmpresaContext";
 import { supabase } from "@/lib/supabase";
 import {
   ShieldCheckIcon,
@@ -53,26 +54,14 @@ export default function Navbar({ categories = [] }: NavbarProps) {
   const [search, setSearch] = useState("");
   const [megaOpen, setMegaOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [logoUrl, setLogoUrl] = useState("");
-  const [logoLoaded, setLogoLoaded] = useState(false);
-  const [socialUrls, setSocialUrls] = useState<{ instagram: string | null; facebook: string | null; tiktok: string | null }>({
-    instagram: null, facebook: null, tiktok: null,
-  });
+  const { empresa, loaded: logoLoaded } = useEmpresa();
 
-  useEffect(() => {
-    fetch("/api/empresa")
-      .then((r) => r.json())
-      .then((d) => {
-        if (d?.logo) setLogoUrl(d.logo);
-        setSocialUrls({
-          instagram: d?.instagram_url || null,
-          facebook: d?.facebook_url || null,
-          tiktok: d?.tiktok_url || null,
-        });
-        setLogoLoaded(true);
-      })
-      .catch(() => setLogoLoaded(true));
-  }, []);
+  const logoUrl = empresa?.logo || "";
+  const socialUrls = {
+    instagram: empresa?.instagram_url || null,
+    facebook: empresa?.facebook_url || null,
+    tiktok: empresa?.tiktok_url || null,
+  };
 
   const [cats, setCats] = useState<Categoria[]>(categories);
   const megaTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);

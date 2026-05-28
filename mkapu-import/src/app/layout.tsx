@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { EmpresaProvider } from "@/context/EmpresaContext";
 import { CartProvider } from "@/app/context/CartContext";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import ClientShell from "@/components/ClientShell";
@@ -66,10 +67,12 @@ export default function RootLayout({
           backgroundColor: "#fafaf7",
         }}
       >
-        <CartProvider>
-          <ClientShell>{children}</ClientShell>
-          <WhatsAppButton />
-        </CartProvider>
+        <EmpresaProvider>
+          <CartProvider>
+            <ClientShell>{children}</ClientShell>
+            <WhatsAppButton />
+          </CartProvider>
+        </EmpresaProvider>
       </body>
     </html>
   );
