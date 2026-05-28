@@ -17,17 +17,12 @@ export default function Footer() {
     <footer className="footer">
       <div className="footer__inner">
         <div className="footer__brand">
-          {empresa?.logo ? (
+          {empresa?.logo && (
             <img
               src={empresa.logo}
               alt={empresa.nombre || "MKapu Import"}
               className="footer__logo-img"
             />
-          ) : (
-            <>
-              <span className="footer__logo-title">mkapu</span>
-              <span className="footer__logo-sub">import</span>
-            </>
           )}
           <p className="footer__tagline">
             {empresa?.descripcion || "Equipos de importación para tu negocio"}
