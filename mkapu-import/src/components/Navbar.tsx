@@ -54,12 +54,16 @@ export default function Navbar({ categories = [] }: NavbarProps) {
   const [megaOpen, setMegaOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [logoUrl, setLogoUrl] = useState("");
+  const [logoLoaded, setLogoLoaded] = useState(false);
 
   useEffect(() => {
     fetch("/api/empresa")
       .then((r) => r.json())
-      .then((d) => { if (d?.logo) setLogoUrl(d.logo); })
-      .catch(() => {});
+      .then((d) => {
+        if (d?.logo) setLogoUrl(d.logo);
+        setLogoLoaded(true);
+      })
+      .catch(() => setLogoLoaded(true));
   }, []);
 
   const [cats, setCats] = useState<Categoria[]>(categories);
@@ -209,14 +213,11 @@ export default function Navbar({ categories = [] }: NavbarProps) {
             className="nb__logo"
             onClick={() => setMobileOpen(false)}
           >
-            {logoUrl ? (
-              <img src={logoUrl} alt="MKapu Import" className="nb__logo-img" />
-            ) : (
-              <>
-                <span className="nb__logo-t">mkapu</span>
-                <span className="nb__logo-s">import</span>
-              </>
-            )}
+            <span className={`nb__logo-placeholder${!logoLoaded ? " nb__logo-placeholder--loading" : ""}${logoUrl ? "" : " nb__logo-placeholder--empty"}`}>
+              {logoUrl && (
+                <img src={logoUrl} alt="MKapu Import" className="nb__logo-img" />
+              )}
+            </span>
           </Link>
 
           <div
@@ -843,6 +844,25 @@ export default function Navbar({ categories = [] }: NavbarProps) {
 
         .nb__cart-label {
           line-height: 1;
+        }
+
+        .nb__logo-placeholder {
+          display: block;
+          height: 40px;
+          min-width: 120px;
+        }
+        .nb__logo-placeholder--loading {
+          background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+          background-size: 200% 100%;
+          animation: nbLogoShimmer 1.4s ease-in-out infinite;
+          border-radius: 8px;
+        }
+        .nb__logo-placeholder--empty {
+          min-width: 0;
+        }
+        @keyframes nbLogoShimmer {
+          0% { background-position: 200% 0; }
+          100% { background-position: -200% 0; }
         }
 
         .nb__logo-img {
