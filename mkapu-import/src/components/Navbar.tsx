@@ -641,6 +641,12 @@ export default function Navbar({ categories = [] }: NavbarProps) {
 
       <div className="nb__subnav">
         <div className="nb__subnav-inner">
+          <Link href="/" className="nb__subnav-link">
+            <span className="nb__subnav-text">Home</span>
+          </Link>
+          <Link href="/productos" className="nb__subnav-link">
+            <span className="nb__subnav-text">Catálogo</span>
+          </Link>
           <Link href="/blog" className="nb__subnav-link">
             <span className="nb__subnav-text">Blog</span>
           </Link>
