@@ -25,16 +25,38 @@ interface EmpresaContextType {
   loaded: boolean;
 }
 
+const STORAGE_KEY = "mkapu_empresa";
+
+function getCached(): EmpresaData | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function setCached(data: EmpresaData) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch {}
+}
+
 const EmpresaContext = createContext<EmpresaContextType | null>(null);
 
 export function EmpresaProvider({ children }: { children: ReactNode }) {
-  const [empresa, setEmpresa] = useState<EmpresaData | null>(null);
-  const [loaded, setLoaded] = useState(false);
+  const cached = getCached();
+  const [empresa, setEmpresa] = useState<EmpresaData | null>(cached);
+  const [loaded, setLoaded] = useState(!!cached);
 
   useEffect(() => {
     fetch("/api/empresa")
       .then((r) => r.json())
-      .then((d) => { if (d) setEmpresa(d); })
+      .then((d) => {
+        if (d) {
+          setEmpresa(d);
+          setCached(d);
+        }
+      })
       .finally(() => setLoaded(true));
   }, []);
 

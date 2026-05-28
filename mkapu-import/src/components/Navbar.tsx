@@ -212,7 +212,7 @@ export default function Navbar({ categories = [] }: NavbarProps) {
           >
             <span className={`nb__logo-placeholder${!logoLoaded ? " nb__logo-placeholder--loading" : ""}${logoUrl ? "" : " nb__logo-placeholder--empty"}`}>
               {logoUrl && (
-                <img src={logoUrl} alt="MKapu Import" className="nb__logo-img" />
+                <img src={logoUrl} alt="MKapu Import" className="nb__logo-img" fetchPriority="high" loading="eager" />
               )}
             </span>
           </Link>
