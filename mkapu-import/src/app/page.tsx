@@ -69,20 +69,6 @@ function CarouselSection({
           </Link>
         </div>
       </div>
-      <style>{`
-        .csec { padding: 4rem 1.5rem; background: #faf8f5; }
-        .csec--dark { background: #111; }
-        .csec__inner { max-width: 1200px; margin: 0 auto; }
-        .csec__head { text-align: center; margin-bottom: 2rem; }
-        .csec__tag { display: inline-block; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #f5a623; margin-bottom: 0.5rem; }
-        .csec__title { font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 900; letter-spacing: -0.02em; color: #1a1a1a; margin: 0 0 0.5rem; }
-        .csec--dark .csec__title { color: #fff; }
-        .csec__sub { font-size: 0.92rem; color: #777; max-width: 480px; margin: 0 auto; line-height: 1.6; }
-        .csec--dark .csec__sub { color: #888; }
-        .csec__foot { text-align: center; margin-top: 1.5rem; }
-        .csec__link { font-size: 0.88rem; font-weight: 700; color: #f5a623; text-decoration: none; border-bottom: 2px solid transparent; transition: border-color 0.15s; }
-        .csec__link:hover { border-color: #f5a623; }
-      `}</style>
     </section>
   );
 }
@@ -202,34 +188,6 @@ export default async function HomePage() {
 
       <VideoSection tipo="video" />
 
-      <style>{`
-        .home { overflow-x: hidden; }
-        .why { background: #0d0d0d; padding: 96px 40px; }
-        .why__inner { max-width: 1100px; margin: 0 auto; }
-        .why__head { margin-bottom: 72px; }
-        .why__tag { display: inline-block; font-size: 11px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: #f5a623; margin-bottom: 16px; }
-        .why__title { font-size: clamp(32px, 5vw, 56px); font-weight: 800; color: #fff; line-height: 1.05; max-width: 620px; }
-        .why__title em { font-style: normal; color: #f5a623; }
-        .why__grid { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid rgba(255,255,255,0.08); border-radius: 2px; }
-        .why__card { padding: 40px 32px; border-right: 1px solid rgba(255,255,255,0.08); }
-        .why__card:last-child { border-right: none; }
-        .why__num { font-size: 72px; font-weight: 800; color: rgba(255,255,255,0.04); line-height: 1; margin-bottom: -16px; letter-spacing: -4px; }
-        .why__icon-wrap { width: 40px; height: 40px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; }
-        .why__icon-wrap svg { width: 28px; height: 28px; stroke: #f5a623; fill: none; stroke-width: 1.5; }
-        .why__card-title { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 12px; }
-        .why__card-desc { font-size: 13.5px; color: rgba(255,255,255,0.45); line-height: 1.65; }
-        @media (max-width: 768px) { .why__grid { grid-template-columns: 1fr 1fr; } .why__card { border-bottom: 1px solid rgba(255,255,255,0.08); } .why__card:nth-child(2n) { border-right: none; } }
-        @media (max-width: 480px) { .why__grid { grid-template-columns: 1fr; } .why__card { border-right: none; } }
-        .section--video { padding: 4rem 1.5rem; background: #faf8f5; }
-        .section__inner--narrow { max-width: 900px; margin: 0 auto; }
-        .section__head { text-align: center; margin-bottom: 2rem; }
-        .section__tag { display: inline-block; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #f5a623; margin-bottom: 0.5rem; }
-        .section__title { font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 900; color: #1a1a1a; margin: 0 0 0.5rem; }
-        .section__sub { font-size: 0.92rem; color: #777; max-width: 480px; margin: 0 auto; line-height: 1.6; }
-        .videos-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
-        .video-item { width: 100%; max-height: 480px; border-radius: 16px; display: block; background: #000; object-fit: cover; }
-        @media (max-width: 600px) { .videos-row { grid-template-columns: 1fr; } }
-      `}</style>
     </div>
   );
 }

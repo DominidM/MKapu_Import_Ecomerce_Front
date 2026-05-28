@@ -48,19 +48,6 @@ export default function MapaLocal() {
           />
         </div>
       </div>
-
-      <style>{`
-        .mapa-section { padding: 4rem 1.5rem; background: #0d0d0d; }
-        .mapa-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1.6fr; gap: 3rem; align-items: center; }
-        .mapa-tag { display: inline-block; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #f5a623; margin-bottom: 0.75rem; }
-        .mapa-title { font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 900; color: #fff; margin: 0 0 1rem; line-height: 1.15; }
-        .mapa-address { font-size: 0.95rem; color: #ccc; margin: 0 0 0.75rem; font-weight: 600; }
-        .mapa-desc { font-size: 0.9rem; color: #888; line-height: 1.65; margin: 0 0 1.75rem; }
-        .mapa-btn { display: inline-flex; align-items: center; gap: 8px; background: #f5a623; color: #fff; padding: 0.75rem 1.5rem; border-radius: 10px; font-weight: 700; font-size: 0.9rem; text-decoration: none; transition: background 0.2s; }
-        .mapa-btn:hover { background: #d4891a; }
-        .mapa-embed { height: 400px; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.1); }
-        @media (max-width: 768px) { .mapa-inner { grid-template-columns: 1fr; gap: 2rem; } .mapa-embed { height: 280px; } }
-      `}</style>
     </section>
   );
 }

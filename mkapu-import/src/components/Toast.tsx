@@ -74,13 +74,6 @@ export default function Toast() {
         >
           <X size={16} />
         </button>
-      </div>
-      <style>{`
-        @keyframes toastIn {
-          from { opacity: 0; transform: translateY(-12px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
-    </>
+      </div>    </>
   );
 }
