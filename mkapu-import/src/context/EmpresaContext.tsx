@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useLayoutEffect, useState, ReactNode } from "react";
 
 type EmpresaData = {
   id: number;
@@ -44,9 +44,16 @@ function setCached(data: EmpresaData) {
 const EmpresaContext = createContext<EmpresaContextType | null>(null);
 
 export function EmpresaProvider({ children }: { children: ReactNode }) {
-  const cached = getCached();
-  const [empresa, setEmpresa] = useState<EmpresaData | null>(cached);
-  const [loaded, setLoaded] = useState(!!cached);
+  const [empresa, setEmpresa] = useState<EmpresaData | null>(null);
+  const [loaded, setLoaded] = useState(false);
+
+  useLayoutEffect(() => {
+    const cached = getCached();
+    if (cached) {
+      setEmpresa(cached);
+      setLoaded(true);
+    }
+  }, []);
 
   useEffect(() => {
     fetch("/api/empresa")
