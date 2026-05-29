@@ -526,6 +526,63 @@ button {
     width: 152px;
   }
 }
+.carousel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-right: 20px;
+}
+.carousel__nav {
+  display: flex;
+  gap: 6px;
+}
+.carousel__arrow {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid #ddd;
+  background: #fff;
+  font-size: 1.2rem;
+  color: #333;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, border-color 0.15s;
+}
+.carousel__arrow:hover:not(:disabled) {
+  background: #f5a623;
+  border-color: #f5a623;
+  color: #fff;
+}
+.carousel__arrow:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.carousel__dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 14px;
+  padding-right: 20px;
+}
+.carousel__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: none;
+  background: #ccc;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.carousel__dot--active {
+  background: #f5a623;
+}
+.carousel__track--dragging {
+  scroll-snap-type: none;
+  cursor: grabbing;
+  user-select: none;
+}
 
 /* PRODUCTOS PAGE */
 .productos-page {
@@ -4281,22 +4338,6 @@ button {
    TOAST (Toast.tsx)
    ============================================================ */
 @keyframes toastIn { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: translateY(0); } }
-
-/* ============================================================
-   HOMEPAGE - CAROUSEL_SECTION (page.tsx)
-   ============================================================ */
-.csec { padding: 4rem 1.5rem; background: #faf8f5; }
-.csec--dark { background: #111; }
-.csec__inner { max-width: 1200px; margin: 0 auto; }
-.csec__head { text-align: center; margin-bottom: 2rem; }
-.csec__tag { display: inline-block; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #f5a623; margin-bottom: 0.5rem; }
-.csec__title { font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 900; letter-spacing: -0.02em; color: #1a1a1a; margin: 0 0 0.5rem; }
-.csec--dark .csec__title { color: #fff; }
-.csec__sub { font-size: 0.92rem; color: #777; max-width: 480px; margin: 0 auto; line-height: 1.6; }
-.csec--dark .csec__sub { color: #888; }
-.csec__foot { text-align: center; margin-top: 1.5rem; }
-.csec__link { font-size: 0.88rem; font-weight: 700; color: #f5a623; text-decoration: none; border-bottom: 2px solid transparent; transition: border-color 0.15s; }
-.csec__link:hover { border-color: #f5a623; }
 
 /* ============================================================
    HOMEPAGE (page.tsx) — .section--video / .videos-row

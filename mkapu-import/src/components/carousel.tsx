@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
-import { useRef, useState, useEffect, useCallback } from "react";
+import { useRef, useState, useEffect, useCallback, useLayoutEffect } from "react";
 import ProductCard from "@/components/productCard";
 
 interface Product {
@@ -80,7 +80,7 @@ export default function Carousel({ products, title = "Destacados", promocionesMa
   }, [getCardWidth]);
 
   // Se ejecuta al montar y recalcula si se redimensiona la pantalla
-  useEffect(() => {
+  useLayoutEffect(() => {
     const el = trackRef.current;
     if (!el) return;
 
@@ -91,6 +91,19 @@ export default function Carousel({ products, title = "Destacados", promocionesMa
 
     return () => observer.disconnect();
   }, [updateLayout, total]);
+
+  // Recalcular después del paint por si el layout cambió
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => updateLayout());
+    return () => cancelAnimationFrame(raf);
+  }, [updateLayout, total]);
+
+  // Recalcular al cambiar tamaño de ventana
+  useEffect(() => {
+    const onResize = () => updateLayout();
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [updateLayout]);
 
   // Ilumina el dot más cercano a nuestra posición actual de scroll
   const handleScroll = useCallback(() => {

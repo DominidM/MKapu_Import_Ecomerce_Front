@@ -276,10 +276,7 @@ export default function ProductoDetailClient({ producto, sugeridos, promocionesM
           <div className="detail-heading">
             <div className="detail-kicker">Detalle del producto</div>
             <h1 className="detail-title">{producto.name}</h1>
-            <p className="detail-summary">
-              {producto.description ||
-                "Este producto no tiene descripción por ahora."}
-            </p>
+
 
             {producto.low_stock && (
               <div className="detail-stock-alert">
@@ -439,6 +436,11 @@ export default function ProductoDetailClient({ producto, sugeridos, promocionesM
               </div>
               <span className="detail-delivery-label">Disponible retiro en tienda</span>
             </div>
+
+                        <p className="detail-summary">
+              {producto.description ||
+                "Este producto no tiene descripción por ahora."}
+            </p>
           </div>
         </div>
       </section>

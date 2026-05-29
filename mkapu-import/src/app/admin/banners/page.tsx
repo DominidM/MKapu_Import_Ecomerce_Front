@@ -88,11 +88,20 @@ export default function AdminBannersPage() {
     message: string;
     variant: "confirm" | "alert";
     onConfirm: () => void;
-  }>({ open: false, title: "", message: "", variant: "confirm", onConfirm: () => {} });
+  }>({
+    open: false,
+    title: "",
+    message: "",
+    variant: "confirm",
+    onConfirm: () => {},
+  });
   const [currentPage, setCurrentPage] = useState(1);
   const filtered = carousel;
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE) || 1;
-  const paginatedData = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+  const paginatedData = filtered.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE,
+  );
 
   async function load() {
     setLoading(true);
@@ -131,7 +140,13 @@ export default function AdminBannersPage() {
       const data = await res.json();
       return data.url;
     } catch (error) {
-      setModal({ open: true, title: "Error", message: "Error subiendo imagen: " + error, variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) });
+      setModal({
+        open: true,
+        title: "Error",
+        message: "Error subiendo imagen: " + error,
+        variant: "alert",
+        onConfirm: () => setModal((m) => ({ ...m, open: false })),
+      });
       return null;
     }
   }
@@ -171,7 +186,13 @@ export default function AdminBannersPage() {
   async function saveCarousel(e: React.FormEvent) {
     e.preventDefault();
     if (!formC.image_url) {
-      setModal({ open: true, title: "Campo requerido", message: "Debes seleccionar o ingresar una imagen para el slide", variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) });
+      setModal({
+        open: true,
+        title: "Campo requerido",
+        message: "Debes seleccionar o ingresar una imagen para el slide",
+        variant: "alert",
+        onConfirm: () => setModal((m) => ({ ...m, open: false })),
+      });
       return;
     }
     const payload = {
@@ -191,10 +212,20 @@ export default function AdminBannersPage() {
           .eq("id", editCId)
       : await supabase.from("banners_carousel").insert(payload);
     if (error) {
-      setModal({ open: true, title: "Error", message: error.message, variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) });
+      setModal({
+        open: true,
+        title: "Error",
+        message: error.message,
+        variant: "alert",
+        onConfirm: () => setModal((m) => ({ ...m, open: false })),
+      });
       return;
     }
-    setSuccessMsg(editCId ? "Slide actualizado correctamente" : "Slide creado correctamente");
+    setSuccessMsg(
+      editCId
+        ? "Slide actualizado correctamente"
+        : "Slide creado correctamente",
+    );
     setTimeout(() => setSuccessMsg(""), 3000);
     setFormC(initialCarousel);
     setEditCId(null);
@@ -222,7 +253,8 @@ export default function AdminBannersPage() {
     setModal({
       open: true,
       title: "Eliminar banner",
-      message: "¿Estás seguro de eliminar este banner? Esta acción no se puede deshacer.",
+      message:
+        "¿Estás seguro de eliminar este banner? Esta acción no se puede deshacer.",
       variant: "confirm",
       onConfirm: async () => {
         setModal((m) => ({ ...m, open: false }));
@@ -246,7 +278,13 @@ export default function AdminBannersPage() {
       })
       .eq("id", editConfig.id);
     if (error) {
-      setModal({ open: true, title: "Error", message: error.message, variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) });
+      setModal({
+        open: true,
+        title: "Error",
+        message: error.message,
+        variant: "alert",
+        onConfirm: () => setModal((m) => ({ ...m, open: false })),
+      });
       return;
     }
     setSuccessMsg("Banner de página actualizado correctamente");
@@ -255,12 +293,16 @@ export default function AdminBannersPage() {
     await load();
   }
 
-  function onFocusInput(e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) {
+  function onFocusInput(
+    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) {
     e.currentTarget.style.borderColor = "#f5a623";
     e.currentTarget.style.boxShadow = "0 0 0 3px rgba(245,166,35,0.12)";
   }
 
-  function onBlurInput(e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) {
+  function onBlurInput(
+    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) {
     e.currentTarget.style.borderColor = "#e2e2e2";
     e.currentTarget.style.boxShadow = "none";
   }
@@ -380,7 +422,28 @@ export default function AdminBannersPage() {
         minHeight: "100vh",
       }}
     >
-      {successMsg && (<div style={{position:"fixed",top:"1rem",right:"1rem",zIndex:9999,background:"#16a34a",color:"#fff",padding:"0.75rem 1.25rem",borderRadius:"10px",fontWeight:600,fontSize:"0.875rem",boxShadow:"0 4px 16px rgba(0,0,0,0.12)",display:"flex",alignItems:"center",gap:"8px"}}><CheckCircle size={16}/> {successMsg}</div>)}
+      {successMsg && (
+        <div
+          style={{
+            position: "fixed",
+            top: "1rem",
+            right: "1rem",
+            zIndex: 9999,
+            background: "#16a34a",
+            color: "#fff",
+            padding: "0.75rem 1.25rem",
+            borderRadius: "10px",
+            fontWeight: 600,
+            fontSize: "0.875rem",
+            boxShadow: "0 4px 16px rgba(0,0,0,0.12)",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+          }}
+        >
+          <CheckCircle size={16} /> {successMsg}
+        </div>
+      )}
 
       <ConfirmModal
         open={modal.open}
@@ -567,18 +630,100 @@ export default function AdminBannersPage() {
               </h2>
 
               <form onSubmit={saveCarousel}>
-                {/* Fila 1: título + subtítulo */}
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns:
-                      "repeat(auto-fit, minmax(min(100%, 240px), 1fr))",
-                    gap: "1rem",
-                    marginBottom: "1rem",
-                  }}
-                >
-                  <div>
-                    <label style={lbl}>Título</label>
+                {/* ── Sección: Contenido del slide ── */}
+                <div style={{ marginBottom: "2rem" }}>
+                  <h3
+                    style={{
+                      fontSize: "0.82rem",
+                      fontWeight: 700,
+                      color: "#999",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.06em",
+                      margin: "0 0 1rem",
+                      paddingBottom: "0.5rem",
+                      borderBottom: "1px solid #eee",
+                    }}
+                  >
+                    Contenido del slide
+                  </h3>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns:
+                        "repeat(auto-fit, minmax(min(100%, 240px), 1fr))",
+                      gap: "1rem",
+                      marginBottom: "1rem",
+                    }}
+                  >
+                    <div>
+                      <label style={lbl}>Encabezado</label>
+                      <input
+                        style={inp}
+                        value={formC.eyebrow}
+                        placeholder="Ej: Equipos de importación · Lima, Perú"
+                        onChange={(e) =>
+                          setFormC({ ...formC, eyebrow: e.target.value })
+                        }
+                        onFocus={onFocusInput}
+                        onBlur={onBlurInput}
+                      />
+                    </div>
+                    <div>
+                      <label style={lbl}>Título completo</label>
+                      <input
+                        style={inp}
+                        value={formC.titulo_completo}
+                        placeholder="Ej: Equipos que em Profesionales em para tu negocio"
+                        onChange={(e) =>
+                          setFormC({ ...formC, titulo_completo: e.target.value })
+                        }
+                        onFocus={onFocusInput}
+                        onBlur={onBlurInput}
+                      />
+                    </div>
+                  </div>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns:
+                        "repeat(auto-fit, minmax(min(100%, 240px), 1fr))",
+                      gap: "1rem",
+                    }}
+                  >
+                    <div>
+                      <label style={lbl}>Descripción</label>
+                      <textarea
+                        style={{ ...inp, minHeight: "80px", resize: "vertical" }}
+                        value={formC.descripcion}
+                        placeholder="Texto completo para el slide..."
+                        onChange={(e) =>
+                          setFormC({ ...formC, descripcion: e.target.value })
+                        }
+                        onFocus={onFocusInput}
+                        onBlur={onBlurInput}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* ── Sección: Imagen ── */}
+                <div style={{ marginBottom: "2rem" }}>
+                  <h3
+                    style={{
+                      fontSize: "0.82rem",
+                      fontWeight: 700,
+                      color: "#999",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.06em",
+                      margin: "0 0 1rem",
+                      paddingBottom: "0.5rem",
+                      borderBottom: "1px solid #eee",
+                    }}
+                  >
+                    Imagen
+                  </h3>
+                  <div style={{ marginBottom: "0.75rem" }}>
+                    <label style={lbl}>Nombre de imagen (alt)</label>
                     <input
                       style={inp}
                       value={formC.titulo}
@@ -591,218 +736,172 @@ export default function AdminBannersPage() {
                     />
                   </div>
                   <div>
-                    <label style={lbl}>Subtítulo</label>
-                    <input
-                      style={inp}
-                      value={formC.subtitulo}
-                      placeholder="Ej: Hasta 50% de descuento"
-                      onChange={(e) =>
-                        setFormC({ ...formC, subtitulo: e.target.value })
-                      }
-                      onFocus={onFocusInput}
-                      onBlur={onBlurInput}
-                    />
-                  </div>
-                </div>
-
-                {/* Descripción larga */}
-                <div style={{ marginBottom: "1rem" }}>
-                  <label style={lbl}>Descripción</label>
-                  <textarea
-                    style={{ ...inp, minHeight: "80px", resize: "vertical" }}
-                    value={formC.descripcion}
-                    placeholder="Texto completo para el slide..."
-                    onChange={(e) =>
-                      setFormC({ ...formC, descripcion: e.target.value })
-                    }
-                    onFocus={onFocusInput}
-                    onBlur={onBlurInput}
-                  />
-                </div>
-
-                {/* Fila: eyebrow + titulo_completo */}
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns:
-                      "repeat(auto-fit, minmax(min(100%, 240px), 1fr))",
-                    gap: "1rem",
-                    marginBottom: "1rem",
-                  }}
-                >
-                  <div>
-                    <label style={lbl}>Eyebrow</label>
-                    <input
-                      style={inp}
-                      value={formC.eyebrow}
-                      placeholder="Ej: Equipos de importación · Lima, Perú"
-                      onChange={(e) =>
-                        setFormC({ ...formC, eyebrow: e.target.value })
-                      }
-                      onFocus={onFocusInput}
-                      onBlur={onBlurInput}
-                    />
-                  </div>
-                  <div>
-                    <label style={lbl}>Título completo</label>
-                    <input
-                      style={inp}
-                      value={formC.titulo_completo}
-                      placeholder='Ej: Equipos que em Profesionales em para tu negocio'
-                      onChange={(e) =>
-                        setFormC({ ...formC, titulo_completo: e.target.value })
-                      }
-                      onFocus={onFocusInput}
-                      onBlur={onBlurInput}
-                    />
-                  </div>
-                </div>
-
-                {/* Fila 2: orden + activo */}
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns:
-                      "repeat(auto-fit, minmax(min(100%, 160px), 1fr))",
-                    gap: "1rem",
-                    marginBottom: "1rem",
-                  }}
-                >
-                  <div>
-                    <label style={lbl}>Orden</label>
-                    <input
-                      style={inp}
-                      type="number"
-                      value={formC.orden}
-                      onChange={(e) =>
-                        setFormC({ ...formC, orden: Number(e.target.value) })
-                      }
-                      onFocus={onFocusInput}
-                      onBlur={onBlurInput}
-                    />
-                  </div>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "flex-end",
-                      paddingBottom: "0.65rem",
-                    }}
-                  >
-                    <label
+                    <label style={lbl}>Imagen *</label>
+                    <div
                       style={{
                         display: "flex",
-                        alignItems: "center",
                         gap: "8px",
-                        cursor: "pointer",
-                        fontSize: "0.875rem",
-                        color: "#444",
-                        fontWeight: 500,
+                        alignItems: "center",
+                        flexWrap: "wrap",
                       }}
                     >
                       <input
-                        type="checkbox"
-                        checked={formC.activo}
-                        onChange={(e) =>
-                          setFormC({ ...formC, activo: e.target.checked })
-                        }
+                        style={{ ...inp, flex: 1, minWidth: "180px" }}
+                        placeholder="Sube un archivo para generar la URL"
+                        value={formC.image_url}
+                        readOnly
+                        onFocus={onFocusInput}
+                        onBlur={onBlurInput}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => fileRefC.current?.click()}
                         style={{
-                          width: 16,
-                          height: 16,
-                          accentColor: "#f5a623",
-                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "6px",
+                          padding: "0.6rem 0.9rem",
+                          borderRadius: "8px",
+                          border: "1px solid #e2e2e2",
+                          background: uploadingC ? "#f0f0f0" : "#fafafa",
+                          color: "#555",
+                          fontWeight: 600,
+                          fontSize: "0.8rem",
+                          cursor: uploadingC ? "not-allowed" : "pointer",
+                          whiteSpace: "nowrap",
+                          transition: "background 0.15s",
+                        }}
+                        disabled={uploadingC}
+                      >
+                        <Upload size={14} />
+                        {uploadingC ? "Subiendo..." : "Subir"}
+                      </button>
+                      <input
+                        ref={fileRefC}
+                        type="file"
+                        accept="image/*"
+                        style={{ display: "none" }}
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          setUploadingC(true);
+                          const url = await uploadImage(file, "carousel");
+                          setUploadingC(false);
+                          if (url)
+                            setFormC((f) => ({ ...f, image_url: url }));
+                          if (fileRefC.current) fileRefC.current.value = "";
                         }}
                       />
-                      Slide activo
-                    </label>
+                    </div>
+                    {formC.image_url && (
+                      <div
+                        style={{
+                          marginTop: "12px",
+                          borderRadius: "8px",
+                          overflow: "hidden",
+                          border: "1px solid #e8e8e8",
+                          background: "#f5f5f5",
+                          width: "25%",
+                          margin: "12px auto 0",
+                        }}
+                      >
+                        <img
+                          src={formC.image_url}
+                          alt="preview"
+                          style={{
+                            width: "100%",
+                            height: "auto",
+                            display: "block",
+                          }}
+                          onError={(e) => {
+                            (
+                              e.currentTarget.parentElement as HTMLElement
+                            ).style.display = "none";
+                          }}
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
 
-                {/* Imagen */}
+                {/* ── Sección: Configuración ── */}
                 <div style={{ marginBottom: "1.5rem" }}>
-                  <label style={lbl}>Imagen *</label>
-                  <div
+                  <h3
                     style={{
-                      display: "flex",
-                      gap: "8px",
-                      alignItems: "center",
-                      flexWrap: "wrap",
+                      fontSize: "0.82rem",
+                      fontWeight: 700,
+                      color: "#999",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.06em",
+                      margin: "0 0 1rem",
+                      paddingBottom: "0.5rem",
+                      borderBottom: "1px solid #eee",
                     }}
                   >
-                    <input
-                      style={{ ...inp, flex: 1, minWidth: "180px" }}
-                      placeholder="Sube un archivo para generar la URL"
-                      value={formC.image_url}
-                      readOnly
-                      onFocus={onFocusInput}
-                      onBlur={onBlurInput}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => fileRefC.current?.click()}
+                    Configuración
+                  </h3>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns:
+                        "repeat(auto-fit, minmax(min(100%, 160px), 1fr))",
+                      gap: "1rem",
+                    }}
+                  >
+                    <div>
+                      <label style={lbl}>Orden</label>
+                      <input
+                        style={inp}
+                        type="number"
+                        value={formC.orden}
+                        onChange={(e) =>
+                          setFormC({
+                            ...formC,
+                            orden: Number(e.target.value),
+                          })
+                        }
+                        onFocus={onFocusInput}
+                        onBlur={onBlurInput}
+                      />
+                    </div>
+                    <div
                       style={{
                         display: "flex",
-                        alignItems: "center",
-                        gap: "6px",
-                        padding: "0.6rem 0.9rem",
-                        borderRadius: "8px",
-                        border: "1px solid #e2e2e2",
-                        background: uploadingC ? "#f0f0f0" : "#fafafa",
-                        color: "#555",
-                        fontWeight: 600,
-                        fontSize: "0.8rem",
-                        cursor: uploadingC ? "not-allowed" : "pointer",
-                        whiteSpace: "nowrap",
-                        transition: "background 0.15s",
+                        alignItems: "flex-end",
+                        paddingBottom: "0.65rem",
                       }}
-                      disabled={uploadingC}
                     >
-                      <Upload size={14} />
-                      {uploadingC ? "Subiendo..." : "Subir"}
-                    </button>
-                    <input
-                      ref={fileRefC}
-                      type="file"
-                      accept="image/*"
-                      style={{ display: "none" }}
-                      onChange={async (e) => {
-                        const file = e.target.files?.[0];
-                        if (!file) return;
-                        setUploadingC(true);
-                        const url = await uploadImage(file, "carousel");
-                        setUploadingC(false);
-                        if (url) setFormC((f) => ({ ...f, image_url: url }));
-                        if (fileRefC.current) fileRefC.current.value = "";
-                      }}
-                    />
+                      <label
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px",
+                          cursor: "pointer",
+                          fontSize: "0.875rem",
+                          color: "#444",
+                          fontWeight: 500,
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={formC.activo}
+                          onChange={(e) =>
+                            setFormC({
+                              ...formC,
+                              activo: e.target.checked,
+                            })
+                          }
+                          style={{
+                            width: 16,
+                            height: 16,
+                            accentColor: "#f5a623",
+                            cursor: "pointer",
+                          }}
+                        />
+                        Slide activo
+                      </label>
+                    </div>
                   </div>
-
-                  {formC.image_url && (
-  <div
-    style={{
-      marginTop: "12px",
-      borderRadius: "8px",
-      overflow: "hidden",
-      border: "1px solid #e8e8e8",
-      background: "#f5f5f5",
-      width: "25%",
-      margin: "12px auto 0",
-    }}
-  >
-    <img
-      src={formC.image_url}
-      alt="preview"
-      style={{
-        width: "100%",
-        height: "auto",
-        display: "block",
-      }}
-      onError={(e) => {
-        (e.currentTarget.parentElement as HTMLElement).style.display = "none";
-      }}
-    />
-  </div>
-)}
-                      
                 </div>
 
                 {/* Acciones */}
@@ -897,232 +996,239 @@ export default function AdminBannersPage() {
                         </td>
                       </tr>
                     ) : (
-                      paginatedData.map((b, i) => { const idx = (currentPage - 1) * ITEMS_PER_PAGE + i; return (
-                        <tr
-                          key={b.id}
-                          style={{
-                            borderBottom:
-                              idx < filtered.length - 1
-                                ? "1px solid #f2f2f2"
-                                : "none",
-                            transition: "background 0.15s",
-                          }}
-                          onMouseEnter={(e) =>
-                            (e.currentTarget.style.background = "#fdfcfb")
-                          }
-                          onMouseLeave={(e) =>
-                            (e.currentTarget.style.background = "transparent")
-                          }
-                        >
-                          {/* Preview */}
-                          <td style={tdStyle}>
-                            <ThumbImg src={b.image_url} alt={b.titulo ?? ""} />
-                          </td>
+                      paginatedData.map((b, i) => {
+                        const idx = (currentPage - 1) * ITEMS_PER_PAGE + i;
+                        return (
+                          <tr
+                            key={b.id}
+                            style={{
+                              borderBottom:
+                                idx < filtered.length - 1
+                                  ? "1px solid #f2f2f2"
+                                  : "none",
+                              transition: "background 0.15s",
+                            }}
+                            onMouseEnter={(e) =>
+                              (e.currentTarget.style.background = "#fdfcfb")
+                            }
+                            onMouseLeave={(e) =>
+                              (e.currentTarget.style.background = "transparent")
+                            }
+                          >
+                            {/* Preview */}
+                            <td style={tdStyle}>
+                              <ThumbImg
+                                src={b.image_url}
+                                alt={b.titulo ?? ""}
+                              />
+                            </td>
 
-                          {/* Título */}
-                          <td style={tdStyle}>
-                            <div
-                              style={{
-                                fontWeight: 700,
-                                color: "#111",
-                                fontSize: "0.9rem",
-                                marginBottom: "2px",
-                              }}
-                            >
-                              {b.titulo ?? (
-                                <span
-                                  style={{ color: "#ccc", fontWeight: 400 }}
-                                >
-                                  Sin título
-                                </span>
-                              )}
-                            </div>
-                            {b.subtitulo && (
+                            {/* Título */}
+                            <td style={tdStyle}>
                               <div
-                                style={{ fontSize: "0.8rem", color: "#888" }}
-                              >
-                                {b.subtitulo}
-                              </div>
-                            )}
-                          </td>
-
-                          {/* Fecha + orden */}
-                          <td style={tdStyle}>
-                            <div
-                              style={{
-                                fontSize: "0.78rem",
-                                color: "#aaa",
-                                marginBottom: "8px",
-                              }}
-                            >
-                              {formatFecha(b.created_at)}
-                            </div>
-                            <div
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "6px",
-                              }}
-                            >
-                              <button
-                                type="button"
-                                onClick={() => moveUp(idx)}
-                                disabled={idx === 0 || savingOrder}
-                                title="Subir"
                                 style={{
-                                  width: 26,
-                                  height: 26,
-                                  borderRadius: "6px",
-                                  border: "1px solid #e2e2e2",
-                                  background: "#fff",
-                                  cursor:
-                                    idx === 0 || savingOrder
-                                      ? "not-allowed"
-                                      : "pointer",
-                                  opacity: idx === 0 || savingOrder ? 0.35 : 1,
                                   fontWeight: 700,
-                                  color: "#666",
-                                  fontSize: "0.85rem",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                  transition: "background 0.15s",
+                                  color: "#111",
+                                  fontSize: "0.9rem",
+                                  marginBottom: "2px",
                                 }}
                               >
-                                ↑
-                              </button>
+                                {b.titulo ?? (
+                                  <span
+                                    style={{ color: "#ccc", fontWeight: 400 }}
+                                  >
+                                    Sin título
+                                  </span>
+                                )}
+                              </div>
+                              {b.subtitulo && (
+                                <div
+                                  style={{ fontSize: "0.8rem", color: "#888" }}
+                                >
+                                  {b.subtitulo}
+                                </div>
+                              )}
+                            </td>
+
+                            {/* Fecha + orden */}
+                            <td style={tdStyle}>
+                              <div
+                                style={{
+                                  fontSize: "0.78rem",
+                                  color: "#aaa",
+                                  marginBottom: "8px",
+                                }}
+                              >
+                                {formatFecha(b.created_at)}
+                              </div>
+                              <div
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "6px",
+                                }}
+                              >
+                                <button
+                                  type="button"
+                                  onClick={() => moveUp(idx)}
+                                  disabled={idx === 0 || savingOrder}
+                                  title="Subir"
+                                  style={{
+                                    width: 26,
+                                    height: 26,
+                                    borderRadius: "6px",
+                                    border: "1px solid #e2e2e2",
+                                    background: "#fff",
+                                    cursor:
+                                      idx === 0 || savingOrder
+                                        ? "not-allowed"
+                                        : "pointer",
+                                    opacity:
+                                      idx === 0 || savingOrder ? 0.35 : 1,
+                                    fontWeight: 700,
+                                    color: "#666",
+                                    fontSize: "0.85rem",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    transition: "background 0.15s",
+                                  }}
+                                >
+                                  ↑
+                                </button>
+                                <span
+                                  style={{
+                                    minWidth: "20px",
+                                    textAlign: "center",
+                                    fontWeight: 700,
+                                    color: "#555",
+                                    fontSize: "0.85rem",
+                                  }}
+                                >
+                                  {b.orden}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => moveDown(idx)}
+                                  disabled={
+                                    idx === filtered.length - 1 || savingOrder
+                                  }
+                                  title="Bajar"
+                                  style={{
+                                    width: 26,
+                                    height: 26,
+                                    borderRadius: "6px",
+                                    border: "1px solid #e2e2e2",
+                                    background: "#fff",
+                                    cursor:
+                                      idx === filtered.length - 1 || savingOrder
+                                        ? "not-allowed"
+                                        : "pointer",
+                                    opacity:
+                                      idx === filtered.length - 1 || savingOrder
+                                        ? 0.35
+                                        : 1,
+                                    fontWeight: 700,
+                                    color: "#666",
+                                    fontSize: "0.85rem",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    transition: "background 0.15s",
+                                  }}
+                                >
+                                  ↓
+                                </button>
+                              </div>
+                            </td>
+
+                            {/* Estado */}
+                            <td style={tdStyle}>
                               <span
                                 style={{
-                                  minWidth: "20px",
-                                  textAlign: "center",
-                                  fontWeight: 700,
-                                  color: "#555",
-                                  fontSize: "0.85rem",
-                                }}
-                              >
-                                {b.orden}
-                              </span>
-                              <button
-                                type="button"
-                                onClick={() => moveDown(idx)}
-                                disabled={
-                                  idx === filtered.length - 1 || savingOrder
-                                }
-                                title="Bajar"
-                                style={{
-                                  width: 26,
-                                  height: 26,
-                                  borderRadius: "6px",
-                                  border: "1px solid #e2e2e2",
-                                  background: "#fff",
-                                  cursor:
-                                    idx === filtered.length - 1 || savingOrder
-                                      ? "not-allowed"
-                                      : "pointer",
-                                  opacity:
-                                    idx === filtered.length - 1 || savingOrder
-                                      ? 0.35
-                                      : 1,
-                                  fontWeight: 700,
-                                  color: "#666",
-                                  fontSize: "0.85rem",
-                                  display: "flex",
+                                  display: "inline-flex",
                                   alignItems: "center",
-                                  justifyContent: "center",
-                                  transition: "background 0.15s",
+                                  padding: "3px 10px",
+                                  borderRadius: "999px",
+                                  fontSize: "0.75rem",
+                                  fontWeight: 700,
+                                  background: b.activo
+                                    ? "rgba(34,197,94,0.09)"
+                                    : "rgba(239,68,68,0.09)",
+                                  color: b.activo ? "#16a34a" : "#dc2626",
+                                  border: `1px solid ${b.activo ? "rgba(34,197,94,0.2)" : "rgba(239,68,68,0.2)"}`,
                                 }}
                               >
-                                ↓
-                              </button>
-                            </div>
-                          </td>
+                                {b.activo ? "Activo" : "Inactivo"}
+                              </span>
+                            </td>
 
-                          {/* Estado */}
-                          <td style={tdStyle}>
-                            <span
-                              style={{
-                                display: "inline-flex",
-                                alignItems: "center",
-                                padding: "3px 10px",
-                                borderRadius: "999px",
-                                fontSize: "0.75rem",
-                                fontWeight: 700,
-                                background: b.activo
-                                  ? "rgba(34,197,94,0.09)"
-                                  : "rgba(239,68,68,0.09)",
-                                color: b.activo ? "#16a34a" : "#dc2626",
-                                border: `1px solid ${b.activo ? "rgba(34,197,94,0.2)" : "rgba(239,68,68,0.2)"}`,
-                              }}
-                            >
-                              {b.activo ? "Activo" : "Inactivo"}
-                            </span>
-                          </td>
-
-                          {/* Acciones */}
-                          <td style={tdStyle}>
-                            <div style={{ display: "flex", gap: "6px" }}>
-                              <button
-                                onClick={() => onEditCarousel(b)}
-                                title="Editar"
-                                style={{
-                                  background: "rgba(245,166,35,0.08)",
-                                  border: "1px solid rgba(245,166,35,0.2)",
-                                  borderRadius: "7px",
-                                  padding: "6px 7px",
-                                  cursor: "pointer",
-                                  color: "#f5a623",
-                                  display: "flex",
-                                  transition:
-                                    "background 0.15s, border-color 0.15s",
-                                }}
-                                onMouseEnter={(e) => {
-                                  e.currentTarget.style.background =
-                                    "rgba(245,166,35,0.16)";
-                                  e.currentTarget.style.borderColor =
-                                    "rgba(245,166,35,0.4)";
-                                }}
-                                onMouseLeave={(e) => {
-                                  e.currentTarget.style.background =
-                                    "rgba(245,166,35,0.08)";
-                                  e.currentTarget.style.borderColor =
-                                    "rgba(245,166,35,0.2)";
-                                }}
-                              >
-                                <Pencil size={14} />
-                              </button>
-                              <button
-                                onClick={() => onDeleteCarousel(b.id)}
-                                title="Eliminar"
-                                style={{
-                                  background: "rgba(220,38,38,0.07)",
-                                  border: "1px solid rgba(220,38,38,0.18)",
-                                  borderRadius: "7px",
-                                  padding: "6px 7px",
-                                  cursor: "pointer",
-                                  color: "#dc2626",
-                                  display: "flex",
-                                  transition:
-                                    "background 0.15s, border-color 0.15s",
-                                }}
-                                onMouseEnter={(e) => {
-                                  e.currentTarget.style.background =
-                                    "rgba(220,38,38,0.14)";
-                                  e.currentTarget.style.borderColor =
-                                    "rgba(220,38,38,0.35)";
-                                }}
-                                onMouseLeave={(e) => {
-                                  e.currentTarget.style.background =
-                                    "rgba(220,38,38,0.07)";
-                                  e.currentTarget.style.borderColor =
-                                    "rgba(220,38,38,0.18)";
-                                }}
-                              >
-                                <Trash2 size={14} />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ); })
+                            {/* Acciones */}
+                            <td style={tdStyle}>
+                              <div style={{ display: "flex", gap: "6px" }}>
+                                <button
+                                  onClick={() => onEditCarousel(b)}
+                                  title="Editar"
+                                  style={{
+                                    background: "rgba(245,166,35,0.08)",
+                                    border: "1px solid rgba(245,166,35,0.2)",
+                                    borderRadius: "7px",
+                                    padding: "6px 7px",
+                                    cursor: "pointer",
+                                    color: "#f5a623",
+                                    display: "flex",
+                                    transition:
+                                      "background 0.15s, border-color 0.15s",
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    e.currentTarget.style.background =
+                                      "rgba(245,166,35,0.16)";
+                                    e.currentTarget.style.borderColor =
+                                      "rgba(245,166,35,0.4)";
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    e.currentTarget.style.background =
+                                      "rgba(245,166,35,0.08)";
+                                    e.currentTarget.style.borderColor =
+                                      "rgba(245,166,35,0.2)";
+                                  }}
+                                >
+                                  <Pencil size={14} />
+                                </button>
+                                <button
+                                  onClick={() => onDeleteCarousel(b.id)}
+                                  title="Eliminar"
+                                  style={{
+                                    background: "rgba(220,38,38,0.07)",
+                                    border: "1px solid rgba(220,38,38,0.18)",
+                                    borderRadius: "7px",
+                                    padding: "6px 7px",
+                                    cursor: "pointer",
+                                    color: "#dc2626",
+                                    display: "flex",
+                                    transition:
+                                      "background 0.15s, border-color 0.15s",
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    e.currentTarget.style.background =
+                                      "rgba(220,38,38,0.14)";
+                                    e.currentTarget.style.borderColor =
+                                      "rgba(220,38,38,0.35)";
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    e.currentTarget.style.background =
+                                      "rgba(220,38,38,0.07)";
+                                    e.currentTarget.style.borderColor =
+                                      "rgba(220,38,38,0.18)";
+                                  }}
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })
                     )}
                   </tbody>
                 </table>
@@ -1315,33 +1421,34 @@ export default function AdminBannersPage() {
                         }}
                       />
                     </div>
-{editConfig.image_url && (
-  <div
-    style={{
-      marginTop: "12px",
-      borderRadius: "8px",
-      overflow: "hidden",
-      border: "1px solid #e8e8e8",
-      background: "#f5f5f5",
-      width: "60%",
-      margin: "12px auto 0",
-    }}
-  >
-    <img
-      src={editConfig.image_url}
-      alt="preview"
-      style={{
-        width: "100%",
-        height: "auto",
-        display: "block",
-      }}
-      onError={(e) => {
-        (e.currentTarget.parentElement as HTMLElement).style.display = "none";
-      }}
-    />
-  </div>
-)}
-   
+                    {editConfig.image_url && (
+                      <div
+                        style={{
+                          marginTop: "12px",
+                          borderRadius: "8px",
+                          overflow: "hidden",
+                          border: "1px solid #e8e8e8",
+                          background: "#f5f5f5",
+                          width: "60%",
+                          margin: "12px auto 0",
+                        }}
+                      >
+                        <img
+                          src={editConfig.image_url}
+                          alt="preview"
+                          style={{
+                            width: "100%",
+                            height: "auto",
+                            display: "block",
+                          }}
+                          onError={(e) => {
+                            (
+                              e.currentTarget.parentElement as HTMLElement
+                            ).style.display = "none";
+                          }}
+                        />
+                      </div>
+                    )}
                   </div>
 
                   <div

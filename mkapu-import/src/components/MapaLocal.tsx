@@ -20,7 +20,7 @@ export default function MapaLocal() {
         <div className="mapa-info">
           <span className="mapa-tag">Encuéntranos</span>
           <h2 className="mapa-title">Visita nuestra tienda</h2>
-          <p className="mapa-address">📍 {address}</p>
+          <p className="mapa-address"> {address}</p>
           <p className="mapa-desc">
             Contamos con showroom para que puedas ver los equipos en persona
             antes de comprar.
