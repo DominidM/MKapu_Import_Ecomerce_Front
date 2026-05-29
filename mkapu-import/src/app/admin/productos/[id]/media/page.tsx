@@ -11,6 +11,8 @@ import {
   Image as ImageIcon,
   Video,
 } from "lucide-react";
+import ConfirmModal from "@/components/ConfirmModal";
+import Pagination from "@/components/Pagination";
 
 type ProductoImagen = {
   id: number;
@@ -36,6 +38,8 @@ type Producto = {
 
 type Tab = "imagenes" | "videos";
 
+const ITEMS_PER_PAGE = 10;
+
 export default function ProductoMediaPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
@@ -51,7 +55,22 @@ export default function ProductoMediaPage() {
   const [loading, setLoading] = useState(true);
   const [vidError, setVidError] = useState<string | null>(null);
   const [vidSuccess, setVidSuccess] = useState(false);
+  const [modal, setModal] = useState({
+    open: false,
+    title: "",
+    message: "",
+    variant: "confirm",
+    onConfirm: () => {},
+  });
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPageVideos, setCurrentPageVideos] = useState(1);
+  const filteredImagenes = imagenes;
+  const totalPagesImagenes = Math.ceil(filteredImagenes.length / ITEMS_PER_PAGE) || 1;
+  const paginatedImagenes = filteredImagenes.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+  const filteredVideos = videos;
+  const totalPagesVideos = Math.ceil(filteredVideos.length / ITEMS_PER_PAGE) || 1;
+  const paginatedVideos = filteredVideos.slice((currentPageVideos - 1) * ITEMS_PER_PAGE, currentPageVideos * ITEMS_PER_PAGE);
   const imgRef = useRef<HTMLInputElement>(null);
   const vidRef = useRef<HTMLInputElement>(null);
 
@@ -118,9 +137,8 @@ export default function ProductoMediaPage() {
   }
 
   async function deleteImagen(imgId: number) {
-    if (!confirm("¿Eliminar imagen?")) return;
-    await supabase.from("producto_imagenes").delete().eq("id", imgId);
-    await loadAll();
+    setModal({ open: true, title: "Eliminar", message: "¿Eliminar imagen?", variant: "confirm", onConfirm: async () => { setModal((m) => ({ ...m, open: false })); await supabase.from("producto_imagenes").delete().eq("id", imgId); await loadAll(); } });
+    return;
   }
 
   async function setMainImage(url: string) {
@@ -209,9 +227,8 @@ export default function ProductoMediaPage() {
   }
 
   async function deleteVideo(vidId: number) {
-    if (!confirm("¿Eliminar video?")) return;
-    await supabase.from("producto_videos").delete().eq("id", vidId);
-    await loadAll();
+    setModal({ open: true, title: "Eliminar", message: "¿Eliminar video?", variant: "confirm", onConfirm: async () => { setModal((m) => ({ ...m, open: false })); await supabase.from("producto_videos").delete().eq("id", vidId); await loadAll(); } });
+    return;
   }
 
   async function moverVideo(index: number, dir: "arriba" | "abajo") {
@@ -253,6 +270,14 @@ export default function ProductoMediaPage() {
         minHeight: "100vh",
       }}
     >
+      <ConfirmModal
+        open={modal.open}
+        title={modal.title}
+        message={modal.message}
+        variant={modal.variant as "confirm" | "alert"}
+        onConfirm={modal.onConfirm}
+        onCancel={() => setModal((m) => ({ ...m, open: false }))}
+      />
       <div
         style={{
           width: "100%",
@@ -576,6 +601,7 @@ export default function ProductoMediaPage() {
                 </p>
               </div>
             ) : (
+              <>
               <div
                 style={{
                   display: "grid",
@@ -583,7 +609,8 @@ export default function ProductoMediaPage() {
                   gap: 12,
                 }}
               >
-                {imagenes.map((img, i) => {
+                {paginatedImagenes.map((img, i) => {
+                  const idx = (currentPage - 1) * ITEMS_PER_PAGE + i;
                   const isMain = img.url_imagenes === producto?.image_url;
                   return (
                     <div
@@ -714,18 +741,18 @@ export default function ProductoMediaPage() {
                       >
                         <div style={{ display: "flex", gap: 4 }}>
                           <button
-                            disabled={i === 0}
-                            onClick={() => moverImagen(i, "arriba")}
-                            style={ordenBtnStyle(i === 0)}
+                            disabled={idx === 0}
+                            onClick={() => moverImagen(idx, "arriba")}
+                            style={ordenBtnStyle(idx === 0)}
                             title="Mover arriba"
                           >
                             ▲
                           </button>
 
                           <button
-                            disabled={i === imagenes.length - 1}
-                            onClick={() => moverImagen(i, "abajo")}
-                            style={ordenBtnStyle(i === imagenes.length - 1)}
+                            disabled={idx === filteredImagenes.length - 1}
+                            onClick={() => moverImagen(idx, "abajo")}
+                            style={ordenBtnStyle(idx === filteredImagenes.length - 1)}
                             title="Mover abajo"
                           >
                             ▼
@@ -736,10 +763,18 @@ export default function ProductoMediaPage() {
                   );
                 })}
               </div>
+              <Pagination
+                currentPage={currentPage}
+                totalPages={Math.ceil(imagenes.length / ITEMS_PER_PAGE) || 1}
+                totalItems={imagenes.length}
+                pageSize={ITEMS_PER_PAGE}
+                onPageChange={setCurrentPage}
+              />
+              </>
             )}
           </div>
         )}
-
+        
         {tab === "videos" && (
           <div style={{ animation: "pm-fadein 0.2s ease" }}>
             <div
@@ -936,6 +971,7 @@ export default function ProductoMediaPage() {
                 </p>
               </div>
             ) : (
+              <>
               <div
                 style={{
                   display: "flex",
@@ -943,7 +979,9 @@ export default function ProductoMediaPage() {
                   gap: 10,
                 }}
               >
-                {videos.map((v, i) => (
+                {paginatedVideos.map((v, i) => {
+                  const idx = (currentPageVideos - 1) * ITEMS_PER_PAGE + i;
+                  return (
                   <div
                     key={v.id}
                     style={{
@@ -965,18 +1003,18 @@ export default function ProductoMediaPage() {
                       }}
                     >
                       <button
-                        disabled={i === 0}
-                        onClick={() => moverVideo(i, "arriba")}
-                        style={ordenBtnStyle(i === 0)}
+                        disabled={idx === 0}
+                        onClick={() => moverVideo(idx, "arriba")}
+                        style={ordenBtnStyle(idx === 0)}
                         title="Subir"
                       >
                         ▲
                       </button>
 
                       <button
-                        disabled={i === videos.length - 1}
-                        onClick={() => moverVideo(i, "abajo")}
-                        style={ordenBtnStyle(i === videos.length - 1)}
+                        disabled={idx === filteredVideos.length - 1}
+                        onClick={() => moverVideo(idx, "abajo")}
+                        style={ordenBtnStyle(idx === filteredVideos.length - 1)}
                         title="Bajar"
                       >
                         ▼
@@ -1051,8 +1089,17 @@ export default function ProductoMediaPage() {
                       Eliminar
                     </button>
                   </div>
-                ))}
+                );
+                })}
               </div>
+              <Pagination
+                currentPage={currentPageVideos}
+                totalPages={Math.ceil(videos.length / ITEMS_PER_PAGE) || 1}
+                totalItems={videos.length}
+                pageSize={ITEMS_PER_PAGE}
+                onPageChange={setCurrentPageVideos}
+              />
+              </>
             )}
           </div>
         )}

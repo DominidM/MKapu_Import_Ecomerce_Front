@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import type { Empresa } from "@/lib/supabase";
 import { Camera, Save } from "lucide-react";
+import ConfirmModal from "@/components/ConfirmModal";
 import { showToast } from "@/components/Toast";
 
 const inp: React.CSSProperties = {
@@ -49,6 +50,13 @@ export default function AdminEmpresaPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [modal, setModal] = useState<{
+    open: boolean;
+    title: string;
+    message: string;
+    variant: "confirm" | "alert";
+    onConfirm: () => void;
+  }>({ open: false, title: "", message: "", variant: "confirm", onConfirm: () => {} });
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -94,39 +102,42 @@ export default function AdminEmpresaPage() {
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
-    if (!confirm("¿Guardar estos cambios?")) return;
-    if (!data.nombre.trim()) return showToast("El nombre es requerido", "error");
+    setModal({ open: true, title: "Confirmar", message: "¿Guardar estos cambios?", variant: "confirm", onConfirm: async () => {
+      setModal((m) => ({ ...m, open: false }));
+      if (!data.nombre.trim()) return showToast("El nombre es requerido", "error");
 
-    setSaving(true);
-    try {
-      const res = await fetch("/api/empresa", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          nombre: data.nombre,
-          razon_social: data.razon_social || null,
-          ruc: data.ruc || null,
-          direccion: data.direccion || null,
-          logo: data.logo || null,
-          email: data.email || null,
-          whatsapp: data.whatsapp || null,
-          whatsapp_soporte: data.whatsapp_soporte || null,
-          numero_reclamos: data.numero_reclamos || null,
-          descripcion: data.descripcion || null,
-          horario_atencion: data.horario_atencion || null,
-          instagram_url: data.instagram_url || null,
-          facebook_url: data.facebook_url || null,
-          tiktok_url: data.tiktok_url || null,
-        }),
-      });
+      setSaving(true);
+      try {
+        const res = await fetch("/api/empresa", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            nombre: data.nombre,
+            razon_social: data.razon_social || null,
+            ruc: data.ruc || null,
+            direccion: data.direccion || null,
+            logo: data.logo || null,
+            email: data.email || null,
+            whatsapp: data.whatsapp || null,
+            whatsapp_soporte: data.whatsapp_soporte || null,
+            numero_reclamos: data.numero_reclamos || null,
+            descripcion: data.descripcion || null,
+            horario_atencion: data.horario_atencion || null,
+            instagram_url: data.instagram_url || null,
+            facebook_url: data.facebook_url || null,
+            tiktok_url: data.tiktok_url || null,
+          }),
+        });
 
-      const result = await res.json();
-      if (!res.ok) return showToast("Error al guardar: " + (result.error || "desconocido"), "error");
-      showToast("Datos guardados correctamente", "success");
-    } catch (err) {
-      showToast("Error al guardar: " + err, "error");
-    }
-    setSaving(false);
+        const result = await res.json();
+        if (!res.ok) return showToast("Error al guardar: " + (result.error || "desconocido"), "error");
+        showToast("Datos guardados correctamente", "success");
+      } catch (err) {
+        showToast("Error al guardar: " + err, "error");
+      }
+      setSaving(false);
+    } });
+    return;
   }
 
   function onFocus(e: React.FocusEvent<HTMLInputElement>) {
@@ -155,6 +166,14 @@ export default function AdminEmpresaPage() {
         minHeight: "100vh",
       }}
     >
+      <ConfirmModal
+        open={modal.open}
+        title={modal.title}
+        message={modal.message}
+        variant={modal.variant}
+        onConfirm={modal.onConfirm}
+        onCancel={() => setModal((m) => ({ ...m, open: false }))}
+      />
       <h1
         style={{
           margin: "0 0 1.5rem",

@@ -13,6 +13,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import ConfirmModal from "@/components/ConfirmModal";
 
 type Promocion = {
   id: number;
@@ -257,6 +258,13 @@ export default function AdminPromocionesPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
+  const [modal, setModal] = useState({
+    open: false,
+    title: "",
+    message: "",
+    variant: "confirm",
+    onConfirm: () => {},
+  });
   const [page, setPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
 
@@ -288,7 +296,7 @@ export default function AdminPromocionesPage() {
     const { data, count, error } = await query.range(from, to);
 
     if (error) {
-      alert(error.message);
+      setModal({ open: true, title: "Error", message: error.message, variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) });
       setPromociones([]);
       setTotalItems(0);
       setLoading(false);
@@ -314,7 +322,7 @@ export default function AdminPromocionesPage() {
       .order("code");
 
     if (error) {
-      alert(error.message);
+      setModal({ open: true, title: "Error", message: error.message, variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) });
       return;
     }
 
@@ -373,39 +381,38 @@ export default function AdminPromocionesPage() {
   async function save(e: React.FormEvent) {
     e.preventDefault();
 
-    if (!confirm("¿Guardar estos cambios?")) return;
+    setModal({ open: true, title: "Confirmar", message: "¿Guardar estos cambios?", variant: "confirm", onConfirm: async () => { setModal((m) => ({ ...m, open: false })); 
+      if (!form.producto_id) { setModal({ open: true, title: "Error", message: "Ingresa un código de producto válido", variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) }); return; }
+      if (!form.valor_descuento || form.valor_descuento <= 0) { setModal({ open: true, title: "Error", message: "Valor de descuento inválido", variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) }); return; }
+      if (form.tipo_descuento === "porcentaje" && form.valor_descuento > 100) { setModal({ open: true, title: "Error", message: "El porcentaje no puede ser mayor a 100", variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) }); return; }
 
-    if (!form.producto_id) return alert("Ingresa un código de producto válido");
-    if (!form.valor_descuento || form.valor_descuento <= 0)
-      return alert("Valor de descuento inválido");
-    if (form.tipo_descuento === "porcentaje" && form.valor_descuento > 100)
-      return alert("El porcentaje no puede ser mayor a 100");
+      const payload: Record<string, any> = {
+        producto_id: form.producto_id,
+        tipo_descuento: form.tipo_descuento,
+        valor_descuento: form.valor_descuento,
+        activo: form.activo,
+      };
 
-    const payload: Record<string, any> = {
-      producto_id: form.producto_id,
-      tipo_descuento: form.tipo_descuento,
-      valor_descuento: form.valor_descuento,
-      activo: form.activo,
-    };
+      if (form.fecha_inicio) payload.fecha_inicio = form.fecha_inicio;
+      if (form.fecha_fin) payload.fecha_fin = form.fecha_fin;
 
-    if (form.fecha_inicio) payload.fecha_inicio = form.fecha_inicio;
-    if (form.fecha_fin) payload.fecha_fin = form.fecha_fin;
+      setSaving(true);
 
-    setSaving(true);
+      const { error } = editId
+        ? await supabase.from("promociones").update(payload).eq("id", editId)
+        : await supabase.from("promociones").insert(payload);
 
-    const { error } = editId
-      ? await supabase.from("promociones").update(payload).eq("id", editId)
-      : await supabase.from("promociones").insert(payload);
+      setSaving(false);
 
-    setSaving(false);
+      if (error) { setModal({ open: true, title: "Error", message: error.message, variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) }); return; }
 
-    if (error) return alert(error.message);
-
-    cancelForm();
-    setSuccessMsg("Promoción guardada correctamente");
-    setTimeout(() => setSuccessMsg(""), 3000);
-    setPage(1);
-    loadPromociones(1, search);
+      cancelForm();
+      setSuccessMsg("Promoción guardada correctamente");
+      setTimeout(() => setSuccessMsg(""), 3000);
+      setPage(1);
+      loadPromociones(1, search);
+    } });
+    return;
   }
 
   function onEdit(p: Promocion) {
@@ -430,14 +437,8 @@ export default function AdminPromocionesPage() {
   }
 
   async function onDelete(id: number) {
-    if (!confirm("¿Eliminar esta promoción?")) return;
-
-    const { error } = await supabase.from("promociones").delete().eq("id", id);
-    if (error) return alert(error.message);
-
-    const nextPage = promociones.length === 1 && page > 1 ? page - 1 : page;
-    setPage(nextPage);
-    loadPromociones(nextPage, search);
+    setModal({ open: true, title: "Eliminar", message: "¿Eliminar esta promoción?", variant: "confirm", onConfirm: async () => { setModal((m) => ({ ...m, open: false })); const { error } = await supabase.from("promociones").delete().eq("id", id); if (error) { setModal({ open: true, title: "Error", message: error.message, variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) }); return; } const nextPage = promociones.length === 1 && page > 1 ? page - 1 : page; setPage(nextPage); loadPromociones(nextPage, search); } });
+    return;
   }
 
   async function toggleActivo(p: Promocion) {
@@ -446,7 +447,7 @@ export default function AdminPromocionesPage() {
       .update({ activo: !p.activo })
       .eq("id", p.id);
 
-    if (error) return alert(error.message);
+    if (error) { setModal({ open: true, title: "Error", message: error.message, variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) }); return; }
 
     loadPromociones(page, search);
   }
@@ -507,6 +508,14 @@ export default function AdminPromocionesPage() {
       }}
     >
       {successMsg && (<div style={{position:"fixed",top:"1rem",right:"1rem",zIndex:9999,background:"#16a34a",color:"#fff",padding:"0.75rem 1.25rem",borderRadius:"10px",fontWeight:600,fontSize:"0.875rem",boxShadow:"0 4px 16px rgba(0,0,0,0.12)",display:"flex",alignItems:"center",gap:"8px"}}><CheckCircle size={16}/> {successMsg}</div>)}
+      <ConfirmModal
+        open={modal.open}
+        title={modal.title}
+        message={modal.message}
+        variant={modal.variant as "confirm" | "alert"}
+        onConfirm={modal.onConfirm}
+        onCancel={() => setModal((m) => ({ ...m, open: false }))}
+      />
       <div
         style={{
           display: "flex",

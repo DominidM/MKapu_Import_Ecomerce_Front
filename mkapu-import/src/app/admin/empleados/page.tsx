@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import bcrypt from "bcryptjs";
 import { Pencil, Trash2, Eye, EyeOff, CheckCircle } from "lucide-react";
+import ConfirmModal from "@/components/ConfirmModal";
+import Pagination from "@/components/Pagination";
 
 interface Empleado {
   id: number;
@@ -51,6 +53,8 @@ const lbl: React.CSSProperties = {
   marginBottom: "0.4rem",
 };
 
+const ITEMS_PER_PAGE = 10;
+
 export default function EmpleadosPage() {
   const [empleados, setEmpleados] = useState<Empleado[]>([]);
   const [loading, setLoading] = useState(true);
@@ -61,6 +65,14 @@ export default function EmpleadosPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [modal, setModal] = useState<{
+    open: boolean;
+    title: string;
+    message: string;
+    variant: "confirm" | "alert";
+    onConfirm: () => void;
+  }>({ open: false, title: "", message: "", variant: "confirm", onConfirm: () => {} });
 
   useEffect(() => {
     fetchEmpleados();
@@ -102,9 +114,10 @@ export default function EmpleadosPage() {
   }
 
   async function guardar(e: React.FormEvent) {
-    if (!confirm("¿Guardar estos cambios?")) return;
     e.preventDefault();
-    setError("");
+    setModal({ open: true, title: "Confirmar", message: "¿Guardar estos cambios?", variant: "confirm", onConfirm: async () => {
+      setModal((m) => ({ ...m, open: false }));
+      setError("");
 
     if (!form.nombre || !form.email) {
       setError("Nombre y email son obligatorios.");
@@ -161,17 +174,17 @@ export default function EmpleadosPage() {
     } finally {
       setGuardando(false);
     }
+    } });
+    return;
   }
 
   async function eliminar(id: number) {
-    if (
-      !confirm("¿Eliminar este empleado? Esta acción no se puede deshacer.")
-    ) {
-      return;
-    }
-
-    await supabase.from("empleados").delete().eq("id", id);
-    await fetchEmpleados();
+    setModal({ open: true, title: "Confirmar", message: "¿Eliminar este empleado? Esta acción no se puede deshacer.", variant: "confirm", onConfirm: async () => {
+      setModal((m) => ({ ...m, open: false }));
+      await supabase.from("empleados").delete().eq("id", id);
+      await fetchEmpleados();
+    } });
+    return;
   }
 
   async function toggleActivo(emp: Empleado) {
@@ -190,6 +203,10 @@ export default function EmpleadosPage() {
     setError("");
     setShowPassword(false);
   }
+
+  const filtered = empleados;
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE) || 1;
+  const paginatedData = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
   function onFocusInput(
     e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -223,6 +240,14 @@ export default function EmpleadosPage() {
           <CheckCircle size={16} /> {successMsg}
         </div>
       )}
+      <ConfirmModal
+        open={modal.open}
+        title={modal.title}
+        message={modal.message}
+        variant={modal.variant}
+        onConfirm={modal.onConfirm}
+        onCancel={() => setModal((m) => ({ ...m, open: false }))}
+      />
       <div
         style={{
           display: "flex",
@@ -575,12 +600,12 @@ export default function EmpleadosPage() {
                 </thead>
 
                 <tbody>
-                  {empleados.map((emp, i) => (
+                  {paginatedData.map((emp, i) => (
                     <tr
                       key={emp.id}
                       style={{
                         borderBottom:
-                          i < empleados.length - 1
+                          i < paginatedData.length - 1
                             ? "1px solid #f0f0f0"
                             : "none",
                       }}
@@ -718,6 +743,13 @@ export default function EmpleadosPage() {
               </table>
             </div>
           )}
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={filtered.length}
+            pageSize={ITEMS_PER_PAGE}
+            onPageChange={setCurrentPage}
+          />
         </div>
       )}
     </div>

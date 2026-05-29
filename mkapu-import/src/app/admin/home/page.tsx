@@ -11,6 +11,7 @@ import {
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
+import ConfirmModal from "@/components/ConfirmModal";
 
 type Categoria = { id: number; name: string; slug: string; activo: boolean };
 type Seccion = {
@@ -27,6 +28,13 @@ export default function AdminHomePage() {
   const [saving, setSaving] = useState(false);
   const [dragIdx, setDragIdx] = useState<number | null>(null);
   const [mostrarTodas, setMostrarTodas] = useState(false);
+  const [modal, setModal] = useState<{
+    open: boolean;
+    title: string;
+    message: string;
+    variant: "confirm" | "alert";
+    onConfirm: () => void;
+  }>({ open: false, title: "", message: "", variant: "confirm", onConfirm: () => {} });
 
   async function load() {
     setLoading(true);
@@ -70,9 +78,12 @@ export default function AdminHomePage() {
   }
 
   async function eliminar(sec: Seccion) {
-    if (!confirm("¿Quitar esta sección del home?")) return;
-    await supabase.from("home_secciones").delete().eq("id", sec.id);
-    setSecciones((prev) => prev.filter((s) => s.id !== sec.id));
+    setModal({ open: true, title: "Confirmar", message: "¿Quitar esta sección del home?", variant: "confirm", onConfirm: async () => {
+      setModal((m) => ({ ...m, open: false }));
+      await supabase.from("home_secciones").delete().eq("id", sec.id);
+      setSecciones((prev) => prev.filter((s) => s.id !== sec.id));
+    } });
+    return;
   }
 
   async function persistOrder(list: Seccion[]) {
@@ -127,6 +138,14 @@ export default function AdminHomePage() {
         minHeight: "100vh",
       }}
     >
+      <ConfirmModal
+        open={modal.open}
+        title={modal.title}
+        message={modal.message}
+        variant={modal.variant}
+        onConfirm={modal.onConfirm}
+        onCancel={() => setModal((m) => ({ ...m, open: false }))}
+      />
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
       `}</style>

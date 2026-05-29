@@ -21,6 +21,7 @@ import {
   AlertCircle,
   List,
 } from "lucide-react";
+import ConfirmModal from "@/components/ConfirmModal";
 
 type Producto = {
   id: number;
@@ -82,6 +83,13 @@ export default function AdminProductosPage() {
   const [totalCompletos, setTotalCompletos] = useState(0);
   const [totalIncompletos, setTotalIncompletos] = useState(0);
   const [successMsg, setSuccessMsg] = useState("");
+  const [modal, setModal] = useState({
+    open: false,
+    title: "",
+    message: "",
+    variant: "confirm",
+    onConfirm: () => {},
+  });
 
   const fileRef = useRef<HTMLInputElement>(null);
   const topRef = useRef<HTMLDivElement>(null);
@@ -197,7 +205,7 @@ export default function AdminProductosPage() {
     setUploading(false);
 
     if (error) {
-      alert(`Error: ${error.message}`);
+      setModal({ open: true, title: "Error", message: `Error: ${error.message}`, variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) });
       return null;
     }
 
@@ -206,12 +214,12 @@ export default function AdminProductosPage() {
 
   async function saveProducto(): Promise<number | null> {
     if (!form.name.trim()) {
-      alert("Nombre requerido");
+      setModal({ open: true, title: "Error", message: "Nombre requerido", variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) });
       return null;
     }
 
     if (!form.code.trim()) {
-      alert("Código requerido");
+      setModal({ open: true, title: "Error", message: "Código requerido", variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) });
       return null;
     }
 
@@ -240,7 +248,7 @@ export default function AdminProductosPage() {
       setSaving(false);
 
       if (error) {
-        alert(error.message);
+        setModal({ open: true, title: "Error", message: error.message, variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) });
         return null;
       }
 
@@ -255,7 +263,7 @@ export default function AdminProductosPage() {
       setSaving(false);
 
       if (error) {
-        alert(error.message);
+        setModal({ open: true, title: "Error", message: error.message, variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) });
         return null;
       }
 
@@ -266,18 +274,8 @@ export default function AdminProductosPage() {
   async function handleSave(e: React.FormEvent, closeAfter = false) {
     e.preventDefault();
 
-    if (!confirm("¿Guardar estos cambios?")) return;
-
-    const id = await saveProducto();
-    if (!id) return;
-
-    setSuccessMsg(editId ? "Producto actualizado correctamente" : "Producto creado correctamente");
-    setTimeout(() => setSuccessMsg(""), 3000);
-    setSavedId(id);
-    setEditId(id);
-    await load();
-
-    if (closeAfter) goToList();
+    setModal({ open: true, title: "Confirmar", message: "¿Guardar estos cambios?", variant: "confirm", onConfirm: async () => { setModal((m) => ({ ...m, open: false })); const id = await saveProducto(); if (!id) return; setSuccessMsg(editId ? "Producto actualizado correctamente" : "Producto creado correctamente"); setTimeout(() => setSuccessMsg(""), 3000); setSavedId(id); setEditId(id); await load(); if (closeAfter) goToList(); } });
+    return;
   }
 
   function onEdit(p: Producto) {
@@ -301,9 +299,8 @@ export default function AdminProductosPage() {
   }
 
   async function onDelete(id: number) {
-    if (!confirm("¿Eliminar producto?")) return;
-    await supabase.from("productos").delete().eq("id", id);
-    await load();
+    setModal({ open: true, title: "Eliminar", message: "¿Eliminar producto?", variant: "confirm", onConfirm: async () => { setModal((m) => ({ ...m, open: false })); await supabase.from("productos").delete().eq("id", id); await load(); } });
+    return;
   }
 
   // ── NUEVO: toggle agotado directo desde la tabla ──────────────────────────
@@ -434,6 +431,14 @@ export default function AdminProductosPage() {
             <CheckCircle size={16} /> {successMsg}
           </div>
         )}
+      <ConfirmModal
+        open={modal.open}
+        title={modal.title}
+        message={modal.message}
+        variant={modal.variant as "confirm" | "alert"}
+        onConfirm={modal.onConfirm}
+        onCancel={() => setModal((m) => ({ ...m, open: false }))}
+      />
         {/* ── FORMULARIO CREATE / EDIT ─────────────────────────────────────── */}
         {formMode !== "list" && (
           <div className="ap-card ap-fadein">
@@ -564,11 +569,9 @@ export default function AdminProductosPage() {
                   <input
                     className="ap-inp"
                     style={{ flex: 1 }}
-                    placeholder="URL o sube un archivo..."
+                    placeholder="Sube un archivo para generar la URL"
                     value={form.image_url}
-                    onChange={(e) =>
-                      setForm({ ...form, image_url: e.target.value })
-                    }
+                    readOnly
                   />
 
                   <button

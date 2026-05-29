@@ -12,6 +12,8 @@ import {
   Loader2,
   CheckCircle,
 } from "lucide-react";
+import ConfirmModal from "@/components/ConfirmModal";
+import Pagination from "@/components/Pagination";
 
 type BlogPost = {
   id: number;
@@ -65,6 +67,8 @@ const lbl: React.CSSProperties = {
   marginBottom: "0.4rem",
 };
 
+const ITEMS_PER_PAGE = 10;
+
 export default function AdminBlogPage() {
   const [rows, setRows] = useState<BlogPost[]>([]);
   const [form, setForm] = useState(initialForm);
@@ -81,6 +85,14 @@ export default function AdminBlogPage() {
   const [uploadingVid, setUploadingVid] = useState(false);
   const [savingOrder, setSavingOrder] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [modal, setModal] = useState({
+    open: false,
+    title: "",
+    message: "",
+    variant: "confirm",
+    onConfirm: () => {},
+  });
   const imgRef = useRef<HTMLInputElement>(null);
   const vidRef = useRef<HTMLInputElement>(null);
 
@@ -130,6 +142,10 @@ export default function AdminBlogPage() {
     load();
   }, []);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search]);
+
   async function persistOrder(list: BlogPost[]) {
     setSavingOrder(true);
     const reordered = list.map((p, i) => ({ ...p, orden: i + 1 }));
@@ -163,7 +179,7 @@ export default function AdminBlogPage() {
       .from("imagenes")
       .upload(path, file, { upsert: true });
     if (error) {
-      alert("Error subiendo imagen: " + error.message);
+      setModal({ open: true, title: "Error", message: "Error subiendo imagen: " + error.message, variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) });
       return null;
     }
     return supabase.storage.from("imagenes").getPublicUrl(path).data.publicUrl;
@@ -176,7 +192,7 @@ export default function AdminBlogPage() {
       .from("imagenes")
       .upload(path, file, { upsert: true });
     if (error) {
-      alert("Error subiendo video: " + error.message);
+      setModal({ open: true, title: "Error", message: "Error subiendo video: " + error.message, variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) });
       return null;
     }
     return supabase.storage.from("imagenes").getPublicUrl(path).data.publicUrl;
@@ -229,65 +245,19 @@ export default function AdminBlogPage() {
   }
 
   async function deleteImagen(id: number) {
-    if (!confirm("¿Eliminar imagen?")) return;
-    await supabase.from("vlog_imagenes").delete().eq("id", id);
-    if (editId) await loadMedia(editId);
-    await load();
+    setModal({ open: true, title: "Eliminar", message: "¿Eliminar imagen?", variant: "confirm", onConfirm: async () => { setModal((m) => ({ ...m, open: false })); await supabase.from("vlog_imagenes").delete().eq("id", id); if (editId) await loadMedia(editId); await load(); } });
+    return;
   }
 
   async function deleteVideo(id: number) {
-    if (!confirm("¿Eliminar video?")) return;
-    await supabase.from("vlog_videos").delete().eq("id", id);
-    if (editId) await loadMedia(editId);
-    await load();
+    setModal({ open: true, title: "Eliminar", message: "¿Eliminar video?", variant: "confirm", onConfirm: async () => { setModal((m) => ({ ...m, open: false })); await supabase.from("vlog_videos").delete().eq("id", id); if (editId) await loadMedia(editId); await load(); } });
+    return;
   }
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
-    if (!confirm("¿Guardar estos cambios?")) return;
-    if (!form.titulo.trim()) return alert("Título requerido");
-    const payload = {
-      titulo: form.titulo.trim(),
-      descripcion: form.descripcion || null,
-      contenido: form.contenido || null,
-      fecha_publicacion: new Date().toISOString().split("T")[0],
-      orden: rows.length + 1,
-      activo: form.activo,
-    };
-    if (editId) {
-      const { error } = await supabase
-        .from("vlog_posts")
-        .update({
-          titulo: payload.titulo,
-          descripcion: payload.descripcion,
-          contenido: payload.contenido,
-          activo: payload.activo,
-        })
-        .eq("id", editId);
-      if (error) return alert(error.message);
-      cancelForm();
-      await load();
-      setSuccessMsg("Post guardado correctamente"); setTimeout(() => setSuccessMsg(""), 3000);
-    } else {
-      const { data, error } = await supabase
-        .from("vlog_posts")
-        .insert(payload)
-        .select()
-        .single();
-      if (error) return alert(error.message);
-      await load();
-      setSuccessMsg("Post guardado correctamente"); setTimeout(() => setSuccessMsg(""), 3000);
-      setEditId(data.id);
-      setForm({
-        titulo: data.titulo ?? "",
-        descripcion: data.descripcion ?? "",
-        contenido: data.contenido ?? "",
-        activo: data.activo ?? true,
-      });
-      setImagenes([]);
-      setVideos([]);
-      setShowForm(true);
-    }
+    setModal({ open: true, title: "Confirmar", message: "¿Guardar estos cambios?", variant: "confirm", onConfirm: async () => { setModal((m) => ({ ...m, open: false })); if (!form.titulo.trim()) { setModal({ open: true, title: "Error", message: "Título requerido", variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) }); return; } const payload = { titulo: form.titulo.trim(), descripcion: form.descripcion || null, contenido: form.contenido || null, fecha_publicacion: new Date().toISOString().split("T")[0], orden: rows.length + 1, activo: form.activo, }; if (editId) { const { error } = await supabase .from("vlog_posts") .update({ titulo: payload.titulo, descripcion: payload.descripcion, contenido: payload.contenido, activo: payload.activo, }) .eq("id", editId); if (error) { setModal({ open: true, title: "Error", message: error.message, variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) }); return; } cancelForm(); await load(); setSuccessMsg("Post guardado correctamente"); setTimeout(() => setSuccessMsg(""), 3000); } else { const { data, error } = await supabase .from("vlog_posts") .insert(payload) .select() .single(); if (error) { setModal({ open: true, title: "Error", message: error.message, variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) }); return; } await load(); setSuccessMsg("Post guardado correctamente"); setTimeout(() => setSuccessMsg(""), 3000); setEditId(data.id); setForm({ titulo: data.titulo ?? "", descripcion: data.descripcion ?? "", contenido: data.contenido ?? "", activo: data.activo ?? true, }); setImagenes([]); setVideos([]); setShowForm(true); } } });
+    return;
   }
 
   function onEdit(p: BlogPost) {
@@ -304,16 +274,8 @@ export default function AdminBlogPage() {
   }
 
   async function onDelete(id: number) {
-    if (
-      !confirm(
-        "¿Eliminar este post? También se eliminarán sus imágenes y videos.",
-      )
-    )
-      return;
-    await supabase.from("vlog_imagenes").delete().eq("vlog_post_id", id);
-    await supabase.from("vlog_videos").delete().eq("vlog_post_id", id);
-    await supabase.from("vlog_posts").delete().eq("id", id);
-    await load();
+    setModal({ open: true, title: "Eliminar", message: "¿Eliminar este post? También se eliminarán sus imágenes y videos.", variant: "confirm", onConfirm: async () => { setModal((m) => ({ ...m, open: false })); await supabase.from("vlog_imagenes").delete().eq("vlog_post_id", id); await supabase.from("vlog_videos").delete().eq("vlog_post_id", id); await supabase.from("vlog_posts").delete().eq("id", id); await load(); } });
+    return;
   }
 
   function cancelForm() {
@@ -341,6 +303,8 @@ export default function AdminBlogPage() {
   const filtered = rows.filter((p) =>
     p.titulo.toLowerCase().includes(search.toLowerCase()),
   );
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE) || 1;
+  const paginatedData = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
   return (
     <div
@@ -351,6 +315,14 @@ export default function AdminBlogPage() {
       }}
     >
       {successMsg && (<div style={{position:"fixed",top:"1rem",right:"1rem",zIndex:9999,background:"#16a34a",color:"#fff",padding:"0.75rem 1.25rem",borderRadius:"10px",fontWeight:600,fontSize:"0.875rem",boxShadow:"0 4px 16px rgba(0,0,0,0.12)",display:"flex",alignItems:"center",gap:"8px"}}><CheckCircle size={16}/> {successMsg}</div>)}
+      <ConfirmModal
+        open={modal.open}
+        title={modal.title}
+        message={modal.message}
+        variant={modal.variant as "confirm" | "alert"}
+        onConfirm={modal.onConfirm}
+        onCancel={() => setModal((m) => ({ ...m, open: false }))}
+      />
       {/* ── Header ── */}
       <div
         style={{
@@ -1036,14 +1008,14 @@ export default function AdminBlogPage() {
                         </td>
                       </tr>
                     ) : (
-                      filtered.map((p, i) => {
+                      paginatedData.map((p, i) => {
                         const media = mediaMap[p.id] ?? { imgs: 0, vids: 0 };
                         return (
                           <tr
                             key={p.id}
                             style={{
                               borderBottom:
-                                i < filtered.length - 1
+                                i < paginatedData.length - 1
                                   ? "1px solid #f0f0f0"
                                   : "none",
                             }}
@@ -1373,18 +1345,14 @@ export default function AdminBlogPage() {
                 </table>
               </div>
 
-              <div
-                style={{
-                  padding: "12px 16px",
-                  borderTop: "1px solid #e8e8e8",
-                  background: "#fafafa",
-                  fontSize: "0.8rem",
-                  color: "#aaa",
-                }}
-              >
-                {filtered.length} de {rows.length} publicación
-                {rows.length !== 1 ? "es" : ""}
-              </div>
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={filtered.length}
+                pageSize={ITEMS_PER_PAGE}
+                onPageChange={setCurrentPage}
+                label="Mostrando"
+              />
             </div>
           )}
         </>

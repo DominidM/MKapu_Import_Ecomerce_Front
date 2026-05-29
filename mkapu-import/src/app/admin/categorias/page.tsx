@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { CheckCircle, Pencil, Trash2 } from "lucide-react";
+import ConfirmModal from "@/components/ConfirmModal";
+import Pagination from "@/components/Pagination";
 
 type Categoria = {
   id: number;
@@ -43,6 +45,8 @@ function toSlug(text: string) {
     .replace(/\s+/g, "-");
 }
 
+const ITEMS_PER_PAGE = 10;
+
 export default function AdminCategoriasPage() {
   const [rows, setRows] = useState<Categoria[]>([]);
   const [form, setForm] = useState(initialForm);
@@ -51,6 +55,14 @@ export default function AdminCategoriasPage() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [successMsg, setSuccessMsg] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [modal, setModal] = useState<{
+    open: boolean;
+    title: string;
+    message: string;
+    variant: "confirm" | "alert";
+    onConfirm: () => void;
+  }>({ open: false, title: "", message: "", variant: "confirm", onConfirm: () => {} });
 
   async function load() {
     setLoading(true);
@@ -65,25 +77,28 @@ export default function AdminCategoriasPage() {
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
-    if (!confirm("¿Guardar estos cambios?")) return;
-    if (!form.name.trim()) return alert("Nombre requerido");
-    if (!form.slug.trim()) return alert("Slug requerido");
+    setModal({ open: true, title: "Confirmar", message: "¿Guardar estos cambios?", variant: "confirm", onConfirm: async () => {
+      setModal((m) => ({ ...m, open: false }));
+      if (!form.name.trim()) { setModal({ open: true, title: "Error", message: "Nombre requerido", variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) }); return; }
+      if (!form.slug.trim()) { setModal({ open: true, title: "Error", message: "Slug requerido", variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) }); return; }
 
-    const payload = {
-      name: form.name.trim(),
-      slug: form.slug.trim(),
-      activo: form.activo,
-    };
+      const payload = {
+        name: form.name.trim(),
+        slug: form.slug.trim(),
+        activo: form.activo,
+      };
 
-    const { error } = editId
-      ? await supabase.from("categorias").update(payload).eq("id", editId)
-      : await supabase.from("categorias").insert(payload);
+      const { error } = editId
+        ? await supabase.from("categorias").update(payload).eq("id", editId)
+        : await supabase.from("categorias").insert(payload);
 
-    if (error) return alert(error.message);
-    cancelForm();
-    await load();
-    setSuccessMsg(editId ? "Categoría actualizada correctamente" : "Categoría creada correctamente");
-    setTimeout(() => setSuccessMsg(""), 3000);
+      if (error) { setModal({ open: true, title: "Error", message: error.message, variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) }); return; }
+      cancelForm();
+      await load();
+      setSuccessMsg(editId ? "Categoría actualizada correctamente" : "Categoría creada correctamente");
+      setTimeout(() => setSuccessMsg(""), 3000);
+    } });
+    return;
   }
 
   function onEdit(c: Categoria) {
@@ -98,17 +113,13 @@ export default function AdminCategoriasPage() {
   }
 
   async function onDelete(id: number) {
-    if (
-      !confirm(
-        "¿Eliminar esta categoría? Los productos asociados quedarán sin categoría.",
-      )
-    ) {
-      return;
-    }
-
-    const { error } = await supabase.from("categorias").delete().eq("id", id);
-    if (error) return alert(error.message);
-    load();
+    setModal({ open: true, title: "Confirmar", message: "¿Eliminar esta categoría? Los productos asociados quedarán sin categoría.", variant: "confirm", onConfirm: async () => {
+      setModal((m) => ({ ...m, open: false }));
+      const { error } = await supabase.from("categorias").delete().eq("id", id);
+      if (error) { setModal({ open: true, title: "Error", message: error.message, variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) }); return; }
+      load();
+    } });
+    return;
   }
 
   async function toggleActivo(c: Categoria) {
@@ -145,6 +156,10 @@ export default function AdminCategoriasPage() {
       c.name.toLowerCase().includes(search.toLowerCase()) ||
       c.slug.toLowerCase().includes(search.toLowerCase()),
   );
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE) || 1;
+  const paginatedData = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+
+  useEffect(() => { setCurrentPage(1); }, [search]);
 
   return (
     <div
@@ -164,6 +179,14 @@ export default function AdminCategoriasPage() {
           <CheckCircle size={16} /> {successMsg}
         </div>
       )}
+      <ConfirmModal
+        open={modal.open}
+        title={modal.title}
+        message={modal.message}
+        variant={modal.variant}
+        onConfirm={modal.onConfirm}
+        onCancel={() => setModal((m) => ({ ...m, open: false }))}
+      />
       <div
         style={{
           display: "flex",
@@ -461,12 +484,12 @@ export default function AdminCategoriasPage() {
                         </td>
                       </tr>
                     ) : (
-                      filtered.map((c, i) => (
+                      paginatedData.map((c, i) => (
                         <tr
                           key={c.id}
                           style={{
                             borderBottom:
-                              i < filtered.length - 1
+                              i < paginatedData.length - 1
                                 ? "1px solid #f0f0f0"
                                 : "none",
                           }}
@@ -631,6 +654,13 @@ export default function AdminCategoriasPage() {
                 {filtered.length} de {rows.length} categoría
                 {rows.length !== 1 ? "s" : ""}
               </div>
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={filtered.length}
+                pageSize={ITEMS_PER_PAGE}
+                onPageChange={setCurrentPage}
+              />
             </div>
           )}
         </>

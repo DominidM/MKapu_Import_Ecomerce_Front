@@ -18,6 +18,8 @@ import {
   PlusCircle,
   X,
 } from "lucide-react";
+import ConfirmModal from "@/components/ConfirmModal";
+import Pagination from "@/components/Pagination";
 
 type ColabMedia = {
   id: number;
@@ -55,6 +57,8 @@ const lbl: React.CSSProperties = {
   marginBottom: "0.4rem",
 };
 
+const ITEMS_PER_PAGE = 10;
+
 export default function AdminColaboradoresPage() {
   const [rows, setRows] = useState<ColaboradorRow[]>([]);
   const [form, setForm] = useState(initialForm);
@@ -71,6 +75,14 @@ export default function AdminColaboradoresPage() {
   const [uploadingVid, setUploadingVid] = useState(false);
   const [savingOrder, setSavingOrder] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [modal, setModal] = useState<{
+    open: boolean;
+    title: string;
+    message: string;
+    variant: "confirm" | "alert";
+    onConfirm: () => void;
+  }>({ open: false, title: "", message: "", variant: "confirm", onConfirm: () => {} });
 
   const fileRef = useRef<HTMLInputElement>(null);
   const imgRef = useRef<HTMLInputElement>(null);
@@ -138,7 +150,7 @@ export default function AdminColaboradoresPage() {
       .upload(path, file, { upsert: true });
 
     if (error) {
-      alert("Error: " + error.message);
+      setModal({ open: true, title: "Error", message: "Error: " + error.message, variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) });
       return null;
     }
 
@@ -207,65 +219,68 @@ export default function AdminColaboradoresPage() {
   }
 
   async function deleteMedia(id: number) {
-    if (!confirm("¿Eliminar este archivo?")) return;
-    await supabase.from("colaborador_media").delete().eq("id", id);
-    if (editId) {
-      await loadMedia(editId);
-      await load();
-    }
+    setModal({ open: true, title: "Confirmar", message: "¿Eliminar este archivo?", variant: "confirm", onConfirm: async () => {
+      setModal((m) => ({ ...m, open: false }));
+      await supabase.from("colaborador_media").delete().eq("id", id);
+      if (editId) {
+        await loadMedia(editId);
+        await load();
+      }
+    } });
+    return;
   }
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
+    setModal({ open: true, title: "Confirmar", message: "¿Guardar estos cambios?", variant: "confirm", onConfirm: async () => {
+      setModal((m) => ({ ...m, open: false }));
 
-    if (!confirm("¿Guardar estos cambios?")) return;
+      if (!form.name.trim()) { setModal({ open: true, title: "Error", message: "Nombre requerido", variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) }); return; }
+      if (!form.logo_url.trim()) { setModal({ open: true, title: "Error", message: "Sube un logo para el colaborador", variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) }); return; }
 
-    if (!form.name.trim()) return alert("Nombre requerido");
-    if (!form.logo_url.trim()) {
-      return alert("Sube un logo para el colaborador");
-    }
+      const payload = {
+        name: form.name,
+        logo_url: form.logo_url,
+        url: null,
+        activo: form.activo,
+        orden: form.orden,
+      };
 
-    const payload = {
-      name: form.name,
-      logo_url: form.logo_url,
-      url: null,
-      activo: form.activo,
-      orden: form.orden,
-    };
+      if (editId) {
+        const { error } = await supabase
+          .from("colaboradores")
+          .update(payload)
+          .eq("id", editId);
 
-    if (editId) {
-      const { error } = await supabase
-        .from("colaboradores")
-        .update(payload)
-        .eq("id", editId);
+        if (error) { setModal({ open: true, title: "Error", message: error.message, variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) }); return; }
 
-      if (error) return alert(error.message);
+        setSuccessMsg("Colaborador actualizado correctamente");
+        setTimeout(() => setSuccessMsg(""), 3000);
+        resetForm();
+        await load();
+      } else {
+        const { data, error } = await supabase
+          .from("colaboradores")
+          .insert(payload)
+          .select()
+          .single();
 
-      setSuccessMsg("Colaborador actualizado correctamente");
-      setTimeout(() => setSuccessMsg(""), 3000);
-      resetForm();
-      await load();
-    } else {
-      const { data, error } = await supabase
-        .from("colaboradores")
-        .insert(payload)
-        .select()
-        .single();
+        if (error) { setModal({ open: true, title: "Error", message: error.message, variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) }); return; }
 
-      if (error) return alert(error.message);
-
-      setSuccessMsg("Colaborador creado correctamente");
-      setTimeout(() => setSuccessMsg(""), 3000);
-      setEditId(data.id);
-      setForm({
-        name: data.name,
-        logo_url: data.logo_url ?? "",
-        activo: data.activo,
-        orden: data.orden,
-      });
-      setMedia([]);
-      await load();
-    }
+        setSuccessMsg("Colaborador creado correctamente");
+        setTimeout(() => setSuccessMsg(""), 3000);
+        setEditId(data.id);
+        setForm({
+          name: data.name,
+          logo_url: data.logo_url ?? "",
+          activo: data.activo,
+          orden: data.orden,
+        });
+        setMedia([]);
+        await load();
+      }
+    } });
+    return;
   }
 
   function onEdit(c: ColaboradorRow) {
@@ -283,13 +298,13 @@ export default function AdminColaboradoresPage() {
   }
 
   async function onDelete(id: number) {
-    if (!confirm("¿Eliminar colaborador? También se eliminará su media.")) {
-      return;
-    }
-
-    await supabase.from("colaborador_media").delete().eq("colaborador_id", id);
-    await supabase.from("colaboradores").delete().eq("id", id);
-    await load();
+    setModal({ open: true, title: "Confirmar", message: "¿Eliminar colaborador? También se eliminará su media.", variant: "confirm", onConfirm: async () => {
+      setModal((m) => ({ ...m, open: false }));
+      await supabase.from("colaborador_media").delete().eq("colaborador_id", id);
+      await supabase.from("colaboradores").delete().eq("id", id);
+      await load();
+    } });
+    return;
   }
 
   async function persistOrder(list: ColaboradorRow[]) {
@@ -331,6 +346,10 @@ export default function AdminColaboradoresPage() {
   const imagenes = media.filter((m) => m.tipo === "imagen");
   const videos = media.filter((m) => m.tipo === "video");
 
+  const filtered = rows;
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE) || 1;
+  const paginatedData = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+
   function onFocusInput(
     e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) {
@@ -363,6 +382,14 @@ export default function AdminColaboradoresPage() {
           <CheckCircle size={16} /> {successMsg}
         </div>
       )}
+      <ConfirmModal
+        open={modal.open}
+        title={modal.title}
+        message={modal.message}
+        variant={modal.variant}
+        onConfirm={modal.onConfirm}
+        onCancel={() => setModal((m) => ({ ...m, open: false }))}
+      />
       <div
         style={{
           display: "flex",
@@ -1105,7 +1132,8 @@ export default function AdminColaboradoresPage() {
                   </thead>
 
                   <tbody>
-                    {rows.map((c, i) => {
+                    {paginatedData.map((c) => {
+                      const idx = rows.indexOf(c);
                       const m = mediaMap[c.id] ?? { imgs: 0, vids: 0 };
 
                       return (
@@ -1113,7 +1141,7 @@ export default function AdminColaboradoresPage() {
                           key={c.id}
                           style={{
                             borderBottom:
-                              i < rows.length - 1
+                              idx < rows.length - 1
                                 ? "1px solid #f0f0f0"
                                 : "none",
                             background: "#fff",
@@ -1191,8 +1219,8 @@ export default function AdminColaboradoresPage() {
                             >
                               <button
                                 type="button"
-                                onClick={() => moveUp(i)}
-                                disabled={i === 0 || savingOrder}
+                                onClick={() => moveUp(idx)}
+                                disabled={idx === 0 || savingOrder}
                                 style={{
                                   width: 26,
                                   height: 26,
@@ -1200,10 +1228,10 @@ export default function AdminColaboradoresPage() {
                                   border: "1px solid #e2e2e2",
                                   background: "#fff",
                                   cursor:
-                                    i === 0 || savingOrder
+                                    idx === 0 || savingOrder
                                       ? "not-allowed"
                                       : "pointer",
-                                  opacity: i === 0 || savingOrder ? 0.35 : 1,
+                                  opacity: idx === 0 || savingOrder ? 0.35 : 1,
                                   fontWeight: 700,
                                   color: "#666",
                                   fontSize: "0.85rem",
@@ -1230,8 +1258,8 @@ export default function AdminColaboradoresPage() {
 
                               <button
                                 type="button"
-                                onClick={() => moveDown(i)}
-                                disabled={i === rows.length - 1 || savingOrder}
+                                onClick={() => moveDown(idx)}
+                                disabled={idx === rows.length - 1 || savingOrder}
                                 style={{
                                   width: 26,
                                   height: 26,
@@ -1239,11 +1267,11 @@ export default function AdminColaboradoresPage() {
                                   border: "1px solid #e2e2e2",
                                   background: "#fff",
                                   cursor:
-                                    i === rows.length - 1 || savingOrder
+                                    idx === rows.length - 1 || savingOrder
                                       ? "not-allowed"
                                       : "pointer",
                                   opacity:
-                                    i === rows.length - 1 || savingOrder
+                                    idx === rows.length - 1 || savingOrder
                                       ? 0.35
                                       : 1,
                                   fontWeight: 700,
@@ -1425,6 +1453,13 @@ export default function AdminColaboradoresPage() {
               registrado
               {rows.length !== 1 ? "s" : ""}
             </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={filtered.length}
+              pageSize={ITEMS_PER_PAGE}
+              onPageChange={setCurrentPage}
+            />
           </div>
         ))}
 

@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { Pencil, Trash2, Upload, ImageIcon, CheckCircle } from "lucide-react";
+import ConfirmModal from "@/components/ConfirmModal";
+import Pagination from "@/components/Pagination";
 
 type BannerCarousel = {
   id: number;
@@ -60,6 +62,8 @@ const initialCarousel = {
   activo: true,
 };
 
+const ITEMS_PER_PAGE = 10;
+
 export default function AdminBannersPage() {
   const [tab, setTab] = useState<"carousel" | "config">("carousel");
 
@@ -78,6 +82,17 @@ export default function AdminBannersPage() {
 
   const [loading, setLoading] = useState(true);
   const [successMsg, setSuccessMsg] = useState("");
+  const [modal, setModal] = useState<{
+    open: boolean;
+    title: string;
+    message: string;
+    variant: "confirm" | "alert";
+    onConfirm: () => void;
+  }>({ open: false, title: "", message: "", variant: "confirm", onConfirm: () => {} });
+  const [currentPage, setCurrentPage] = useState(1);
+  const filtered = carousel;
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE) || 1;
+  const paginatedData = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
   async function load() {
     setLoading(true);
@@ -116,7 +131,7 @@ export default function AdminBannersPage() {
       const data = await res.json();
       return data.url;
     } catch (error) {
-      alert("Error subiendo imagen: " + error);
+      setModal({ open: true, title: "Error", message: "Error subiendo imagen: " + error, variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) });
       return null;
     }
   }
@@ -155,8 +170,10 @@ export default function AdminBannersPage() {
 
   async function saveCarousel(e: React.FormEvent) {
     e.preventDefault();
-    if (!confirm("¿Guardar estos cambios?")) return;
-    if (!formC.image_url) return alert("Imagen requerida");
+    if (!formC.image_url) {
+      setModal({ open: true, title: "Campo requerido", message: "Debes seleccionar o ingresar una imagen para el slide", variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) });
+      return;
+    }
     const payload = {
       titulo: formC.titulo || null,
       subtitulo: formC.subtitulo || null,
@@ -173,7 +190,10 @@ export default function AdminBannersPage() {
           .update(payload)
           .eq("id", editCId)
       : await supabase.from("banners_carousel").insert(payload);
-    if (error) return alert(error.message);
+    if (error) {
+      setModal({ open: true, title: "Error", message: error.message, variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) });
+      return;
+    }
     setSuccessMsg(editCId ? "Slide actualizado correctamente" : "Slide creado correctamente");
     setTimeout(() => setSuccessMsg(""), 3000);
     setFormC(initialCarousel);
@@ -199,14 +219,22 @@ export default function AdminBannersPage() {
   }
 
   async function onDeleteCarousel(id: number) {
-    if (!confirm("¿Eliminar banner?")) return;
-    await supabase.from("banners_carousel").delete().eq("id", id);
-    await load();
+    setModal({
+      open: true,
+      title: "Eliminar banner",
+      message: "¿Estás seguro de eliminar este banner? Esta acción no se puede deshacer.",
+      variant: "confirm",
+      onConfirm: async () => {
+        setModal((m) => ({ ...m, open: false }));
+        await supabase.from("banners_carousel").delete().eq("id", id);
+        await load();
+      },
+    });
+    return;
   }
 
   async function saveConfig(e: React.FormEvent) {
     e.preventDefault();
-    if (!confirm("¿Guardar estos cambios?")) return;
     if (!editConfig) return;
     const { error } = await supabase
       .from("banners_config")
@@ -217,7 +245,10 @@ export default function AdminBannersPage() {
         activo: editConfig.activo,
       })
       .eq("id", editConfig.id);
-    if (error) return alert(error.message);
+    if (error) {
+      setModal({ open: true, title: "Error", message: error.message, variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) });
+      return;
+    }
     setSuccessMsg("Banner de página actualizado correctamente");
     setTimeout(() => setSuccessMsg(""), 3000);
     setEditConfig(null);
@@ -350,6 +381,15 @@ export default function AdminBannersPage() {
       }}
     >
       {successMsg && (<div style={{position:"fixed",top:"1rem",right:"1rem",zIndex:9999,background:"#16a34a",color:"#fff",padding:"0.75rem 1.25rem",borderRadius:"10px",fontWeight:600,fontSize:"0.875rem",boxShadow:"0 4px 16px rgba(0,0,0,0.12)",display:"flex",alignItems:"center",gap:"8px"}}><CheckCircle size={16}/> {successMsg}</div>)}
+
+      <ConfirmModal
+        open={modal.open}
+        title={modal.title}
+        message={modal.message}
+        variant={modal.variant}
+        onConfirm={modal.onConfirm}
+        onCancel={() => setModal((m) => ({ ...m, open: false }))}
+      />
 
       {/* ── Header ── */}
       <div style={{ marginBottom: "1.75rem" }}>
@@ -604,11 +644,11 @@ export default function AdminBannersPage() {
                     />
                   </div>
                   <div>
-                    <label style={lbl}>Título completo (HTML)</label>
+                    <label style={lbl}>Título completo</label>
                     <input
                       style={inp}
                       value={formC.titulo_completo}
-                      placeholder='Ej: Equipos que&lt;br/&gt;&lt;em&gt;Profesionales&lt;/em&gt;&lt;br/&gt;para tu negocio'
+                      placeholder='Ej: Equipos que em Profesionales em para tu negocio'
                       onChange={(e) =>
                         setFormC({ ...formC, titulo_completo: e.target.value })
                       }
@@ -690,11 +730,9 @@ export default function AdminBannersPage() {
                   >
                     <input
                       style={{ ...inp, flex: 1, minWidth: "180px" }}
-                      placeholder="https://... o sube un archivo"
+                      placeholder="Sube un archivo para generar la URL"
                       value={formC.image_url}
-                      onChange={(e) =>
-                        setFormC({ ...formC, image_url: e.target.value })
-                      }
+                      readOnly
                       onFocus={onFocusInput}
                       onBlur={onBlurInput}
                     />
@@ -859,12 +897,12 @@ export default function AdminBannersPage() {
                         </td>
                       </tr>
                     ) : (
-                      carousel.map((b, i) => (
+                      paginatedData.map((b, i) => { const idx = (currentPage - 1) * ITEMS_PER_PAGE + i; return (
                         <tr
                           key={b.id}
                           style={{
                             borderBottom:
-                              i < carousel.length - 1
+                              idx < filtered.length - 1
                                 ? "1px solid #f2f2f2"
                                 : "none",
                             transition: "background 0.15s",
@@ -928,8 +966,8 @@ export default function AdminBannersPage() {
                             >
                               <button
                                 type="button"
-                                onClick={() => moveUp(i)}
-                                disabled={i === 0 || savingOrder}
+                                onClick={() => moveUp(idx)}
+                                disabled={idx === 0 || savingOrder}
                                 title="Subir"
                                 style={{
                                   width: 26,
@@ -938,10 +976,10 @@ export default function AdminBannersPage() {
                                   border: "1px solid #e2e2e2",
                                   background: "#fff",
                                   cursor:
-                                    i === 0 || savingOrder
+                                    idx === 0 || savingOrder
                                       ? "not-allowed"
                                       : "pointer",
-                                  opacity: i === 0 || savingOrder ? 0.35 : 1,
+                                  opacity: idx === 0 || savingOrder ? 0.35 : 1,
                                   fontWeight: 700,
                                   color: "#666",
                                   fontSize: "0.85rem",
@@ -966,9 +1004,9 @@ export default function AdminBannersPage() {
                               </span>
                               <button
                                 type="button"
-                                onClick={() => moveDown(i)}
+                                onClick={() => moveDown(idx)}
                                 disabled={
-                                  i === carousel.length - 1 || savingOrder
+                                  idx === filtered.length - 1 || savingOrder
                                 }
                                 title="Bajar"
                                 style={{
@@ -978,11 +1016,11 @@ export default function AdminBannersPage() {
                                   border: "1px solid #e2e2e2",
                                   background: "#fff",
                                   cursor:
-                                    i === carousel.length - 1 || savingOrder
+                                    idx === filtered.length - 1 || savingOrder
                                       ? "not-allowed"
                                       : "pointer",
                                   opacity:
-                                    i === carousel.length - 1 || savingOrder
+                                    idx === filtered.length - 1 || savingOrder
                                       ? 0.35
                                       : 1,
                                   fontWeight: 700,
@@ -1084,11 +1122,18 @@ export default function AdminBannersPage() {
                             </div>
                           </td>
                         </tr>
-                      ))
+                      ); })
                     )}
                   </tbody>
                 </table>
               </div>
+              <Pagination
+                currentPage={currentPage}
+                totalPages={Math.ceil(carousel.length / ITEMS_PER_PAGE) || 1}
+                totalItems={carousel.length}
+                pageSize={ITEMS_PER_PAGE}
+                onPageChange={setCurrentPage}
+              />
             </div>
           )}
         </>
@@ -1223,14 +1268,9 @@ export default function AdminBannersPage() {
                     >
                       <input
                         style={{ ...inp, flex: 1, minWidth: "180px" }}
-                        placeholder="https://... o sube un archivo"
+                        placeholder="Sube un archivo para generar la URL"
                         value={editConfig.image_url ?? ""}
-                        onChange={(e) =>
-                          setEditConfig({
-                            ...editConfig,
-                            image_url: e.target.value,
-                          })
-                        }
+                        readOnly
                         onFocus={onFocusInput}
                         onBlur={onBlurInput}
                       />

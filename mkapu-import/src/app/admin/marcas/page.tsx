@@ -12,6 +12,8 @@ import {
   Trash2,
   Tag,
 } from "lucide-react";
+import ConfirmModal from "@/components/ConfirmModal";
+import Pagination from "@/components/Pagination";
 
 const initialForm = { name: "", logo_url: "", activo: true, orden: 0 };
 
@@ -36,6 +38,8 @@ const lbl: React.CSSProperties = {
   marginBottom: "0.4rem",
 };
 
+const ITEMS_PER_PAGE = 10;
+
 export default function AdminMarcasPage() {
   const [rows, setRows] = useState<Marca[]>([]);
   const [form, setForm] = useState(initialForm);
@@ -46,6 +50,14 @@ export default function AdminMarcasPage() {
   const [savingOrder, setSavingOrder] = useState(false);
   const [logoName, setLogoName] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [modal, setModal] = useState<{
+    open: boolean;
+    title: string;
+    message: string;
+    variant: "confirm" | "alert";
+    onConfirm: () => void;
+  }>({ open: false, title: "", message: "", variant: "confirm", onConfirm: () => {} });
   const fileRef = useRef<HTMLInputElement>(null);
 
   async function load() {
@@ -84,7 +96,7 @@ export default function AdminMarcasPage() {
     setUploading(false);
 
     if (error) {
-      alert("Error: " + error.message);
+      setModal({ open: true, title: "Error", message: "Error: " + error.message, variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) });
       return null;
     }
 
@@ -93,29 +105,31 @@ export default function AdminMarcasPage() {
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
+    setModal({ open: true, title: "Confirmar", message: "¿Guardar estos cambios?", variant: "confirm", onConfirm: async () => {
+      setModal((m) => ({ ...m, open: false }));
 
-    if (!confirm("¿Guardar estos cambios?")) return;
+      if (!form.name.trim()) { setModal({ open: true, title: "Error", message: "Nombre requerido", variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) }); return; }
+      if (!form.logo_url.trim()) { setModal({ open: true, title: "Error", message: "Sube un logo para la marca", variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) }); return; }
 
-    if (!form.name.trim()) return alert("Nombre requerido");
-    if (!form.logo_url.trim()) return alert("Sube un logo para la marca");
+      const payload = {
+        name: form.name,
+        logo_url: form.logo_url,
+        activo: form.activo,
+        orden: form.orden,
+      };
 
-    const payload = {
-      name: form.name,
-      logo_url: form.logo_url,
-      activo: form.activo,
-      orden: form.orden,
-    };
+      const { error } = editId
+        ? await supabase.from("marcas").update(payload).eq("id", editId)
+        : await supabase.from("marcas").insert(payload);
 
-    const { error } = editId
-      ? await supabase.from("marcas").update(payload).eq("id", editId)
-      : await supabase.from("marcas").insert(payload);
+      if (error) { setModal({ open: true, title: "Error", message: error.message, variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) }); return; }
 
-    if (error) return alert(error.message);
-
-    setSuccessMsg(editId ? "Marca actualizada correctamente" : "Marca creada correctamente");
-    setTimeout(() => setSuccessMsg(""), 3000);
-    resetForm();
-    await load();
+      setSuccessMsg(editId ? "Marca actualizada correctamente" : "Marca creada correctamente");
+      setTimeout(() => setSuccessMsg(""), 3000);
+      resetForm();
+      await load();
+    } });
+    return;
   }
 
   function onEdit(m: Marca) {
@@ -132,9 +146,12 @@ export default function AdminMarcasPage() {
   }
 
   async function onDelete(id: number) {
-    if (!confirm("¿Eliminar marca?")) return;
-    await supabase.from("marcas").delete().eq("id", id);
-    await load();
+    setModal({ open: true, title: "Confirmar", message: "¿Eliminar marca?", variant: "confirm", onConfirm: async () => {
+      setModal((m) => ({ ...m, open: false }));
+      await supabase.from("marcas").delete().eq("id", id);
+      await load();
+    } });
+    return;
   }
 
   async function persistOrder(list: Marca[]) {
@@ -184,6 +201,10 @@ export default function AdminMarcasPage() {
     e.currentTarget.style.boxShadow = "none";
   }
 
+  const filtered = rows;
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE) || 1;
+  const paginatedData = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+
   return (
     <div
       style={{
@@ -202,6 +223,14 @@ export default function AdminMarcasPage() {
           <CheckCircle size={16} /> {successMsg}
         </div>
       )}
+      <ConfirmModal
+        open={modal.open}
+        title={modal.title}
+        message={modal.message}
+        variant={modal.variant}
+        onConfirm={modal.onConfirm}
+        onCancel={() => setModal((m) => ({ ...m, open: false }))}
+      />
       <div
         style={{
           display: "flex",
@@ -655,12 +684,12 @@ export default function AdminMarcasPage() {
                   </thead>
 
                   <tbody>
-                    {rows.map((m, i) => (
+                    {paginatedData.map((m, i) => (
                       <tr
                         key={m.id}
                         style={{
                           borderBottom:
-                            i < rows.length - 1 ? "1px solid #f0f0f0" : "none",
+                            i < paginatedData.length - 1 ? "1px solid #f0f0f0" : "none",
                           background: "#fff",
                         }}
                       >
@@ -774,7 +803,7 @@ export default function AdminMarcasPage() {
                             <button
                               type="button"
                               onClick={() => moveDown(i)}
-                              disabled={i === rows.length - 1 || savingOrder}
+                              disabled={i === paginatedData.length - 1 || savingOrder}
                               style={{
                                 width: 26,
                                 height: 26,
@@ -782,11 +811,11 @@ export default function AdminMarcasPage() {
                                 border: "1px solid #e2e2e2",
                                 background: "#fff",
                                 cursor:
-                                  i === rows.length - 1 || savingOrder
+                                  i === paginatedData.length - 1 || savingOrder
                                     ? "not-allowed"
                                     : "pointer",
                                 opacity:
-                                  i === rows.length - 1 || savingOrder
+                                  i === paginatedData.length - 1 || savingOrder
                                     ? 0.35
                                     : 1,
                                 fontWeight: 700,
@@ -879,18 +908,14 @@ export default function AdminMarcasPage() {
               </div>
             )}
 
-            <div
-              style={{
-                padding: "12px 16px",
-                borderTop: "1px solid #e8e8e8",
-                background: "#fafafa",
-                fontSize: "0.8rem",
-                color: "#aaa",
-              }}
-            >
-              {rows.length} marca{rows.length !== 1 ? "s" : ""} registrada
-              {rows.length !== 1 ? "s" : ""}
-            </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={rows.length}
+              pageSize={ITEMS_PER_PAGE}
+              onPageChange={setCurrentPage}
+              label="Mostrando"
+            />
           </div>
         ))}
 

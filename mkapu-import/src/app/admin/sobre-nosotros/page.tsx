@@ -2,6 +2,8 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { Pencil, Trash2, Image as ImageIcon, ImageOff, ImagePlus, CheckCircle } from "lucide-react";
+import ConfirmModal from "@/components/ConfirmModal";
+import Pagination from "@/components/Pagination";
 
 type Seccion = {
   id: number;
@@ -41,6 +43,8 @@ const lbl: React.CSSProperties = {
   marginBottom: "0.4rem",
 };
 
+const ITEMS_PER_PAGE = 10;
+
 export default function AdminSobreNosotrosPage() {
   const [rows, setRows] = useState<Seccion[]>([]);
   const [form, setForm] = useState(initialForm);
@@ -52,6 +56,17 @@ export default function AdminSobreNosotrosPage() {
   const [uploadingImg, setUploadingImg] = useState(false);
   const [savingOrder, setSavingOrder] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
+  const [modal, setModal] = useState({
+    open: false,
+    title: "",
+    message: "",
+    variant: "confirm",
+    onConfirm: () => {},
+  });
+  const [currentPage, setCurrentPage] = useState(1);
+  const filtered = rows;
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE) || 1;
+  const paginatedData = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
   const imgRef = useRef<HTMLInputElement>(null);
 
   async function load() {
@@ -98,7 +113,7 @@ export default function AdminSobreNosotrosPage() {
       .upload(path, file, { upsert: true });
 
     if (error) {
-      alert("Error subiendo imagen: " + error.message);
+      setModal({ open: true, title: "Error", message: "Error subiendo imagen: " + error.message, variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) });
       return null;
     }
 
@@ -134,10 +149,8 @@ export default function AdminSobreNosotrosPage() {
   }
 
   async function deleteImagen(id: number) {
-    if (!confirm("¿Eliminar imagen?")) return;
-    await supabase.from("quienes_somos_imagenes").delete().eq("id", id);
-    if (editId) await loadImagenes(editId);
-    await load();
+    setModal({ open: true, title: "Eliminar", message: "¿Eliminar imagen?", variant: "confirm", onConfirm: async () => { setModal((m) => ({ ...m, open: false })); await supabase.from("quienes_somos_imagenes").delete().eq("id", id); if (editId) await loadImagenes(editId); await load(); } });
+    return;
   }
 
   async function persistOrder(list: Seccion[]) {
@@ -175,50 +188,51 @@ export default function AdminSobreNosotrosPage() {
   async function save(e: React.FormEvent) {
     e.preventDefault();
 
-    if (!confirm("¿Guardar estos cambios?")) return;
+    setModal({ open: true, title: "Confirmar", message: "¿Guardar estos cambios?", variant: "confirm", onConfirm: async () => { setModal((m) => ({ ...m, open: false })); 
+      const payload = {
+        titulo: form.titulo || null,
+        descripcion: form.descripcion || null,
+        orden: form.orden,
+        activo: form.activo,
+      };
 
-    const payload = {
-      titulo: form.titulo || null,
-      descripcion: form.descripcion || null,
-      orden: form.orden,
-      activo: form.activo,
-    };
+      if (editId) {
+        const { error } = await supabase
+          .from("quienes_somos_secciones")
+          .update(payload)
+          .eq("id", editId);
 
-    if (editId) {
-      const { error } = await supabase
-        .from("quienes_somos_secciones")
-        .update(payload)
-        .eq("id", editId);
+        if (error) { setModal({ open: true, title: "Error", message: error.message, variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) }); return; }
 
-      if (error) return alert(error.message);
+        setSuccessMsg("Sección actualizada correctamente");
+        setTimeout(() => setSuccessMsg(""), 3000);
+        cancelForm();
+        await load();
+      } else {
+        const { data, error } = await supabase
+          .from("quienes_somos_secciones")
+          .insert(payload)
+          .select()
+          .single();
 
-      setSuccessMsg("Sección actualizada correctamente");
-      setTimeout(() => setSuccessMsg(""), 3000);
-      cancelForm();
-      await load();
-    } else {
-      const { data, error } = await supabase
-        .from("quienes_somos_secciones")
-        .insert(payload)
-        .select()
-        .single();
+        if (error) { setModal({ open: true, title: "Error", message: error.message, variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) }); return; }
 
-      if (error) return alert(error.message);
+        setSuccessMsg("Sección creada correctamente");
+        setTimeout(() => setSuccessMsg(""), 3000);
+        await load();
 
-      setSuccessMsg("Sección creada correctamente");
-      setTimeout(() => setSuccessMsg(""), 3000);
-      await load();
-
-      setEditId(data.id);
-      setForm({
-        titulo: data.titulo ?? "",
-        descripcion: data.descripcion ?? "",
-        orden: data.orden ?? 1,
-        activo: data.activo ?? true,
-      });
-      setImagenes([]);
-      setShowForm(true);
-    }
+        setEditId(data.id);
+        setForm({
+          titulo: data.titulo ?? "",
+          descripcion: data.descripcion ?? "",
+          orden: data.orden ?? 1,
+          activo: data.activo ?? true,
+        });
+        setImagenes([]);
+        setShowForm(true);
+      }
+    } });
+    return;
   }
 
   function onEdit(s: Seccion) {
@@ -235,15 +249,8 @@ export default function AdminSobreNosotrosPage() {
   }
 
   async function onDelete(id: number) {
-    if (
-      !confirm("¿Eliminar esta sección? También se eliminarán sus imágenes.")
-    ) {
-      return;
-    }
-
-    await supabase.from("quienes_somos_imagenes").delete().eq("seccion_id", id);
-    await supabase.from("quienes_somos_secciones").delete().eq("id", id);
-    await load();
+    setModal({ open: true, title: "Eliminar", message: "¿Eliminar esta sección? También se eliminarán sus imágenes.", variant: "confirm", onConfirm: async () => { setModal((m) => ({ ...m, open: false })); await supabase.from("quienes_somos_imagenes").delete().eq("seccion_id", id); await supabase.from("quienes_somos_secciones").delete().eq("id", id); await load(); } });
+    return;
   }
 
   function cancelForm() {
@@ -289,6 +296,14 @@ export default function AdminSobreNosotrosPage() {
           <CheckCircle size={16} /> {successMsg}
         </div>
       )}
+      <ConfirmModal
+        open={modal.open}
+        title={modal.title}
+        message={modal.message}
+        variant={modal.variant as "confirm" | "alert"}
+        onConfirm={modal.onConfirm}
+        onCancel={() => setModal((m) => ({ ...m, open: false }))}
+      />
       <div
         style={{
           display: "flex",
@@ -731,17 +746,18 @@ export default function AdminSobreNosotrosPage() {
                       </td>
                     </tr>
                   ) : (
-                    rows.map((s, i) => {
+                    paginatedData.map((s, i) => {
+                      const idx = (currentPage - 1) * ITEMS_PER_PAGE + i;
                       const cantImg = imagenesMap[s.id] ?? 0;
-                      const isFirst = i === 0;
-                      const isLast = i === rows.length - 1;
+                      const isFirst = idx === 0;
+                      const isLast = idx === filtered.length - 1;
 
                       return (
                         <tr
                           key={s.id}
                           style={{
                             borderBottom:
-                              i < rows.length - 1
+                              idx < filtered.length - 1
                                 ? "1px solid #f0f0f0"
                                 : "none",
                           }}
@@ -806,7 +822,7 @@ export default function AdminSobreNosotrosPage() {
                             >
                               <button
                                 type="button"
-                                onClick={() => moveUp(i)}
+                                onClick={() => moveUp(idx)}
                                 disabled={isFirst || savingOrder}
                                 title="Subir"
                                 style={{
@@ -844,7 +860,7 @@ export default function AdminSobreNosotrosPage() {
                               </span>
                               <button
                                 type="button"
-                                onClick={() => moveDown(i)}
+                                onClick={() => moveDown(idx)}
                                 disabled={isLast || savingOrder}
                                 title="Bajar"
                                 style={{
@@ -1014,18 +1030,13 @@ export default function AdminSobreNosotrosPage() {
               </table>
             </div>
 
-            <div
-              style={{
-                padding: "12px 16px",
-                borderTop: "1px solid #e8e8e8",
-                background: "#fafafa",
-                fontSize: "0.8rem",
-                color: "#aaa",
-              }}
-            >
-              {rows.length} sección{rows.length !== 1 ? "es" : ""} registrada
-              {rows.length !== 1 ? "s" : ""}
-            </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={Math.ceil(rows.length / ITEMS_PER_PAGE) || 1}
+              totalItems={rows.length}
+              pageSize={ITEMS_PER_PAGE}
+              onPageChange={setCurrentPage}
+            />
           </div>
         ))}
     </div>

@@ -12,6 +12,8 @@ import {
   PlusCircle,
   X,
 } from "lucide-react";
+import ConfirmModal from "@/components/ConfirmModal";
+import Pagination from "@/components/Pagination";
 
 const initialForm = {
   title: "",
@@ -42,6 +44,8 @@ const lbl: React.CSSProperties = {
   marginBottom: "0.4rem",
 };
 
+const ITEMS_PER_PAGE = 10;
+
 export default function AdminVideosPage() {
   const [rows, setRows] = useState<Video[]>([]);
   const [form, setForm] = useState(initialForm);
@@ -55,14 +59,20 @@ export default function AdminVideosPage() {
   const [uploadProgress, setUploadProgress] = useState("");
   const [selectedFileName, setSelectedFileName] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [modal, setModal] = useState<{
+    open: boolean;
+    title: string;
+    message: string;
+    variant: "confirm" | "alert";
+    onConfirm: () => void;
+  }>({ open: false, title: "", message: "", variant: "confirm", onConfirm: () => {} });
 
   async function uploadVideo(file: File): Promise<string | null> {
     const MAX_MB = 50;
 
     if (file.size > MAX_MB * 1024 * 1024) {
-      alert(
-        `El archivo supera los ${MAX_MB}MB. Comprime el video e intenta de nuevo.`,
-      );
+      setModal({ open: true, title: "Error", message: `El archivo supera los ${MAX_MB}MB. Comprime el video e intenta de nuevo.`, variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) });
       return null;
     }
 
@@ -80,7 +90,7 @@ export default function AdminVideosPage() {
 
     if (error) {
       setUploadProgress("");
-      alert("Error al subir: " + error.message);
+      setModal({ open: true, title: "Error", message: "Error al subir: " + error.message, variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) });
       return null;
     }
 
@@ -107,6 +117,10 @@ export default function AdminVideosPage() {
     load();
   }, []);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterTipo]);
+
   function resetForm() {
     setForm(initialForm);
     setEditId(null);
@@ -117,31 +131,34 @@ export default function AdminVideosPage() {
   }
 
   async function save(e: React.FormEvent) {
-    if (!confirm("¿Guardar estos cambios?")) return;
     e.preventDefault();
+    setModal({ open: true, title: "Confirmar", message: "¿Guardar estos cambios?", variant: "confirm", onConfirm: async () => {
+      setModal((m) => ({ ...m, open: false }));
 
-    if (!form.title.trim()) return alert("Título requerido");
-    if (!form.video_url.trim()) return alert("Sube un archivo de video");
+      if (!form.title.trim()) { setModal({ open: true, title: "Error", message: "Título requerido", variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) }); return; }
+      if (!form.video_url.trim()) { setModal({ open: true, title: "Error", message: "Sube un archivo de video", variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) }); return; }
 
-    const payload = {
-      title: form.title,
-      descripcion: form.descripcion || null,
-      video_url: form.video_url,
-      tipo: form.tipo,
-      activo: form.activo,
-    };
+      const payload = {
+        title: form.title,
+        descripcion: form.descripcion || null,
+        video_url: form.video_url,
+        tipo: form.tipo,
+        activo: form.activo,
+      };
 
-    const { error } = editId
-      ? await supabase.from("videos").update(payload).eq("id", editId)
-      : await supabase.from("videos").insert(payload);
+      const { error } = editId
+        ? await supabase.from("videos").update(payload).eq("id", editId)
+        : await supabase.from("videos").insert(payload);
 
-    if (error) return alert(error.message);
+      if (error) { setModal({ open: true, title: "Error", message: error.message, variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) }); return; }
 
-    const isEdit = !!editId;
-    resetForm();
-    await load();
-    setSuccessMsg(isEdit ? "Video actualizado correctamente" : "Video creado correctamente");
-    setTimeout(() => setSuccessMsg(""), 3000);
+      const isEdit = !!editId;
+      resetForm();
+      await load();
+      setSuccessMsg(isEdit ? "Video actualizado correctamente" : "Video creado correctamente");
+      setTimeout(() => setSuccessMsg(""), 3000);
+    } });
+    return;
   }
 
   function onEdit(v: Video) {
@@ -160,14 +177,19 @@ export default function AdminVideosPage() {
   }
 
   async function onDelete(id: number) {
-    if (!confirm("¿Eliminar video?")) return;
-    await supabase.from("videos").delete().eq("id", id);
-    await load();
+    setModal({ open: true, title: "Confirmar", message: "¿Eliminar video?", variant: "confirm", onConfirm: async () => {
+      setModal((m) => ({ ...m, open: false }));
+      await supabase.from("videos").delete().eq("id", id);
+      await load();
+    } });
+    return;
   }
 
   const filtered = filterTipo
     ? rows.filter((v) => v.tipo === filterTipo)
     : rows;
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE) || 1;
+  const paginatedData = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
   function isVideo(url: string | null | undefined) {
     if (!url) return false;
@@ -210,6 +232,14 @@ export default function AdminVideosPage() {
           <CheckCircle size={16} /> {successMsg}
         </div>
       )}
+      <ConfirmModal
+        open={modal.open}
+        title={modal.title}
+        message={modal.message}
+        variant={modal.variant}
+        onConfirm={modal.onConfirm}
+        onCancel={() => setModal((m) => ({ ...m, open: false }))}
+      />
       <div
         style={{
           display: "flex",
@@ -658,12 +688,12 @@ export default function AdminVideosPage() {
                 </thead>
 
                 <tbody>
-                  {filtered.map((v, i) => (
+                  {paginatedData.map((v, i) => (
                     <tr
                       key={v.id}
                       style={{
                         borderBottom:
-                          i < filtered.length - 1
+                          i < paginatedData.length - 1
                             ? "1px solid #f0f0f0"
                             : "none",
                         background: "#fff",
@@ -840,20 +870,14 @@ export default function AdminVideosPage() {
             </div>
           )}
 
-          <div
-            style={{
-              padding: "12px 16px",
-              borderTop: "1px solid #e8e8e8",
-              background: "#fafafa",
-              fontSize: "0.8rem",
-              color: "#aaa",
-            }}
-          >
-            {filtered.length} resultado{filtered.length !== 1 ? "s" : ""}
-            {filterTipo
-              ? ` en ${filterTipo === "video" ? "Videos" : "Vlogs"}`
-              : ""}
-          </div>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={filtered.length}
+            pageSize={ITEMS_PER_PAGE}
+            onPageChange={setCurrentPage}
+            label="Mostrando"
+          />
         </div>
       )}
 
