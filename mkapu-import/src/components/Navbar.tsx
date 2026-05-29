@@ -310,7 +310,7 @@ export default function Navbar({ categories = [] }: NavbarProps) {
                 className="nb__search-btn"
                 aria-label="Buscar"
               >
-                <MagnifyingGlassIcon className="h-4 w-4" />
+                <MagnifyingGlassIcon className="h-6 w-6" />
               </button>
             </form>
 
@@ -511,7 +511,7 @@ export default function Navbar({ categories = [] }: NavbarProps) {
                   className="nb__search-btn"
                   aria-label="Buscar"
                 >
-                  <MagnifyingGlassIcon className="h-4 w-4" />
+                  <MagnifyingGlassIcon className="h-6 w-6" />
                 </button>
               </form>
 

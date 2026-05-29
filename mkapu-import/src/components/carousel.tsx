@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
-import { useRef, useState, useEffect, useCallback, useLayoutEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import ProductCard from "@/components/productCard";
 
 interface Product {
@@ -26,84 +26,75 @@ interface Props {
   promocionesMap?: Record<number, { tipo_descuento: string; valor_descuento: number }>;
 }
 
+const CARD_GAP = 16;
+
 export default function Carousel({ products, title = "Destacados", promocionesMap = {} }: Props) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [activeIdx, setActiveIdx] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
-  
-  // NUEVO: Guardaremos las posiciones exactas donde el carrusel puede detenerse
   const [snapPoints, setSnapPoints] = useState<number[]>([]);
 
   const total = products.length;
 
-  // Obtiene el ancho real de la tarjeta + su gap (margen)
-  const getCardWidth = useCallback(() => {
-    if (!trackRef.current) return 220;
-    const slide = trackRef.current.querySelector(".carousel__slide") as HTMLElement;
-    return slide ? slide.offsetWidth + 14 : 220;
-  }, []);
-
-  // Calcula exactamente en qué posiciones de scroll deben existir puntos (dots)
-  const updateLayout = useCallback(() => {
-    if (!trackRef.current) return;
-    const { scrollWidth, clientWidth } = trackRef.current;
-    
-    // maxScroll es lo máximo que la barra puede desplazarse a la derecha
-    const maxScroll = scrollWidth - clientWidth;
-
-    // Si los productos no superan el ancho de pantalla, no hay puntos (lista corta)
-    if (maxScroll <= 5) {
+  const calcSnapPoints = useCallback(() => {
+    const track = trackRef.current;
+    if (!track || total === 0) {
       setSnapPoints([]);
-      setActiveIdx(0);
       return;
     }
 
-    const cw = getCardWidth();
-    const points: number[] = [];
-    
-    // Agregamos un punto por cada salto posible
-    for (let p = 0; p < maxScroll; p += cw) {
-      points.push(p);
+    const slide = track.querySelector<HTMLElement>(".carousel__slide");
+    const cardW = slide?.offsetWidth ?? 260;
+    const step = cardW + CARD_GAP;
+    const totalW = total * cardW + Math.max(0, total - 1) * CARD_GAP;
+    const viewW = track.clientWidth;
+    if (totalW <= viewW + 1) {
+      setSnapPoints([]);
+      return;
     }
 
-    // Aseguramos que el último punto represente el tope exacto del carrusel
-    const lastPoint = points[points.length - 1];
-    if (maxScroll - lastPoint > cw * 0.2) {
-      points.push(maxScroll);
+    const maxScroll = totalW - viewW;
+    const pts: number[] = [];
+    for (let p = 0; p < maxScroll; p += step) {
+      pts.push(Math.round(p));
+    }
+    const last = pts[pts.length - 1];
+    if (maxScroll - last > step * 0.2) {
+      pts.push(Math.round(maxScroll));
     } else {
-      points[points.length - 1] = maxScroll;
+      pts[pts.length - 1] = Math.round(maxScroll);
     }
 
-    setSnapPoints(points);
-  }, [getCardWidth]);
+    setSnapPoints(pts);
+  }, [total]);
 
-  // Se ejecuta al montar y recalcula si se redimensiona la pantalla
-  useLayoutEffect(() => {
+  // Recalcular inmediatamente y con retrasos para cuando el DOM termina de pintar
+  useEffect(() => {
+    calcSnapPoints();
+    const t1 = setTimeout(() => calcSnapPoints(), 100);
+    const t2 = setTimeout(() => calcSnapPoints(), 400);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [calcSnapPoints]);
+
+  // Recalcular cuando los productos cambian (total cambia)
+  useEffect(() => {
+    if (total === 0) return;
+    const t1 = setTimeout(() => calcSnapPoints(), 50);
+    const t2 = setTimeout(() => calcSnapPoints(), 300);
+    const t3 = setTimeout(() => calcSnapPoints(), 800);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+  }, [total, calcSnapPoints]);
+
+  // ResizeObserver para detectar cambios en el tamaño del contenedor
+  useEffect(() => {
     const el = trackRef.current;
     if (!el) return;
-
-    updateLayout();
-
-    const observer = new ResizeObserver(() => updateLayout());
-    observer.observe(el);
-
-    return () => observer.disconnect();
-  }, [updateLayout, total]);
-
-  // Recalcular después del paint por si el layout cambió
-  useEffect(() => {
-    const raf = requestAnimationFrame(() => updateLayout());
-    return () => cancelAnimationFrame(raf);
-  }, [updateLayout, total]);
-
-  // Recalcular al cambiar tamaño de ventana
-  useEffect(() => {
-    const onResize = () => updateLayout();
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, [updateLayout]);
+    const ro = new ResizeObserver(() => calcSnapPoints());
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [calcSnapPoints]);
 
   // Ilumina el dot más cercano a nuestra posición actual de scroll
   const handleScroll = useCallback(() => {
@@ -170,39 +161,44 @@ export default function Carousel({ products, title = "Destacados", promocionesMa
     <section className="carousel">
       <div className="carousel__header">
         <h2 className="carousel__title">{title}</h2>
-        <div className="carousel__nav">
-          <button
-            className="carousel__arrow"
-            onClick={prev}
-            disabled={activeIdx === 0}
-            aria-label="Anterior"
-          >
-            ‹
-          </button>
-          <button
-            className="carousel__arrow"
-            onClick={next}
-            disabled={dotCount === 0 || activeIdx >= dotCount - 1}
-            aria-label="Siguiente"
-          >
-            ›
-          </button>
-        </div>
       </div>
 
-      <div
-        className={`carousel__track${isDragging ? " carousel__track--dragging" : ""}`}
-        ref={trackRef}
-        onMouseDown={onMouseDown}
-        onMouseMove={onMouseMove}
-        onMouseUp={onMouseUp}
-        onMouseLeave={onMouseUp}
-      >
-        {products.map((p) => (
-          <div className="carousel__slide" key={p.id}>
-            <ProductCard product={{ ...p, descuento: promocionesMap[p.id] ?? undefined }} />
-          </div>
-        ))}
+      <div className="carousel__wrapper">
+        <div
+          className={`carousel__track${isDragging ? " carousel__track--dragging" : ""}`}
+          ref={trackRef}
+          onMouseDown={onMouseDown}
+          onMouseMove={onMouseMove}
+          onMouseUp={onMouseUp}
+          onMouseLeave={onMouseUp}
+        >
+          {products.map((p) => (
+            <div className="carousel__slide" key={p.id}>
+              <ProductCard product={{ ...p, descuento: promocionesMap[p.id] ?? undefined }} />
+            </div>
+          ))}
+        </div>
+
+        {dotCount > 0 && (
+          <>
+            <button
+              className={`carousel__arrow carousel__arrow--prev${activeIdx === 0 ? " carousel__arrow--hidden" : ""}`}
+              onClick={prev}
+              disabled={activeIdx === 0}
+              aria-label="Anterior"
+            >
+              ‹
+            </button>
+            <button
+              className={`carousel__arrow carousel__arrow--next${dotCount === 0 || activeIdx >= dotCount - 1 ? " carousel__arrow--hidden" : ""}`}
+              onClick={next}
+              disabled={dotCount === 0 || activeIdx >= dotCount - 1}
+              aria-label="Siguiente"
+            >
+              ›
+            </button>
+          </>
+        )}
       </div>
 
       {/* SOLO renderizar dots si realmente hay más de una página posible */}
