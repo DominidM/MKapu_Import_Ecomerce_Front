@@ -749,6 +749,13 @@ button {
   background: var(--bg);
   border-radius: 10px;
 }
+.cart-item__img {
+  width: 46px;
+  height: 46px;
+  object-fit: cover;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
 .cart-item__emoji {
   font-size: 28px;
   width: 46px;
