@@ -86,21 +86,21 @@ export default function AdminMarcasPage() {
   async function uploadLogo(file: File): Promise<string | null> {
     setUploading(true);
 
-    const ext = file.name.split(".").pop();
-    const path = `marcas/${Date.now()}.${ext}`;
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("folder", "marcas");
 
-    const { error } = await supabase.storage
-      .from("imagenes")
-      .upload(path, file, { upsert: true });
+    const res = await fetch("/api/upload", { method: "POST", body: formData });
 
     setUploading(false);
 
-    if (error) {
-      setModal({ open: true, title: "Error", message: "Error: " + error.message, variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) });
+    if (!res.ok) {
+      setModal({ open: true, title: "Error", message: "Error al subir el logo", variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) });
       return null;
     }
 
-    return supabase.storage.from("imagenes").getPublicUrl(path).data.publicUrl;
+    const data = await res.json();
+    return data.url;
   }
 
   async function save(e: React.FormEvent) {

@@ -79,26 +79,24 @@ export default function AdminVideosPage() {
     setUploadingVideo(true);
     setUploadProgress("Subiendo...");
 
-    const ext = file.name.split(".").pop();
-    const path = `videos/${Date.now()}.${ext}`;
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("folder", "videos");
 
-    const { error } = await supabase.storage
-      .from("imagenes")
-      .upload(path, file, { upsert: true });
+    const res = await fetch("/api/upload", { method: "POST", body: formData });
 
     setUploadingVideo(false);
 
-    if (error) {
+    if (!res.ok) {
       setUploadProgress("");
-      setModal({ open: true, title: "Error", message: "Error al subir: " + error.message, variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) });
+      setModal({ open: true, title: "Error", message: "Error al subir el video", variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) });
       return null;
     }
 
-    const url = supabase.storage.from("imagenes").getPublicUrl(path)
-      .data.publicUrl;
+    const data = await res.json();
 
     setUploadProgress("✓ Video subido correctamente");
-    return url;
+    return data.url;
   }
 
   async function load() {

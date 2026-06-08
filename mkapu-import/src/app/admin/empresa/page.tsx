@@ -83,21 +83,22 @@ export default function AdminEmpresaPage() {
 
   async function uploadLogo(file: File): Promise<string | null> {
     setUploading(true);
-    const ext = file.name.split(".").pop();
-    const path = `empresa/logo-${Date.now()}.${ext}`;
 
-    const { error } = await supabase.storage
-      .from("imagenes")
-      .upload(path, file, { upsert: true });
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("folder", "empresa");
+
+    const res = await fetch("/api/upload", { method: "POST", body: formData });
 
     setUploading(false);
 
-    if (error) {
-      showToast("Error al subir logo: " + error.message, "error");
+    if (!res.ok) {
+      showToast("Error al subir logo", "error");
       return null;
     }
 
-    return supabase.storage.from("imagenes").getPublicUrl(path).data.publicUrl;
+    const data = await res.json();
+    return data.url;
   }
 
   async function save(e: React.FormEvent) {

@@ -17,25 +17,29 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
+    const isVideo = file.type.startsWith("video/");
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
+    const uploadOptions: any = {
+      folder,
+      resource_type: "auto",
+    };
+
+    if (!isVideo) {
+      uploadOptions.transformation = [
+        { width: 1920, crop: "limit" },
+        { quality: "auto:good" },
+        { fetch_format: "auto" },
+      ];
+    }
+
     const result = await new Promise<any>((resolve, reject) => {
       cloudinary.uploader
-        .upload_stream(
-          {
-            folder,
-            transformation: [
-              { width: 1920, crop: "limit" },
-              { quality: "auto:good" },     
-              { fetch_format: "auto" },   
-            ],
-          },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          }
-        )
+        .upload_stream(uploadOptions, (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        })
         .end(buffer);
     });
 

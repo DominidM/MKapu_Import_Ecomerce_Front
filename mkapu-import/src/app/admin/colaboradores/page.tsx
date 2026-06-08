@@ -136,30 +136,28 @@ export default function AdminColaboradoresPage() {
     setMedia([]);
   }
 
-  async function uploadFile(
+  async function uploadToCloudinary(
     file: File,
-    tipo: "imagen" | "video",
+    folder: string,
   ): Promise<string | null> {
-    const ext = file.name.split(".").pop();
-    const folder =
-      tipo === "imagen" ? "colaboradores/imagenes" : "colaboradores/videos";
-    const path = `${folder}/${Date.now()}.${ext}`;
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("folder", folder);
 
-    const { error } = await supabase.storage
-      .from("imagenes")
-      .upload(path, file, { upsert: true });
+    const res = await fetch("/api/upload", { method: "POST", body: formData });
 
-    if (error) {
-      setModal({ open: true, title: "Error", message: "Error: " + error.message, variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) });
+    if (!res.ok) {
+      setModal({ open: true, title: "Error", message: "Error al subir archivo", variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) });
       return null;
     }
 
-    return supabase.storage.from("imagenes").getPublicUrl(path).data.publicUrl;
+    const data = await res.json();
+    return data.url;
   }
 
   async function uploadLogo(file: File): Promise<string | null> {
     setUploading(true);
-    const url = await uploadFile(file, "imagen");
+    const url = await uploadToCloudinary(file, "colaboradores/logos");
     setUploading(false);
     return url;
   }
@@ -174,7 +172,7 @@ export default function AdminColaboradoresPage() {
     const baseOrden = media.filter((m) => m.tipo === "imagen").length;
 
     for (let i = 0; i < files.length; i++) {
-      const url = await uploadFile(files[i], "imagen");
+      const url = await uploadToCloudinary(files[i], "colaboradores/imagenes");
       if (url) {
         await supabase.from("colaborador_media").insert({
           colaborador_id: editId,
@@ -201,7 +199,7 @@ export default function AdminColaboradoresPage() {
     const baseOrden = media.filter((m) => m.tipo === "video").length;
 
     for (let i = 0; i < files.length; i++) {
-      const url = await uploadFile(files[i], "video");
+      const url = await uploadToCloudinary(files[i], "colaboradores/videos");
       if (url) {
         await supabase.from("colaborador_media").insert({
           colaborador_id: editId,

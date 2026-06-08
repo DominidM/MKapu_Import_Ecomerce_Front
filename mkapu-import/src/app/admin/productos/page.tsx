@@ -197,19 +197,22 @@ export default function AdminProductosPage() {
   async function uploadMainImage(file: File): Promise<string | null> {
     setUploading(true);
 
-    const path = `productos/${Date.now()}.${file.name.split(".").pop()}`;
-    const { error } = await supabase.storage
-      .from("imagenes")
-      .upload(path, file, { upsert: true });
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("folder", "productos/main");
+
+    const res = await fetch("/api/upload", { method: "POST", body: formData });
 
     setUploading(false);
 
-    if (error) {
-      setModal({ open: true, title: "Error", message: `Error: ${error.message}`, variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) });
+    if (!res.ok) {
+      const err = await res.json();
+      setModal({ open: true, title: "Error", message: `Error: ${err.error}`, variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) });
       return null;
     }
 
-    return supabase.storage.from("imagenes").getPublicUrl(path).data.publicUrl;
+    const data = await res.json();
+    return data.url;
   }
 
   async function saveProducto(): Promise<number | null> {

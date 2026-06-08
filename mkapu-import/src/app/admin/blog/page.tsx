@@ -173,29 +173,31 @@ export default function AdminBlogPage() {
   }
 
   async function uploadImagen(file: File): Promise<string | null> {
-    const ext = file.name.split(".").pop();
-    const path = `blog/imagenes/${Date.now()}.${ext}`;
-    const { error } = await supabase.storage
-      .from("imagenes")
-      .upload(path, file, { upsert: true });
-    if (error) {
-      setModal({ open: true, title: "Error", message: "Error subiendo imagen: " + error.message, variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) });
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("folder", "blog/imagenes");
+
+    const res = await fetch("/api/upload", { method: "POST", body: formData });
+    if (!res.ok) {
+      setModal({ open: true, title: "Error", message: "Error subiendo imagen", variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) });
       return null;
     }
-    return supabase.storage.from("imagenes").getPublicUrl(path).data.publicUrl;
+    const data = await res.json();
+    return data.url;
   }
 
   async function uploadVideo(file: File): Promise<string | null> {
-    const ext = file.name.split(".").pop();
-    const path = `blog/videos/${Date.now()}.${ext}`;
-    const { error } = await supabase.storage
-      .from("imagenes")
-      .upload(path, file, { upsert: true });
-    if (error) {
-      setModal({ open: true, title: "Error", message: "Error subiendo video: " + error.message, variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) });
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("folder", "blog/videos");
+
+    const res = await fetch("/api/upload", { method: "POST", body: formData });
+    if (!res.ok) {
+      setModal({ open: true, title: "Error", message: "Error subiendo video", variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) });
       return null;
     }
-    return supabase.storage.from("imagenes").getPublicUrl(path).data.publicUrl;
+    const data = await res.json();
+    return data.url;
   }
 
   async function handleImgUpload(e: React.ChangeEvent<HTMLInputElement>) {

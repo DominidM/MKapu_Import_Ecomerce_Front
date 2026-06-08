@@ -112,21 +112,19 @@ export default function ProductoMediaPage() {
     let orden = imagenes.length;
 
     for (const file of files) {
-      const ext = file.name.split(".").pop();
-      const path = `productos/gallery/${productoId}_${Date.now()}.${ext}`;
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("folder", `productos/gallery/${productoId}`);
 
-      const { error } = await supabase.storage
-        .from("imagenes")
-        .upload(path, file, { upsert: true });
+      const res = await fetch("/api/upload", { method: "POST", body: formData });
 
-      if (error) continue;
+      if (!res.ok) continue;
 
-      const url = supabase.storage.from("imagenes").getPublicUrl(path)
-        .data.publicUrl;
+      const data = await res.json();
 
       await supabase
         .from("producto_imagenes")
-        .insert({ producto_id: productoId, url_imagenes: url, orden });
+        .insert({ producto_id: productoId, url_imagenes: data.url, orden });
 
       orden++;
     }
@@ -185,22 +183,21 @@ export default function ProductoMediaPage() {
 
     setUploadingVid(true);
 
-    const ext = file.name.split(".").pop();
-    const path = `productos/videos/${productoId}_${Date.now()}.${ext}`;
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("folder", `productos/videos/${productoId}`);
 
-    const { error: uploadError } = await supabase.storage
-      .from("imagenes")
-      .upload(path, file, { upsert: true, contentType: file.type });
+    const res = await fetch("/api/upload", { method: "POST", body: formData });
 
-    if (uploadError) {
+    if (!res.ok) {
       setUploadingVid(false);
-      setVidError("Error al subir el archivo: " + uploadError.message);
+      setVidError("Error al subir el archivo");
       if (vidRef.current) vidRef.current.value = "";
       return;
     }
 
-    const url = supabase.storage.from("imagenes").getPublicUrl(path)
-      .data.publicUrl;
+    const data = await res.json();
+    const url = data.url;
 
     const { error: insertError } = await supabase
       .from("producto_videos")
