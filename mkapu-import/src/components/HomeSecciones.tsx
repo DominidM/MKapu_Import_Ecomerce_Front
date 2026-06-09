@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { getPromocionesActivasMap } from "@/lib/queries";
 import HomeSeccionesCarousel from "@/components/HomeSeccionesCarousel";
 
 type Producto = {
@@ -27,16 +28,17 @@ type Seccion = {
 };
 
 export default async function HomeSecciones() {
-  // ANTES: 3 queries — secciones → catIds → productos filtrados
-  // AHORA: 2 queries en paralelo con Promise.all
-  const [{ data: secciones }, { data: productos }] = await Promise.all([
+  const [seccionesRes, productosRes, promocionesMap] = await Promise.all([
     supabase
       .from("home_secciones")
       .select("orden, categoria_id, categorias(id, name, slug)")
       .eq("activo", true)
       .order("orden"),
     supabase.from("productos").select("*").eq("activo", true).order("name"),
-  ]);
+    getPromocionesActivasMap(),
+  ] as const);
+  const secciones = seccionesRes.data;
+  const productos = productosRes.data;
 
   if (!secciones?.length) return <div style={{ minHeight: "400px" }} />;
 
@@ -113,6 +115,7 @@ export default async function HomeSecciones() {
                 products={prods.map((p) => ({
                   ...p,
                   category_name: cat.name,
+                  descuento: promocionesMap[p.id] ?? undefined,
                 }))}
                 categoryName={cat.name}
               />

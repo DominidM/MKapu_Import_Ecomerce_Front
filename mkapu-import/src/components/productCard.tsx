@@ -61,11 +61,11 @@ export default function ProductCard({ product }: Props) {
         id: String(product.id),
         code: product.code,
         name: product.name,
-        price: product.price,
-        itemTotal: product.price,
+        price: precioFinal,
+        itemTotal: precioFinal,
         imageUrl: product.image_url,
         emoji: "📦",
-        product: { price: product.price },
+        product: { price: precioFinal },
       });
     }
   }

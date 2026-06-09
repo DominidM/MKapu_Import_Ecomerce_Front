@@ -16,6 +16,7 @@ type Producto = {
   activo: boolean;
   is_new: boolean;
   category_name?: string;
+  descuento?: { tipo_descuento: string; valor_descuento: number };
 };
 
 interface Props {
