@@ -102,13 +102,14 @@ async function migrateTable(cfg: TableConfig): Promise<{ ok: number; fail: numbe
   let ok = 0, fail = 0, skip = 0;
 
   for (const row of rows) {
-    const oldUrl: string | null = row[cfg.column];
+    const r = row as unknown as Record<string, unknown>;
+    const oldUrl: string | null = r[cfg.column] as string | null;
     if (!isSupabaseUrl(oldUrl)) {
       skip++;
       continue;
     }
 
-    process.stdout.write(`  [${ok + fail + skip}/${rows.length}] Migrating ID ${row.id}... `);
+    process.stdout.write(`  [${ok + fail + skip}/${rows.length}] Migrating ID ${r.id}... `);
     const newUrl = await migrateUrl(oldUrl!, cfg.folder, cfg.resourceType ?? "auto");
 
     if (!newUrl) {
@@ -120,7 +121,7 @@ async function migrateTable(cfg: TableConfig): Promise<{ ok: number; fail: numbe
     const { error: updateError } = await supabase
       .from(cfg.table)
       .update({ [cfg.column]: newUrl })
-      .eq("id", row.id);
+      .eq("id", r.id);
 
     if (updateError) {
       console.log(`UPDATED CLOUDINARY BUT FAILED TO SAVE TO DB: ${updateError.message}`);

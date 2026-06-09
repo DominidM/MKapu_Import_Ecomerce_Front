@@ -41,7 +41,7 @@ export default function AdminLoginPage() {
     }
 
     if (!empleado.activo) {
-      setError("Tu cuenta está desactivada. Contacta soporte.");
+      setError("Ya no tienes acceso al panel. Habla con el coordinador.");
       setLoading(false);
       return;
     }

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import bcrypt from "bcryptjs";
-import { Pencil, Trash2, Eye, EyeOff, CheckCircle } from "lucide-react";
+import { Pencil, Trash2, CheckCircle } from "lucide-react";
 import ConfirmModal from "@/components/ConfirmModal";
 import Pagination from "@/components/Pagination";
 
@@ -62,7 +62,6 @@ export default function EmpleadosPage() {
   const [form, setForm] = useState<FormData>(FORM_INICIAL);
   const [showForm, setShowForm] = useState(false);
   const [guardando, setGuardando] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -93,7 +92,6 @@ export default function EmpleadosPage() {
     setEditando(null);
     setForm(FORM_INICIAL);
     setError("");
-    setShowPassword(false);
     setShowForm(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -108,9 +106,19 @@ export default function EmpleadosPage() {
       activo: emp.activo,
     });
     setError("");
-    setShowPassword(false);
     setShowForm(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
+
+    supabase
+      .from("empleados")
+      .select("password")
+      .eq("id", emp.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.password) {
+          setForm((f) => ({ ...f, password: data.password }));
+        }
+      });
   }
 
   async function guardar(e: React.FormEvent) {
@@ -178,22 +186,54 @@ export default function EmpleadosPage() {
     return;
   }
 
-  async function eliminar(id: number) {
-    setModal({ open: true, title: "Confirmar", message: "¿Eliminar este empleado? Esta acción no se puede deshacer.", variant: "confirm", onConfirm: async () => {
+  function eliminar(emp: Empleado) {
+    setModal({ open: true, title: "Desactivar empleado", message: `¿Desactivar a ${emp.nombre} ${emp.apellido}? El usuario perderá acceso al panel.`, variant: "confirm", onConfirm: async () => {
       setModal((m) => ({ ...m, open: false }));
-      await supabase.from("empleados").delete().eq("id", id);
+      const { error } = await supabase
+        .from("empleados")
+        .update({ activo: false })
+        .eq("id", emp.id);
+
+      if (error) {
+        setModal({ open: true, title: "Error", message: error.message, variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) });
+        return;
+      }
+      setSuccessMsg(`${emp.nombre} ${emp.apellido} desactivado correctamente`);
+      setTimeout(() => setSuccessMsg(""), 3000);
       await fetchEmpleados();
     } });
-    return;
   }
 
-  async function toggleActivo(emp: Empleado) {
-    await supabase
-      .from("empleados")
-      .update({ activo: !emp.activo })
-      .eq("id", emp.id);
+  function toggleActivo(emp: Empleado) {
+    const nuevoEstado = !emp.activo;
+    setModal({
+      open: true,
+      title: nuevoEstado ? "Activar empleado" : "Desactivar empleado",
+      message: nuevoEstado
+        ? `¿Activar a ${emp.nombre} ${emp.apellido}?`
+        : `¿Desactivar a ${emp.nombre} ${emp.apellido}? El usuario perderá acceso al panel.`,
+      variant: "confirm",
+      onConfirm: async () => {
+        setModal((m) => ({ ...m, open: false }));
+        const { error } = await supabase
+          .from("empleados")
+          .update({ activo: nuevoEstado })
+          .eq("id", emp.id);
 
-    await fetchEmpleados();
+        if (error) {
+          setModal({ open: true, title: "Error", message: error.message, variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) });
+          return;
+        }
+
+        setSuccessMsg(
+          nuevoEstado
+            ? `${emp.nombre} ${emp.apellido} activado correctamente`
+            : `${emp.nombre} ${emp.apellido} desactivado correctamente`,
+        );
+        setTimeout(() => setSuccessMsg(""), 3000);
+        await fetchEmpleados();
+      },
+    });
   }
 
   function cancelForm() {
@@ -201,7 +241,6 @@ export default function EmpleadosPage() {
     setForm(FORM_INICIAL);
     setShowForm(false);
     setError("");
-    setShowPassword(false);
   }
 
   const filtered = empleados;
@@ -404,39 +443,18 @@ export default function EmpleadosPage() {
                 Contraseña {editando ? "(dejar vacío para no cambiar)" : "*"}
               </label>
 
-              <div style={{ position: "relative" }}>
-                <input
-                  type={showPassword ? "text" : "password"}
-                  style={{ ...inp, paddingRight: "2.5rem" }}
-                  placeholder="••••••••"
-                  value={form.password}
-                  onChange={(e) =>
-                    setForm({ ...form, password: e.target.value })
-                  }
-                  onFocus={onFocusInput}
-                  onBlur={onBlurInput}
-                  required={!editando}
-                />
-
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  style={{
-                    position: "absolute",
-                    right: "10px",
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    color: "#aaa",
-                    display: "flex",
-                    padding: 0,
-                  }}
-                >
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
-              </div>
+              <input
+                type="password"
+                style={inp}
+                placeholder="••••••••"
+                value={form.password}
+                onChange={(e) =>
+                  setForm({ ...form, password: e.target.value })
+                }
+                onFocus={onFocusInput}
+                onBlur={onBlurInput}
+                required={!editando}
+              />
             </div>
 
             <div style={{ marginBottom: "1.25rem" }}>
@@ -712,7 +730,7 @@ export default function EmpleadosPage() {
                           </button>
 
                           <button
-                            onClick={() => eliminar(emp.id)}
+                            onClick={() => eliminar(emp)}
                             title="Eliminar"
                             style={{
                               background: "rgba(220,38,38,0.08)",
