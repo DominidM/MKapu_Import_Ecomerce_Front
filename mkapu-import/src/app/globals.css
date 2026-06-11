@@ -4253,7 +4253,7 @@ button {
 .footer { background: #1a1a1a; color: #ccc; margin-top: auto; }
 .footer__inner { max-width: 1200px; margin: 0 auto; padding: 2.5rem 1.5rem 1.5rem; display: flex; gap: 2rem; flex-wrap: wrap; justify-content: space-between; }
 .footer__brand { display: flex; flex-direction: column; gap: 0.25rem; }
-.footer__logo-img { height: 60px; width: auto; display: block; justify-content:  center; }
+.footer__logo-img { width: 100px; height: auto; display: block; }
 .footer__logo-title { font-size: 1.4rem; font-weight: 900; color: #fff; letter-spacing: -0.03em; text-transform: lowercase; }
 .footer__logo-sub { font-size: 0.75rem; font-weight: 600; color: #f5a623; text-transform: uppercase; letter-spacing: 0.12em; margin-top: -4px; }
 .footer__tagline { font-size: 0.8rem; color: #888; margin-top: 0.4rem; max-width: 220px; }
