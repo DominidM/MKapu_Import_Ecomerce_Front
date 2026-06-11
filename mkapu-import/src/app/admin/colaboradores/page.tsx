@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import ConfirmModal from "@/components/ConfirmModal";
 import Pagination from "@/components/Pagination";
+import { getVideoDuration, MAX_DURATION_SECONDS } from "@/lib/video-utils";
 
 type ColabMedia = {
   id: number;
@@ -194,6 +195,15 @@ export default function AdminColaboradoresPage() {
 
     const files = Array.from(e.target.files ?? []);
     if (!files.length) return;
+
+    for (const file of files) {
+      const duration = await getVideoDuration(file);
+      if (duration > MAX_DURATION_SECONDS) {
+        setModal({ open: true, title: "Error", message: `El video dura ${Math.round(duration)}s. Máximo permitido: ${MAX_DURATION_SECONDS / 60} minutos.`, variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) });
+        if (vidRef.current) vidRef.current.value = "";
+        return;
+      }
+    }
 
     setUploadingVid(true);
     const baseOrden = media.filter((m) => m.tipo === "video").length;

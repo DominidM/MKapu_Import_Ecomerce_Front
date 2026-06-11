@@ -4245,7 +4245,7 @@ button {
 .nb__logo-placeholder--loading { background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%); background-size: 200% 100%; animation: nbLogoShimmer 1.4s ease-in-out infinite; border-radius: 8px; }
 .nb__logo-placeholder--empty { min-width: 0; }
 @keyframes nbLogoShimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-.nb__logo-img { height: 50px; width: auto; display: block; transform: scale(2); }
+.nb__logo-img { height: 50px; width: auto; display: block; transform: scale(.75); }
 
 /* ============================================================
    FOOTER (Footer.tsx)
@@ -4253,7 +4253,7 @@ button {
 .footer { background: #1a1a1a; color: #ccc; margin-top: auto; }
 .footer__inner { max-width: 1200px; margin: 0 auto; padding: 2.5rem 1.5rem 1.5rem; display: flex; gap: 2rem; flex-wrap: wrap; justify-content: space-between; }
 .footer__brand { display: flex; flex-direction: column; gap: 0.25rem; }
-.footer__logo-img { height: 100px; width: 100px; display: block; justify-content: center; }
+.footer__logo-img { height: 80px; width: auto; display: block; justify-content:  center;transform: scale(.75); }
 .footer__logo-title { font-size: 1.4rem; font-weight: 900; color: #fff; letter-spacing: -0.03em; text-transform: lowercase; }
 .footer__logo-sub { font-size: 0.75rem; font-weight: 600; color: #f5a623; text-transform: uppercase; letter-spacing: 0.12em; margin-top: -4px; }
 .footer__tagline { font-size: 0.8rem; color: #888; margin-top: 0.4rem; max-width: 220px; }

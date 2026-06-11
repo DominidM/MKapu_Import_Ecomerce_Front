@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import ConfirmModal from "@/components/ConfirmModal";
 import Pagination from "@/components/Pagination";
+import { getVideoDuration, MAX_DURATION_SECONDS } from "@/lib/video-utils";
 
 type ProductoImagen = {
   id: number;
@@ -177,6 +178,13 @@ export default function ProductoMediaPage() {
       setVidError(
         `El video pesa ${(file.size / 1024 / 1024).toFixed(1)} MB. Máximo permitido: 100 MB.`,
       );
+      if (vidRef.current) vidRef.current.value = "";
+      return;
+    }
+
+    const duration = await getVideoDuration(file);
+    if (duration > MAX_DURATION_SECONDS) {
+      setVidError(`El video dura ${Math.round(duration)}s. Máximo permitido: ${MAX_DURATION_SECONDS / 60} minutos.`);
       if (vidRef.current) vidRef.current.value = "";
       return;
     }

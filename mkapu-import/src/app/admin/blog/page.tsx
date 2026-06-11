@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import ConfirmModal from "@/components/ConfirmModal";
 import Pagination from "@/components/Pagination";
+import { getVideoDuration, MAX_DURATION_SECONDS } from "@/lib/video-utils";
 
 type BlogPost = {
   id: number;
@@ -187,6 +188,12 @@ export default function AdminBlogPage() {
   }
 
   async function uploadVideo(file: File): Promise<string | null> {
+    const duration = await getVideoDuration(file);
+    if (duration > MAX_DURATION_SECONDS) {
+      setModal({ open: true, title: "Error", message: `El video dura ${Math.round(duration)}s. Máximo permitido: ${MAX_DURATION_SECONDS / 60} minutos.`, variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) });
+      return null;
+    }
+
     const formData = new FormData();
     formData.append("file", file);
     formData.append("folder", "blog/videos");

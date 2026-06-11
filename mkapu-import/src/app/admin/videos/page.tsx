@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import ConfirmModal from "@/components/ConfirmModal";
 import Pagination from "@/components/Pagination";
+import { getVideoDuration, MAX_DURATION_SECONDS } from "@/lib/video-utils";
 
 const initialForm = {
   title: "",
@@ -73,6 +74,12 @@ export default function AdminVideosPage() {
 
     if (file.size > MAX_MB * 1024 * 1024) {
       setModal({ open: true, title: "Error", message: `El archivo supera los ${MAX_MB}MB. Comprime el video e intenta de nuevo.`, variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) });
+      return null;
+    }
+
+    const duration = await getVideoDuration(file);
+    if (duration > MAX_DURATION_SECONDS) {
+      setModal({ open: true, title: "Error", message: `El video dura ${Math.round(duration)}s. Máximo permitido: ${MAX_DURATION_SECONDS / 60} minutos.`, variant: "alert", onConfirm: () => setModal((m) => ({ ...m, open: false })) });
       return null;
     }
 

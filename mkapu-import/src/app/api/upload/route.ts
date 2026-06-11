@@ -32,6 +32,13 @@ export async function POST(req: NextRequest) {
         { quality: "auto:good" },
         { fetch_format: "auto" },
       ];
+    } else {
+      uploadOptions.transformation = [
+        { width: 1920, height: 1080, crop: "limit" },
+        { quality: "auto:good" },
+        { fetch_format: "auto" },
+        { video_codec: "auto" },
+      ];
     }
 
     const result = await new Promise<any>((resolve, reject) => {
