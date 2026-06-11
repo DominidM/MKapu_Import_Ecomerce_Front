@@ -126,6 +126,12 @@ export default function AdminProductosPage() {
       query = query.eq("category", selectedCategory);
     }
 
+    if (viewMode === "completos") {
+      query = query.gt("img_count", 0).gt("vid_count", 0);
+    } else if (viewMode === "incompletos") {
+      query = query.or("img_count.eq.0,vid_count.eq.0");
+    }
+
     const prodRes = await query;
 
     const products = ((prodRes.data as Producto[]) ?? []).map((p) => ({
@@ -148,31 +154,23 @@ export default function AdminProductosPage() {
       }
     }
 
-    const { data: allCounts } = await supabase
+    let countQuery = supabase
       .from("productos_con_media")
-      .select("img_count, vid_count")
-      .eq("activo", true);
+      .select("img_count, vid_count");
+
+    if (selectedCategory) {
+      countQuery = countQuery.eq("category", selectedCategory);
+    }
+
+    const { data: allCounts } = await countQuery;
 
     const totalCompletos = (allCounts ?? []).filter(
       (p: any) => p.img_count > 0 && p.vid_count > 0,
     ).length;
     const totalIncompletos = (allCounts ?? []).length - totalCompletos;
 
-    let finalProducts = products;
-    const finalCount = prodRes.count ?? 0;
-
-    if (viewMode === "completos") {
-      finalProducts = products.filter(
-        (p) => (p.imgCount ?? 0) > 0 && (p.vidCount ?? 0) > 0,
-      );
-    } else if (viewMode === "incompletos") {
-      finalProducts = products.filter(
-        (p) => (p.imgCount ?? 0) === 0 || (p.vidCount ?? 0) === 0,
-      );
-    }
-
-    setRows(finalProducts);
-    setTotalCount(finalCount);
+    setRows(products);
+    setTotalCount(prodRes.count ?? 0);
     setTotalCompletos(totalCompletos);
     setTotalIncompletos(totalIncompletos);
     setLoading(false);
